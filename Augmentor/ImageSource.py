@@ -1,4 +1,6 @@
 import glob
+# Perhaps put all imports in __init__.py
+# Because I am not sure if this is where imports go for classes.
 
 class ImageSource(object):
 
