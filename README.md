@@ -1,5 +1,5 @@
 # Augmentor
-Image augmentation library in Python for Machine Learning practioners. 
+Image augmentation library in Python for Machine Learning practitioners. 
 
 ## Usage
 The package works by building an augmentation pipeline as a series of operations to perform on a set of images. Operations, such as rotations or transforms, are added piece by piece in order to create an augmentation pipeline, which can then be executed in order to create an augmented dataset.
