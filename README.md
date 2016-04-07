@@ -8,10 +8,10 @@ The package currently consists of two basic building blocks that allow for a pip
 
 You start by initialising an `ImageSource` object where you define the source of your images. Then you define a `Pipeline` object that defines what operations you wish to perform on your dataset (defined in your `ImageSource` object).
 
-### ImageSource
+### `ImageSource`
 Defines the source directory or directories where your original images are stored. 
 
-### Pipeine
+### `Pipeine`
 Defines the operations (rotations, mirroring, tranforms, etc.) which should be applied to your original dataset. Once a pipeline has been built, the `execute()` method applies the operations to your images.
 
 ## Installation
