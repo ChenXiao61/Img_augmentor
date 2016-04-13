@@ -1,17 +1,23 @@
 from Augmentor import Pipeline
-from Augmentor import ImageSource
 
-
+## set the path to the folder with images to manipulate
 pathToImages = 'C:/Users/Lukas/Pictures/sample'
+
+## create pipeline
 pipe = Pipeline.Pipeline(pathToImages)
-#pipe.addFlipY(0.4)
-#pipe.addFlipX(0.4)
-#pipe.addRotate90(0.4)
-#pipe.addRotate180(0.4)
-#pipe.addRotate270(0.4)
-#pipe.addResize(90,180)
-#pipe.addScale(90,180)
-#pipe.addRotate(45)
-pipe.addCrop(90,90)
+
+## add function to pipeline
+pipe.addFlipY()
+pipe.addFlipX(1)
+
+## add another function to pipeline
+pipe.addCrop(45, 45)
+
+## execute the functions in pipline
 pipe.execute()
-pipe.imageSource.summary()
+
+## all images are created in target folder
+
+## print a summary
+pipe.image_source.summary()
+
