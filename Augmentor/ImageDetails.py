@@ -1,10 +1,11 @@
-import os 
+import os
+
+
 # Perhaps put all imports in __init__.py
 # Because I am not sure if this is where imports go for classes.
 
 
 class ImageDetails(object):
-    
     def __init__(self, image, filename):
         self.image = image
         self.fullpath = filename

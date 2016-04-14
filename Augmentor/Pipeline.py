@@ -1,6 +1,6 @@
 from Augmentor import ImageOperations
 from Augmentor import ImageSource
-from Augmentor import AsciiTable
+from Augmentor import GithubFlavoredMarkdownTable
 
 
 class Pipeline(object):
@@ -61,8 +61,9 @@ class Pipeline(object):
 
     def addCrop(self, height, width, chance=1):
         print("addCrop")
-        self.function_list.append([lambda: ImageOperations.ImageOperations.crop(self.image_operations, self.image_source,
-                                                         height, width, chance), "Crop"])
+        self.function_list.append(
+            [lambda: ImageOperations.ImageOperations.crop(self.image_operations, self.image_source,
+                                                          height, width, chance), "Crop"])
 
     def addConvertGrayscale(self, chance=1):
         print("addConvertGrayscale")
@@ -83,10 +84,12 @@ class Pipeline(object):
             list_of_operations.append(function_name)
 
         table_data = [
-            ['Pipline Summary:'],
-            [str(len(self.function_list)) + ' operation(s)'],
-            ['New size: ' + str(len(self.image_source.list_of_images) + len(self.image_source.list_of_images))],
-            ['TODO: Print additional information'],
+            ['Pipline Summary:', ''],
+            ['Operation count', str(len(self.function_list))],
+            ['Operations', ''],
         ]
-        table = AsciiTable(table_data)
+        for i in range(0, len(list_of_operations)):
+            table_data[2][1] += str(list_of_operations[i] + '\n')
+
+        table = GithubFlavoredMarkdownTable(table_data)
         print(table.table)
