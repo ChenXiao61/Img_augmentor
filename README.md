@@ -10,9 +10,32 @@ You start by initialising an `ImageSource` object where you define the source of
 
 ### `ImageSource`
 Defines the source directory or directories where your original images are stored.
+```bash
+summary()
+```
+
+### `ImageDetails`
+is a container which contains image, path and other necessary informations about images such as path, filename, extension, ... .
+
+### `ImageOperations`
+Includes mainly the different image operations and therefore the main functionality.
 
 ### `Pipeline`
 Defines the operations (rotations, mirroring, tranforms, etc.) which should be applied to your original dataset. Once a pipeline has been built, the `execute()` method applies the operations to your images.
+The currently implemented image manipulation functions are:
+```bash
+addFlipX(chance=1)
+addFlipY(chance=1)
+addRotate90(chance=1)
+addRotate180(chance=1)
+addRotate270(chance=1)
+addResize(height, width, chance=1)
+addScale(height, width, chance=1)
+addRotate(degree, chance=1)
+addCrop(height, width, chance=1)
+addConvertGrayscale(chance=1)
+summary()
+```
 
 ## Installation
 __Not yet implemented.__
@@ -21,3 +44,34 @@ __Not yet implemented.__
 # This is not yet implemented.
 pip install Augmentor
 ```
+
+## Usage
+
+The example can also be found in ```SimpleSample.py```
+```bash
+from Augmentor import Pipeline
+
+## set the path to the folder with images to manipulate
+pathToImages = 'C:/Users/Lukas/Pictures/sample'
+
+## create pipeline
+pipe = Pipeline.Pipeline(pathToImages)
+
+## add function to pipeline
+pipe.addFlipY()
+pipe.addFlipX(0.6)
+
+## add another function to pipeline
+pipe.addCrop(45, 45)
+
+## execute the functions in pipline
+pipe.execute()
+
+## all images are created in target folder
+
+## print a summary
+pipe.image_source.summary()
+
+
+```
+
