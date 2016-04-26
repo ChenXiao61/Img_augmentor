@@ -38,10 +38,10 @@ summary()
 ```
 
 ## Installation
-__Not yet implemented.__
+__Currently beta. Mileage may vary.__
 
 ```Python
-# This is not yet implemented.
+# Currently testing. Mileage may vary.
 pip install Augmentor
 ```
 
