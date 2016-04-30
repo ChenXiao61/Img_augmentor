@@ -5,15 +5,14 @@ from Augmentor import os
 
 
 class Pipeline(object):
-    def __init__(self, image_path=None, image=None):
+    def __init__(self, image_path=None):
         self.function_list = []
         if image_path is not None:
             self.image_path = image_path
             self.image_source = ImageSource.ImageSource(image_path)
-
-        if image is not None:
-            self.image_path = os.path.dirname(image.filename)
-            self.image_source = ImageSource.ImageSource(self.image_path, image)
+        else:
+            print("No image source.")
+            exit()
 
         self.image_operations = ImageOperations.ImageOperations()
 
