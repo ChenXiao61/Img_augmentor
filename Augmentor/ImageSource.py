@@ -4,30 +4,72 @@ from Augmentor import ImageFormat
 from Augmentor import Image
 from Augmentor import GithubFlavoredMarkdownTable
 from Augmentor import gcd
+import os
 
 
 class ImageSource(object):
-    def __init__(self, root_path=None, image=None):
+    def __init__(self, root_path):
 
         self.root_path = root_path
         self.list_of_images = []
         self.file_extension = ('jpg', 'jpeg', 'png', 'bmp')
-        if image is not None:
-            self.list_of_images.append(ImageDetails.ImageDetails(image, image.filename))
-        else:
-            self.scan(root_path)
         self.dimensions = {}
         self.image_format = ImageFormat.ImageFormat()
+        self.scan(root_path)
+        if len(self.list_of_images) == 0:
+            print("Image repository is empty.")
+            exit()
+
+
 
     def scan(self, path_to_scan):
         # for root, subdirs, list_of_files in os.walk(path_to_scan):
         list_of_files = []
-        for type in self.file_extension:
-            list_of_files.extend(glob.glob(path_to_scan + '/**/*.' + type, recursive=True))
 
-        for file in list_of_files:
-            image = Image.open(file)
-            self.list_of_images.append(ImageDetails.ImageDetails(image, file))
+        if isinstance(path_to_scan, list):
+            print("Processing list of images")
+            # List of PIL images
+            if all(isinstance(item, Image.Image) for item in path_to_scan):
+                for file in path_to_scan:
+                    print(file.filename)
+                    self.list_of_images.append(ImageDetails.ImageDetails(file, file.filename))
+                self.root_path = os.path.dirname(path_to_scan[0].filename)
+
+            # List of images paths
+            elif all(os.path.isfile(item) for item in path_to_scan):
+                for file in path_to_scan:
+                    image = Image.open(file)
+                    self.list_of_images.append(ImageDetails.ImageDetails(image, file))
+                self.root_path = os.path.dirname(path_to_scan[0])
+            else:
+                print("List contains unsupported formats. Only list of PIL-images or list of direct paths supported!")
+                exit()
+
+        elif isinstance(path_to_scan, Image.Image):
+            print("Processing PIL image object")
+
+            self.root_path = os.path.dirname(path_to_scan.filename)
+            self.list_of_images.append(ImageDetails.ImageDetails(path_to_scan, path_to_scan.filename))
+
+        elif any(extension in path_to_scan for extension in self.file_extension):
+            print("Processing one image")
+
+            self.root_path = os.path.dirname(path_to_scan)
+            image = Image.open(path_to_scan)
+            self.list_of_images.append(ImageDetails.ImageDetails(image, path_to_scan))
+
+        elif os.path.isdir(path_to_scan):
+            print("Processing directory")
+
+            for extension in self.file_extension:
+                list_of_files.extend(glob.glob(path_to_scan + '/**/*.' + extension, recursive=True))
+
+            for file in list_of_files:
+                image = Image.open(file)
+                self.list_of_images.append(ImageDetails.ImageDetails(image, file))
+        else:
+            print("Unsupported image source. Please have look at the documentation!")
+            exit()
 
     def setup_summary(self):
         for image in self.list_of_images:
@@ -69,7 +111,6 @@ class ImageSource(object):
                 file_formats[image.image.mode] = self.image_format.get_format_printable(image.image)
 
         return [str(', '.join(str(file_format) for file_format in file_formats.values())), str(len(file_formats))]
-        #return 'lol'
 
     def process_filetypes(self):
         file_types = []
@@ -77,7 +118,7 @@ class ImageSource(object):
             if image.extension not in file_types:
                 file_types.append(image.extension)
 
-        return [str(', '.join(str(type[1:]) for type in file_types)), str(len(file_types))]
+        return [str(', '.join(str(file_type[1:]) for file_type in file_types)), str(len(file_types))]
 
     def process_aspect_ratio(self):
         aspect_ratios = []
@@ -91,3 +132,12 @@ class ImageSource(object):
             result += '\nand more...'
 
         return result
+
+    def process_list(self, list_of_images):
+        if all(isinstance(item, Image.Image) for item in list_of_images):
+            return;
+        elif all(os.path.isfile(item) for item in list_of_images):
+            return;
+        else:
+            print("List contains unsupported formats. Only list of PIL-images or list of direct paths supported!")
+            exit()
