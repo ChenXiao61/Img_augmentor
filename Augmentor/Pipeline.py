@@ -78,6 +78,7 @@ class Pipeline(object):
                                    "ConvertGrayscale"])
 
     def execute(self):
+        self.image_source.populateImages()
         print("Saving " + str(len(self.image_source.list_of_images) * len(
             self.function_list)) + " images to " + self.image_source.root_path)
 
