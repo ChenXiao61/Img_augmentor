@@ -9,7 +9,6 @@ import os
 
 class ImageSource(object):
     def __init__(self, root_path):
-
         self.root_path = root_path
         self.list_of_images = []
         self.file_extension = ('jpg', 'jpeg', 'png', 'bmp')
@@ -19,8 +18,6 @@ class ImageSource(object):
         if len(self.list_of_images) == 0:
             print("Image repository is empty.")
             exit()
-
-
 
     def scan(self, path_to_scan):
         # for root, subdirs, list_of_files in os.walk(path_to_scan):
@@ -40,6 +37,7 @@ class ImageSource(object):
                 for file in path_to_scan:
                     image = Image.open(file)
                     self.list_of_images.append(ImageDetails.ImageDetails(image, file))
+                    del image
                 self.root_path = os.path.dirname(path_to_scan[0])
             else:
                 print("List contains unsupported formats. Only list of PIL-images or list of direct paths supported!")
@@ -47,29 +45,31 @@ class ImageSource(object):
 
         elif isinstance(path_to_scan, Image.Image):
             print("Processing PIL image object")
-
             self.root_path = os.path.dirname(path_to_scan.filename)
             self.list_of_images.append(ImageDetails.ImageDetails(path_to_scan, path_to_scan.filename))
 
         elif any(extension in path_to_scan for extension in self.file_extension):
             print("Processing one image")
-
             self.root_path = os.path.dirname(path_to_scan)
             image = Image.open(path_to_scan)
             self.list_of_images.append(ImageDetails.ImageDetails(image, path_to_scan))
+            del image
 
         elif os.path.isdir(path_to_scan):
             print("Processing directory")
-
             for extension in self.file_extension:
                 list_of_files.extend(glob.glob(path_to_scan + '/**/*.' + extension, recursive=True))
-
             for file in list_of_files:
                 image = Image.open(file)
                 self.list_of_images.append(ImageDetails.ImageDetails(image, file))
+                del image
         else:
             print("Unsupported image source. Please have look at the documentation!")
             exit()
+
+    def populateImages(self):
+        for image in self.list_of_images:
+            image.populateImage()
 
     def setup_summary(self):
         for image in self.list_of_images:
@@ -107,8 +107,8 @@ class ImageSource(object):
     def process_file_formats(self):
         file_formats = {}
         for image in self.list_of_images:
-            if image.image.mode not in file_formats:
-                file_formats[image.image.mode] = self.image_format.get_format_printable(image.image)
+            if image.mode not in file_formats:
+                file_formats[image.mode] = self.image_format.get_format_printable(image.mode)
 
         return [str(', '.join(str(file_format) for file_format in file_formats.values())), str(len(file_formats))]
 
