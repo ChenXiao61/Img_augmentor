@@ -1,4 +1,7 @@
 # Augmentor
+
+[![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md)
+
 Image augmentation library in Python for Machine Learning practitioners.
 
 ## Usage
