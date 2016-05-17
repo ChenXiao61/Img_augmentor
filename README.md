@@ -2,7 +2,7 @@
 
 [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md) [![Project Status: WIP - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip)
 
-Image augmentation library in Python for Machine Learning practitioners.
+Image augmentation library in Python for Machine Learning practitioners. A Julia version of the package is being also being developed as a sister project and is available [here](https://github.com/Evizero/Augmentor.jl). 
 
 ## Usage
 The package works by building an augmentation pipeline as a series of operations to perform on a set of images. Operations, such as rotations or transforms, are added piece by piece in order to create an augmentation pipeline, which can then be executed in order to create an augmented dataset.
