@@ -15,7 +15,8 @@ You start by initialising an `ImageSource` object where you define the source of
 
 ### The `ImageSource` Class
 Defines the source directory or directories where your original images are stored.
-```Python
+
+```python
 summary()
 ```
 
@@ -28,7 +29,8 @@ Includes mainly the different image operations and therefore the main functional
 ### The `Pipeline` Class
 Defines the operations (rotations, mirroring, tranforms, etc.) which should be applied to your original dataset. Once a pipeline has been built, the `execute()` method applies the operations to your images.
 The currently implemented image manipulation functions are:
-```Python
+
+```python
 addFlipX(chance=1)
 addFlipY(chance=1)
 addRotate90(chance=1)
@@ -45,7 +47,7 @@ summary()
 ## Installation
 __Currently beta. Mileage may vary.__
 
-```Python
+```python
 # Currently testing. Mileage may vary.
 pip install Augmentor
 ```
@@ -53,7 +55,8 @@ pip install Augmentor
 ## Usage
 
 The example can also be found in ```SimpleSample.py```
-```Python
+
+```python
 from Augmentor import Pipeline
 
 ## set the path to the folder with images to manipulate
@@ -76,7 +79,4 @@ pipe.execute()
 
 ## print a summary
 pipe.image_source.summary()
-
-
 ```
-
