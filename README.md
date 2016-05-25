@@ -11,19 +11,19 @@ The package currently consists of two basic building blocks that allow for a pip
 
 You start by initialising an `ImageSource` object where you define the source of your images. Then you define a `Pipeline` object that defines what operations you wish to perform on your dataset (defined in your `ImageSource` object).
 
-### `ImageSource`
+### The `ImageSource` Class
 Defines the source directory or directories where your original images are stored.
 ```Python
 summary()
 ```
 
-### `ImageDetails`
-is a container which contains image, path and other necessary informations about images such as path, filename, extension, ... .
+### The `ImageDetails` Class
+A container which comprises images, paths and other necessary information about the data pointed to.
 
-### `ImageOperations`
+### The `ImageOperations` Class
 Includes mainly the different image operations and therefore the main functionality.
 
-### `Pipeline`
+### The `Pipeline` Class
 Defines the operations (rotations, mirroring, tranforms, etc.) which should be applied to your original dataset. Once a pipeline has been built, the `execute()` method applies the operations to your images.
 The currently implemented image manipulation functions are:
 ```Python
