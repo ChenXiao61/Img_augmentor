@@ -55,7 +55,7 @@ The example can also be found in ```SimpleSample.py```
 from Augmentor import Pipeline
 
 ## set the path to the folder with images to manipulate
-pathToImages = 'C:/Users/Lukas/Pictures/sample'
+pathToImages = '\home\user\images'
 
 ## create pipeline
 pipe = Pipeline.Pipeline(pathToImages)
