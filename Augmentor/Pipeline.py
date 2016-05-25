@@ -1,8 +1,7 @@
 from Augmentor import ImageOperations
 from Augmentor import ImageSource
 from Augmentor import GithubFlavoredMarkdownTable
-from Augmentor import os
-
+from Augmentor import ProgramFinishedException
 
 class Pipeline(object):
     def __init__(self, image_path=None):
@@ -11,9 +10,7 @@ class Pipeline(object):
             self.image_path = image_path
             self.image_source = ImageSource.ImageSource(image_path)
         else:
-            print("No image source.")
-            exit()
-
+            raise ProgramFinishedException.ProgramFinishedException("No image source")
         self.image_operations = ImageOperations.ImageOperations()
 
     def addFlipX(self, chance=1):
@@ -74,16 +71,16 @@ class Pipeline(object):
     def addConvertGrayscale(self, chance=1):
         print("addConvertGrayscale")
         self.function_list.append([lambda: ImageOperations.ImageOperations.convert_grayscale(self, self.image_source,
-                                                                                             chance),
-                                   "ConvertGrayscale"])
+                                                                                             chance), "ConvertGrayscale"])
 
-    def execute(self):
-        self.image_source.populateImages()
-        print("Saving " + str(len(self.image_source.list_of_images) * len(
-            self.function_list)) + " images to " + self.image_source.root_path)
-
+    def execute(self, number_of_images=None):
+        finished = self.image_source.populate_images(number_of_images)
         for f, _ in self.function_list:
             f()
+        print("Saving " + str(number_of_images * len(
+                self.function_list)) + " images to " + self.image_source.root_path)
+        if finished is -1 :
+            raise ProgramFinishedException.ProgramFinishedException("All images have been executed!")
 
     def summary(self):
         list_of_operations = []
