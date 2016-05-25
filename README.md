@@ -27,7 +27,7 @@ A container which comprises images, paths and other necessary information about 
 Includes mainly the different image operations and therefore the main functionality.
 
 ### The `Pipeline` Class
-Defines the operations (rotations, mirroring, tranforms, etc.) which should be applied to your original dataset. Once a pipeline has been built, the `execute()` method applies the operations to your images.
+Defines the operations (rotations, mirroring, transforms, etc.) which should be applied to your original dataset. Once a pipeline has been built, the `execute()` method applies the operations to your images.
 The currently implemented image manipulation functions are:
 
 ```python
