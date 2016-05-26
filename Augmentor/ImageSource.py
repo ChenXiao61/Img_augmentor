@@ -4,6 +4,7 @@ from Augmentor import ImageFormat
 from Augmentor import Image
 from Augmentor import GithubFlavoredMarkdownTable
 from Augmentor import gcd
+from Augmentor import ProgramFinishedException
 import os
 
 
@@ -15,9 +16,9 @@ class ImageSource(object):
         self.dimensions = {}
         self.image_format = ImageFormat.ImageFormat()
         self.scan(root_path)
+        self.image_iterator = iter(self.list_of_images)
         if len(self.list_of_images) == 0:
-            print("Image repository is empty.")
-            exit()
+            raise ProgramFinishedException.ProgramFinishedException("Image repository is empty.")
 
     def scan(self, path_to_scan):
         # for root, subdirs, list_of_files in os.walk(path_to_scan):
@@ -40,8 +41,7 @@ class ImageSource(object):
                     del image
                 self.root_path = os.path.dirname(path_to_scan[0])
             else:
-                print("List contains unsupported formats. Only list of PIL-images or list of direct paths supported!")
-                exit()
+                raise ProgramFinishedException.ProgramFinishedException("List contains unsupported formats. Only list of PIL-images or list of direct paths supported!")
 
         elif isinstance(path_to_scan, Image.Image):
             print("Processing PIL image object")
@@ -64,12 +64,20 @@ class ImageSource(object):
                 self.list_of_images.append(ImageDetails.ImageDetails(image, file))
                 del image
         else:
-            print("Unsupported image source. Please have look at the documentation!")
-            exit()
+            raise ProgramFinishedException.ProgramFinishedException("Unsupported image source. Please have look at the documentation!")
 
-    def populateImages(self):
-        for image in self.list_of_images:
-            image.populateImage()
+    def populate_images(self, number_of_images):
+        if number_of_images is None:
+                for image in self.list_of_images:
+                    image.populateImage()
+        else:
+            for count in range(0, number_of_images):
+                try:
+                    image = next(self.image_iterator)
+                    image.populateImage()
+                except StopIteration:
+                    return -1
+        return 0
 
     def setup_summary(self):
         for image in self.list_of_images:
@@ -135,9 +143,8 @@ class ImageSource(object):
 
     def process_list(self, list_of_images):
         if all(isinstance(item, Image.Image) for item in list_of_images):
-            return;
+            return
         elif all(os.path.isfile(item) for item in list_of_images):
-            return;
+            return
         else:
-            print("List contains unsupported formats. Only list of PIL-images or list of direct paths supported!")
-            exit()
+            raise ProgramFinishedException.ProgramFinishedException("List contains unsupported formats. Only list of PIL-images or list of direct paths supported!")
