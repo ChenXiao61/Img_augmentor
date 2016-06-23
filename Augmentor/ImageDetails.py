@@ -14,4 +14,7 @@ class ImageDetails(object):
 
     def populateImage(self):
         self.image = Image.open(self.fullpath)
+        return self.image
 
+    def clear_image(self):
+        self.image = None
