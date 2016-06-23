@@ -12,6 +12,8 @@ class ImageSource(object):
     def __init__(self, root_path):
         self.root_path = root_path
         self.list_of_images = []
+        self.image_source_slice = None
+        self.processed_images = 0;
         self.file_extension = ('jpg', 'jpeg', 'png', 'bmp')
         self.dimensions = {}
         self.image_format = ImageFormat.ImageFormat()
@@ -41,7 +43,8 @@ class ImageSource(object):
                     del image
                 self.root_path = os.path.dirname(path_to_scan[0])
             else:
-                raise ProgramFinishedException.ProgramFinishedException("List contains unsupported formats. Only list of PIL-images or list of direct paths supported!")
+                raise ProgramFinishedException.ProgramFinishedException(
+                    "List contains unsupported formats. Only list of PIL-images or list of direct paths supported!")
 
         elif isinstance(path_to_scan, Image.Image):
             print("Processing PIL image object")
@@ -64,20 +67,21 @@ class ImageSource(object):
                 self.list_of_images.append(ImageDetails.ImageDetails(image, file))
                 del image
         else:
-            raise ProgramFinishedException.ProgramFinishedException("Unsupported image source. Please have look at the documentation!")
+            raise ProgramFinishedException.ProgramFinishedException(
+                "Unsupported image source. Please have look at the documentation!")
 
-    def populate_images(self, number_of_images):
-        if number_of_images is None:
-                for image in self.list_of_images:
-                    image.populateImage()
-        else:
-            for count in range(0, number_of_images):
-                try:
-                    image = next(self.image_iterator)
-                    image.populateImage()
-                except StopIteration:
-                    return -1
+    def populate_images(self):
+        for image in self.list_of_images:
+            image.populateImage()
         return 0
+
+    def populate_one_image(self):
+        try:
+            image = next(self.image_iterator)
+            image.populateImage()
+            return image
+        except StopIteration:
+            return -1
 
     def setup_summary(self):
         for image in self.list_of_images:
@@ -147,4 +151,5 @@ class ImageSource(object):
         elif all(os.path.isfile(item) for item in list_of_images):
             return
         else:
-            raise ProgramFinishedException.ProgramFinishedException("List contains unsupported formats. Only list of PIL-images or list of direct paths supported!")
+            raise ProgramFinishedException.ProgramFinishedException(
+                "List contains unsupported formats. Only list of PIL-images or list of direct paths supported!")
