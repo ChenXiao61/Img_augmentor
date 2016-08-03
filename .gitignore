@@ -8,3 +8,6 @@
 ehthumbs.db
 Thumbs.db
 .pypirc
+*.pyc
+*.egg
+*.egg-info
