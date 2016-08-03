@@ -21,7 +21,7 @@ summary()
 ```
 
 ### The `ImageDetails` Class
-A container which comprises images, paths and other necessary information about the data pointed to.
+A container which comprises images, paths, and other necessary information about the data it is pointing to.
 
 ### The `ImageOperations` Class
 Includes mainly the different image operations and therefore the main functionality.
