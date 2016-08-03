@@ -34,7 +34,7 @@ The currently implemented image manipulation functions are:
 Where chance is available, this parameter adds the possibility of how likely an image will be modified/generated. If nothing is specified the probability of 1 will be used.
 
 ####Flip
-To flip an image one can choose between the following to functions.  Where addFlipX will flip an image along its x-axis and addFlipY will flip an image along its y-axis.
+To flip an image one can choose between two functions. The function ` addFlipX` will flip an image along its x-axis and `addFlipY` will flip an image along its y-axis.
 ```python
 addFlipX(chance=1)
 addFlipY(chance=1)
