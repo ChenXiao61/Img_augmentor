@@ -1,4 +1,4 @@
-Augmentor is free to use onder the MIT License (MIT)
+Augmentor is free to use under the MIT License (MIT)
 
 >Copyright (c) 2016 Marcus D. Bloice
 >
