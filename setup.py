@@ -10,7 +10,7 @@ setup(
     author_email='marcus.bloice@medunigraz.at',
     url='https://github.com/mdbloice/Augmentor',  # use the URL to the github repo
     download_url='https://github.com/mdbloice/Augmentor/tarball/0.1',  #
-    keywords=['image', 'augmentation', 'generation', 'machine', 'learning'],  # arbitrary keywords
+    keywords=['image', 'augmentation', 'artificial', 'generation', 'machine', 'learning'],  # arbitrary keywords
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
