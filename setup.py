@@ -6,6 +6,7 @@ setup(
     packages=['Augmentor'],  # this must be the same as the name above
     version='0.1',
     description='Image augmentation library for Machine Learning',
+    license='MIT',
     author='Marcus D. Bloice',
     author_email='marcus.bloice@medunigraz.at',
     url='https://github.com/mdbloice/Augmentor',  # use the URL to the github repo
