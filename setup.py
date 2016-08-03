@@ -1,6 +1,5 @@
 from setuptools import setup
 
-
 setup(
     name='Augmentor',
     packages=['Augmentor'],  # this must be the same as the name above
@@ -22,8 +21,8 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     install_requires=[
-        'terminaltables >= 2.1.0',
-        'Pillow >= 3.0.0'
+         'Pillow>=3.0.0',
+	 'terminaltables'
     ],
 
 )
