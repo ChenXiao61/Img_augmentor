@@ -22,7 +22,7 @@ setup(
     ],
     install_requires=[
         'terminaltables >= 2.1.0',
-        'Pillow >= 3.0.0'
+        'Pillow'
     ],
 
 )
