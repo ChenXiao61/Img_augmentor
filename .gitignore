@@ -11,3 +11,4 @@ Thumbs.db
 *.pyc
 *.egg
 *.egg-info
+/.idea
