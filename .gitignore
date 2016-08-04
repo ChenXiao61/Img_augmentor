@@ -14,4 +14,4 @@ Thumbs.db
 *.egg-info
 /.idea
 /dist
-_build
+/build
