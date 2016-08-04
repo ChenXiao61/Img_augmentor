@@ -14,3 +14,6 @@ Thumbs.db
 /.idea
 /dist
 /build
+_build
+_static
+_templates
