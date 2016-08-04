@@ -8,7 +8,6 @@
 ehthumbs.db
 Thumbs.db
 # My additions 
-.pypirc
 *.pyc
 *.egg
 *.egg-info
