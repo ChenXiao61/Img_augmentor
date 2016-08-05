@@ -10,7 +10,7 @@ Augmentor is a Python package designed to aid the artificial generation of image
 
 .. note:: 
 
-    A Julia version of the package is currrently being developed. You can find it `here <https://github.com/Evizero/Augmentor.jl>`_. 
+    A Julia version of the package is also currrently being developed. You can find it `here <https://github.com/Evizero/Augmentor.jl>`_. 
 
 
 The documentation is organised as follows:
@@ -21,6 +21,8 @@ The documentation is organised as follows:
     :caption: User Guide
     
     userguide/install
+    userguide/usage
+    userguide/examples
 
 .. toctree::
     :maxdepth: 2
