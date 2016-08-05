@@ -17,7 +17,7 @@ General Procedure
 
 In general, a usage pattern consists of the following three steps:
 
-1. You instantiate an ``ImageSource`` object poiting to a directory containing your initial image data set
+1. You instantiate an ``ImageSource`` object pointing to a directory containing your initial image data set
 2. You define a number of operations to perform on this data set using the ``ImageOperations`` class.
 3. You execute these operations by using the ``Pipeline`` class.
 
@@ -25,8 +25,9 @@ Each class is explained in detail below. In the next section we shall go over so
 
 .. class:: ImageSource
 
-Some text.
+Defines the source directory or directories where your original images are stored.
+
 
 .. class:: ImageOperations
 
-Some text.
+Provides the various image operations and therefore the main functionality.
