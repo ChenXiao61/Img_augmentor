@@ -8,9 +8,9 @@ Augmentor
 
 .. note:: 
 
-    This package is work in progress and should not be considered stable as of yet!
+    This package is **work in progress** and should not be considered stable as of yet!
 
-Augmentor is a Python package designed to aid the artificial generation of image data for machine learning tasks. It is primarily a data augmentation tool, but will also incorporate basic image preprocessing functionality.
+Augmentor is a Python package designed to aid the augmentation and artificial generation of image data for machine learning tasks. It is primarily a data augmentation tool, but will also incorporate basic image preprocessing functionality.
 
 .. note:: 
 
