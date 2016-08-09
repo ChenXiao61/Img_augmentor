@@ -161,7 +161,7 @@ class Pipeline(object):
             list_of_operations.append(function_name)
 
         table_data = [
-            ['Pipline Summary:', ''],
+            ['Pipeline Summary:', ''],
             ['Operation count', str(len(self.function_list))],
             ['Operations', ''],
         ]
