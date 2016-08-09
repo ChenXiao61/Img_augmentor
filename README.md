@@ -4,7 +4,11 @@
 
 Image augmentation library in Python for Machine Learning. A Julia version of the package is also being developed as a sister project and is available [here](https://github.com/Evizero/Augmentor.jl).
 
-## Usage
+## Documentation
+
+Complete documentation can be found on Read the Docs: <http://augmentor.readthedocs.io/>.
+
+## Quick Start Guide and Usage
 The purpose of this package is to automate image data augmentation (artificial data generation) in order to create more samples for machine learning tasks, especially neural networks and deep learning.
 
 The package works by building an augmentation pipeline as a series of operations to perform on a set of images. Operations, such as rotations or transforms, are added piece by piece in order to create an augmentation pipeline, which can then be executed in order to create an augmented dataset.
