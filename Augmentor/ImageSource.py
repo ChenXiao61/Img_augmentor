@@ -1,3 +1,11 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from builtins import next
+from builtins import str
+from future import standard_library
+standard_library.install_aliases()
 from Augmentor import glob
 from Augmentor import ImageDetails
 from Augmentor import ImageFormat
@@ -13,7 +21,7 @@ class ImageSource(object):
         self.root_path = root_path
         self.list_of_images = []
         self.image_source_slice = None
-        self.processed_images = 0;
+        self.processed_images = 0
         self.file_extension = ('jpg', 'jpeg', 'png', 'bmp')
         self.dimensions = {}
         self.image_format = ImageFormat.ImageFormat()

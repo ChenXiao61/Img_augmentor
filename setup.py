@@ -17,6 +17,7 @@ setup(
         'Natural Language :: English',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
+        'Programming Language :: Python',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.3',
@@ -26,7 +27,7 @@ setup(
     install_requires=[
         'Pillow>=3.0.0',
         'terminaltables',
-        'six>=1.9.0'
+        'future>=0.15.0'
     ]
 
 )
