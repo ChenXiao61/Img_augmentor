@@ -11,10 +11,12 @@ Thumbs.db
 *.pyc
 *.egg
 *.egg-info
-/.idea
-/dist
-/build
-/back
+.idea/
+dist/
+data/
+build/
+back/
+test/
 .tox/
 _build
 _static
