@@ -13,11 +13,16 @@ def remove_filename_whitespace(directory, replace_with="-", preserve_repetitions
     """
     Utility function to remove whitespace from all files in a given directory.
 
-    Libraries such as Caffe, which require that files and labels are inputted using text files containing paths to images, might complain about file names with spaces. This function removes white space from all file names in a given directory.
+    Libraries such as Caffe, which require that files and labels are inputted using text files containing paths to \
+    images, might complain about file names with spaces. This function removes white space from all file names in \
+    a given directory.
 
     :param directory: The directory to scan.
     :param replace_with: The string to replace whitespace with.
-    :param preserve_repetitions: If True, multiple instances of consecutive whitespace are each individually replaced with the ``replace_with`` string. For example ``a  file.txt`` is renamed to ``a--file.txt`` if set to True, otherwise the file is renamed to ``a-file.txt``. **Note that if set to False, files may be overwritten and is therefore True by default**.
+    :param preserve_repetitions: If True, multiple instances of consecutive whitespace are each individually \
+    replaced with the ``replace_with`` string. For example ``a  file.txt`` is renamed to ``a--file.txt`` if \
+    set to True, otherwise the file is renamed to ``a-file.txt``. **Note that if set to False, files may be \
+    overwritten and is therefore True by default**.
     :type directory: String
     :type replace_with: String
     :type preserve_repetitions: Boolean
