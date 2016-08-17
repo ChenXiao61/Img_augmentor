@@ -13,4 +13,4 @@ from collections import defaultdict
 from fractions import gcd
 from io import BytesIO
 
-__all__ = ['ImageDetails', 'ImageOperations', 'ImageSource', 'Pipeline']
+__all__ = ['ImageDetails', 'ImageOperations', 'ImageSource', 'Pipeline', 'Utilities']

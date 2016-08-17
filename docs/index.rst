@@ -28,6 +28,8 @@ The documentation is organised as follows:
     userguide/usage
     userguide/examples
 
+    code
+
 .. toctree::
     :maxdepth: 2
     :caption: Licence and Terms
