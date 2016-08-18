@@ -24,7 +24,7 @@ pip install Augmentor
 ```
 
 ## Usage
-A an example can be found in ```SimpleSample.py```. Which includes creating and importing images, adding image manipulations to the query, executing them and saving these in a list of Image.Image.
+A an example can be found in [`Examples.py`](https://github.com/mdbloice/Augmentor/blob/master/Examples.py). This file includes exampeles of creating and importing images, adding image manipulations to a pipeline, executing the operations and saving them.
 
 There are several ways how to import and export images into the program.
 
