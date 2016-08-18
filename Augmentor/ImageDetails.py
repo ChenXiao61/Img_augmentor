@@ -4,8 +4,8 @@ from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
 standard_library.install_aliases()
-from Augmentor import Image
-from Augmentor import os
+from PIL import Image
+import os
 
 
 class ImageDetails(object):

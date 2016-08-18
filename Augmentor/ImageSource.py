@@ -6,15 +6,17 @@ from builtins import next
 from builtins import str
 from future import standard_library
 standard_library.install_aliases()
-import glob2
-from Augmentor import ImageDetails
-from Augmentor import ImageFormat
-from Augmentor import Image
-from Augmentor import GithubFlavoredMarkdownTable
-from Augmentor import gcd
-from Augmentor import ProgramFinishedException
-import os
 
+# Module imports
+from . import ImageDetails
+from . import ImageFormat
+from . import ProgramFinishedException
+
+from PIL import Image
+from terminaltables import GithubFlavoredMarkdownTable
+from fractions import gcd
+import os
+import glob2
 
 class ImageSource(object):
     def __init__(self, root_path):
