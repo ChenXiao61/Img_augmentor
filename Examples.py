@@ -16,7 +16,7 @@ from Augmentor import Image
 # Specifying a path to one image
 
 
-pathToImages = 'C:/Users/Jonny/Pictures/Camera Roll'
+pathToImages = '.'
 # create pipeline
 pipe = Pipeline.Pipeline(pathToImages)
 
