@@ -8,7 +8,7 @@ import os
 from terminaltables import GithubFlavoredMarkdownTable
 from PIL import Image, ImageOps
 import random
-import glob
+import glob2
 from collections import defaultdict
 from fractions import gcd
 from io import BytesIO

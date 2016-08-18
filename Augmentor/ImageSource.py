@@ -6,7 +6,7 @@ from builtins import next
 from builtins import str
 from future import standard_library
 standard_library.install_aliases()
-from Augmentor import glob
+import glob2
 from Augmentor import ImageDetails
 from Augmentor import ImageFormat
 from Augmentor import Image
@@ -69,7 +69,7 @@ class ImageSource(object):
         elif os.path.isdir(path_to_scan):
             print("Processing directory")
             for extension in self.file_extension:
-                list_of_files.extend(glob.glob(path_to_scan + '/**/*.' + extension, recursive=True))
+                list_of_files.extend(glob2.glob(path_to_scan + '/**/*.' + extension))
             for file in list_of_files:
                 image = Image.open(file)
                 self.list_of_images.append(ImageDetails.ImageDetails(image, file))
