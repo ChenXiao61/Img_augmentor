@@ -9,6 +9,7 @@ import os
 import re
 import collections
 
+
 def remove_filename_whitespace(directory, replace_with="-", preserve_repetitions=True):
     """
     Utility function to remove whitespace from all files in a given directory.

@@ -7,10 +7,10 @@ from builtins import str
 from builtins import next
 from future import standard_library
 standard_library.install_aliases()
-from Augmentor import ImageOperations
-from Augmentor import ImageSource
-from Augmentor import GithubFlavoredMarkdownTable
-from Augmentor.ProgramFinishedException import ProgramFinishedException
+from . import ImageOperations
+from . import ImageSource
+from terminaltables import GithubFlavoredMarkdownTable
+from .ProgramFinishedException import ProgramFinishedException
 
 
 class Pipeline(object):

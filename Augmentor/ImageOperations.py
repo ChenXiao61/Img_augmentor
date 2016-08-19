@@ -5,10 +5,9 @@ from __future__ import absolute_import
 from builtins import str
 from future import standard_library
 standard_library.install_aliases()
-from Augmentor import Image, ImageOps
-from Augmentor import random
-from Augmentor import BytesIO
-from io import StringIO
+from PIL import Image, ImageOps
+import random
+from io import BytesIO
 
 
 def calc_chance(percent):
