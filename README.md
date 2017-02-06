@@ -10,7 +10,7 @@ Complete documentation can be found on Read the Docs: <http://augmentor.readthed
 
 ## Installation
 Install via pip:
-```python
+```
 pip install Augmentor
 ```
 
