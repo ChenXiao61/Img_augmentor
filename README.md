@@ -17,7 +17,7 @@ pip install Augmentor
 ## Quick Start Guide and Usage
 The purpose of _Augmentor_ is to automate image augmentation (artificial data generation) in order to expand datasets as input for machine learning algorithms, especially neural networks and deep learning.
 
-The package works by building an augmentation pipeline by defining a series of operations to perform on a set of images. Operations, such as rotations or transforms, are added piece by piece in order to create an augmentation pipeline: when complete, the pipeline is executed and an augmented dataset is created.
+The package by building an augmentation **pipeline** where you define a series of operations to perform on a set of images. Operations, such as rotations or transforms, are added one by one in order to create this augmentation pipeline: when complete, the pipeline is executed and an augmented dataset is created.
 
 To begin, instantiate a `Pipeline` object that points to a directory on your file system:
 
@@ -32,10 +32,13 @@ You can then add operations to the Pipeline object `p` as follows:
 p.rotate(probability=0.7, max_left=10, max_right=10)
 p.zoom(probability=0.5, min_scale=1.1, max_scale=1.5)
 ```
+
+Every function requires you to specify a probability, which is used to decide if an operation is applied to an image as it is passed through the augmentation pipeline.
+
 Once you have created a pipeline, you can sample from it like so:
 
-```
+```python
 p.sample(10000)
 ```
 
-which will generate 10,000 augmented images based on your specifications.
+which will generate 10,000 augmented images based on your specifications. By default these will be written to the disk in a directory named `output` relative to the path specified when initialising the `p` pipeline object above.

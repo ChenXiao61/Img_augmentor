@@ -20,7 +20,7 @@ class Pipeline(object):
                  save_format="JPEG", seed=None):
 
         if seed:
-            random.seed(seed)  # This till hash strings to set a seed, but some hashing is non-deterministic!
+            random.seed(seed)  # This will hash strings to set a seed, but some hashing is non-deterministic!
         else:
             random.seed()  # Set this to blank to use /dev/random or the time if that does not exist.
 
