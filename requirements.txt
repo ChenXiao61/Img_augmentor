@@ -1,4 +1,2 @@
 Pillow
-terminaltables
 future
-glob2

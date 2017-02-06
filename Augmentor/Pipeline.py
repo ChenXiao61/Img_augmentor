@@ -1,195 +1,189 @@
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
-from builtins import range
-from builtins import str
-from builtins import next
-from future import standard_library
-standard_library.install_aliases()
-from . import ImageOperations
-from . import ImageSource
-from terminaltables import GithubFlavoredMarkdownTable
-from .ProgramFinishedException import ProgramFinishedException
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
+
+from builtins import *
+
+from .Operations import *
+from .ImageUtilities import scan_directory
+
+import os
+import random
+import uuid
+
+from tqdm import tqdm
+from PIL import Image
 
 
 class Pipeline(object):
-    ProgramFinishedException = ProgramFinishedException
 
-    def __init__(self, image_path=None):
-        self.function_list = []
-        self.function_iterator = None
-        self.image_iterator = None
-        self.image_to_process = None
-        self.finished = None
-        if image_path is not None:
-            self.image_path = image_path
-            self.image_source = ImageSource.ImageSource(image_path)
+    def __init__(self, source_directory, recursive_scan=False, output_directory="output",
+                 save_format="JPEG", seed=None):
 
+        if seed:
+            random.seed(seed)  # This till hash strings to set a seed, but some hashing is non-deterministic!
         else:
-            raise ProgramFinishedException("No image source")
+            random.seed()  # Set this to blank to use /dev/random or the time if that does not exist.
 
-        self.image_operations = ImageOperations.ImageOperations()
+        self.image_counter = 0
 
-    def addFlipX(self, chance=1):
-        print("addFlipX")
-        self.function_list.append(
-            [lambda img_source, storage_location: ImageOperations.ImageOperations.flip_x(self.image_operations,
-                                                                                         img_source, storage_location,
-                                                                                         chance),
-             "FlipX"])
-        self.setup_iterators()
+        # TODO: No need to place this in __init__ - move later.
+        valid_formats = ["PNG", "BMP", "GIF", "JPEG"]  # See: https://infohost.nmt.edu/tcc/help/pubs/pil/formats.html
 
-    def addFlipY(self, chance=1):
-        print("addFlipY")
-        self.function_list.append(
-            [lambda img_source, storage_location: ImageOperations.ImageOperations.flip_y(self.image_operations,
-                                                                                         img_source, storage_location,
-                                                                                         chance),
-             "FlipY"])
-        self.setup_iterators()
+        self.save_format = save_format
 
-    def addTranspose(self, chance=1):
-        print("addTranspose")
-        self.setup_iterators()
+        if not os.path.exists(source_directory):
+            raise IOError("The path does not appear to exist.")
 
-    def addRotate90(self, chance=1):
-        print("addRotate90")
-        self.function_list.append(
-            [lambda img_source, storage_location: ImageOperations.ImageOperations.rotate_90(self.image_operations,
-                                                                                            img_source,
-                                                                                            storage_location, chance),
-             "Rotate90"])
-        self.setup_iterators()
+        # TODO: Change this so that we just use the relative path to get the absolute path.
+        self.output_directory = os.path.join(source_directory, output_directory)
 
-    def addRotate180(self, chance=1):
-        print("addRotate180")
-        self.function_list.append(
-            [lambda img_source, storage_location: ImageOperations.ImageOperations.rotate_180(self.image_operations,
-                                                                                             img_source,
-                                                                                             storage_location, chance),
-             "Rotate180"])
-        self.setup_iterators()
+        if not os.path.exists(self.output_directory):
+            try:
+                os.makedirs(self.output_directory)
+            except OSError as exception:
+                raise exception
 
-    def addRotate270(self, chance=1):
-        print("addRotate270")
-        self.function_list.append(
-            [lambda img_source, storage_location: ImageOperations.ImageOperations.rotate_270(self.image_operations,
-                                                                                             img_source,
-                                                                                             storage_location, chance),
-             "Rotate270"])
-        self.setup_iterators()
+        self.source_directory = source_directory
+        self.image_list = scan_directory(self.source_directory, recursive_scan)
+        self.total_files = list(self.image_list)  # Ensure we get a new list and not a link.
+        self.operations = []
 
-    def addResize(self, height, width, chance=1):
-        print("addResize")
-        self.function_list.append(
-            [lambda img_source, storage_location: ImageOperations.ImageOperations.resize(self.image_operations,
-                                                                                         img_source, height, width,
-                                                                                         storage_location,
-                                                                                         chance), "Resize"])
-        self.setup_iterators()
+        print("Initialised with %s images found in selected directory." % len(self.image_list))
+        print("Output directory set to %s." % self.output_directory)
 
-    def addScale(self, height, width, chance=1):
-        print("addScale")
-        self.function_list.append(
-            [lambda img_source, storage_location: ImageOperations.ImageOperations.scale(self.image_operations,
-                                                                                        img_source, height, width,
-                                                                                        storage_location,
-                                                                                        chance), "Scale"])
-        self.setup_iterators()
+        # TODO: check each file to make sure it can be opened by PIL, perhaps like so:
+        # for file_check in self.image_list:
+        #     try:
+        #         with Image.open(file_check) as im:
+        #             print(file_check, im.format, "%dx%d" % im.size, im.mode)
+        #     except IOError:
+        #             self.image_list.remove(file_check)
 
-    def addRotate(self, degree, chance=1):
-        print("addRotate")
-        self.function_list.append(
-            [lambda img_source, storage_location: ImageOperations.ImageOperations.rotate(self.image_operations,
-                                                                                         img_source, degree,
-                                                                                         storage_location,
-                                                                                         chance),
-             "Rotate"])
-        self.setup_iterators()
+    def execute(self):
+        for operation in self.operations:
+            new_files = []
+            for image in tqdm(self.image_list, desc=str(operation)):
+                operation.perform_operation(image)
+            self.total_files.extend(new_files)
 
-    def addCrop(self, height, width, chance=1):
-        print("addCrop")
-        self.function_list.append(
-            [lambda img_source, storage_location: ImageOperations.ImageOperations.crop(self.image_operations,
-                                                                                       img_source,
-                                                                                       height, width, storage_location,
-                                                                                       chance), "Crop"])
-        self.setup_iterators()
+    def probabilistic(self, image):
+        self.image_counter += 1
+        for operation in self.operations:
+            r = round(random.random(), 1)
+            if r <= operation.probability:
+                image = operation.perform_operation(image)
+        # file_name = str(self.image_counter) + "." + self.save_format
+        file_name = str(uuid.uuid4()) + "." + self.save_format
+        try:
+            image.save(os.path.join(self.output_directory, file_name), self.save_format)
+        except IOError:
+            print("Error writing %s." % file_name)
+        return image
 
-    def addConvertGrayscale(self, chance=1):
-        print("addConvertGrayscale")
-        self.function_list.append(
-            [lambda img_source, storage_location: ImageOperations.ImageOperations.convert_grayscale(
-                self.image_operations, img_source,
-                storage_location,
-                chance),
-             "ConvertGrayscale"])
-        self.setup_iterators()
+    def sample(self, n):
+        # TODO: Check if there are any images in self.image_list as if there are 0, it will hang.
+        i = 1
+        progress_bar = tqdm(total=n, desc="Executing Pipeline", unit=' Image Operations')
+        while i <= n:
+            for image_path in self.image_list:
+                if i <= n:
+                    self.probabilistic(Image.open(image_path))
+                    progress_bar.set_description("Processing %s" % os.path.split(image_path)[1])
+                    progress_bar.update(1)
+                i += 1
+        progress_bar.close()
 
-    def execute(self, number_of_images=None, storage_location=None):
-        if number_of_images is None:
-            finished = self.image_source.populate_images()
+    def rotate90(self, probability):
+        self.operations.append(Rotate(probability=probability, rotation=90))
 
-            if finished is -1:
-                raise ProgramFinishedException("All images have been executed!")
+    def rotate180(self, probability):
+        self.operations.append(Rotate(probability=probability, rotation=180))
 
-            for image in self.image_source.list_of_images:
-                for function, _ in self.function_list:
-                    function(image, storage_location)
-            raise ProgramFinishedException("All images have been executed!")
+    def rotate270(self, probability):
+        self.operations.append(Rotate(probability=probability, rotation=270))
 
+    def rotate(self, max_left_rotation=10, max_right_rotation=10, probability=1.0):
+        # TODO: Finish this check and decide if we want to specify a max_l/max_r or not...
+        if max_left_rotation < 180 & max_right_rotation < 180:
+            pass
+        self.operations.append(RotateRange(probability=probability,
+                                           rotate_range=(max_left_rotation, max_right_rotation)))
+
+    def flip_top_bottom(self, probability):
+        # Flip top to bottom (vertically)
+        self.operations.append(Flip(probability=probability, top_bottom_left_right="TOP_BOTTOM"))
+
+    def flip_left_right(self, probability):
+        # Flip lef to right (horizontally)
+        self.operations.append(Flip(probability=probability, top_bottom_left_right="LEFT_RIGHT"))
+
+    def random_displacement(self, severity, fuzziness, rotate=True, probability=1.0):
+        # Control the fuzziness of a transform
+        pass
+
+    def skew(self):
+        pass
+
+    def zoom(self, probability, min_factor=1.05, max_factor=1.2):
+        self.operations.append(Zoom(probability=probability, min_factor=min_factor, max_factor=max_factor))
+        pass
+
+    def crop_by_number_of_tiles(self, number_of_crops_per_image):
+        # In this function we want to crop images, based on the a number of crops per image
+        pass
+
+    def crop_by_size(self, dimensions_per_crop, overlap=False):
+        # In this function we will crop as many as we can with no overlap (or with overlap, depending on the param)
+        pass
+
+    def crop_by_percentage(self, percent_size_of_crop, from_center=True):
+        pass
+
+    def crop_by_size(self, width, height, centre=True):
+        """
+        Crop each image according to width and height, by default in the centre of each image, otherwise at a random \
+        location within the image.
+        :param width: The width of the desired crop.
+        :param height: The height of the desired crop.
+        :param centre: If True, crops from the centre of the image, otherwise crops at a random location within the \
+        image, maintaining the dimensions specified.
+        :return: None.
+        """
+        self.operations.append(Crop(probability=1.0, width=width, height=height, centre=centre))
+
+    def histogram_equalisation(self, probability=1.0):
+        self.operations.append(HistogramEqualisation(probability=probability))
+
+    def resize(self, width, height, probability=1.0, resample_filter="NEAREST"):
+        # TODO: Make this automatic by default, i.e. ANTIALIAS if very small downsampling, BICUBIC if upsampling.
+        legal_filters = ["NEAREST", "BICUBIC", "ANTIALIAS", "BILINEAR"]
+        if resample_filter in legal_filters:
+            self.operations.append(Resize(probability=probability, width=width,
+                                          height=height, resample_filter=resample_filter))
         else:
+            print("The save_filter parameter must be one of ", legal_filters)
+            print("E.g. save_filter(800, 600, \'NEAREST\')")
 
-            if self.image_to_process is None:
-                self.image_to_process = self.image_source.populate_one_image()
-            if self.image_to_process is -1:
-                raise ProgramFinishedException("All images have been executed!")
+    def __add_operation(self, operation):
+        self.operations.append(operation)
 
-            i = 0
-            while i < number_of_images:
-                try:
-                    if self.image_to_process is -1:
-                        raise ProgramFinishedException("All images have been executed!")
-                    f = (next(self.function_iterator))
-                    f(self.image_to_process, storage_location)
-                    i += 1
+    def add_further_directory(self, new_source_directory, recursive_scan=False):
+        if not os.path.exists(new_source_directory):
+            raise IOError("The path does not appear to exist.")
+        # TODO: Add this functionality later.
+        raise NotImplementedError
 
-                except StopIteration:
+########################################################################################################################
+# Utility Functions                                                                                                    #
+########################################################################################################################
+    @staticmethod
+    def extract_paths_and_extensions(self, image_path):
+        """
+        Extract a image's file name, its extension, and its root path (the entire path without the file name).
+        :param image_path:
+        :return: The image's file name (file_name), extension (extension), and root path (root_path).
+        """
+        file_name, extension = os.path.splitext(image_path)
+        root_path = os.path.dirname(image_path)
 
-                    self.image_to_process = self.image_source.populate_one_image()
-                    self.setup_function_iterator()
-        if storage_location is None:
-            print("Saving " + str(i) + " images to " + self.image_source.root_path)
-        if isinstance(storage_location, list):
-            print("Images saved to memory object.")
-
-    def summary(self):
-        list_of_operations = []
-        for _, function_name in self.function_list:
-            list_of_operations.append(function_name)
-
-        table_data = [
-            ['Pipeline Summary:', ''],
-            ['Operation count', str(len(self.function_list))],
-            ['Operations', ''],
-        ]
-        for i in range(0, len(list_of_operations)):
-            table_data[2][1] += str(list_of_operations[i] + '\n')
-
-        table = GithubFlavoredMarkdownTable(table_data)
-        print(table.table)
-
-    def setup_iterators(self):
-        self.image_iterator = iter(self.image_source.list_of_images)
-        self.setup_function_iterator()
-
-    def setup_function_iterator(self):
-        function_list = []
-        for function in self.function_list:
-            function_list.append(function[0])
-        self.function_iterator = iter(function_list)
-
-    def clean_up(self, storage_location):
-        for buffer in storage_location:
-            buffer.close()
+        return file_name, extension, root_path

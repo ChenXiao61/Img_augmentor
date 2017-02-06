@@ -1,6 +1,9 @@
 Licence
 =======
 
+Augmentor Licence
+-----------------
+
 The Augmentor package is licenced under the terms of the MIT licence.
 
 The MIT License (MIT)
