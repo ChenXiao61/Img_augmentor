@@ -25,6 +25,7 @@ The documentation is organised as follows:
     userguide/install
     userguide/usage
     userguide/examples
+    userguide/extend
 
     code
 
