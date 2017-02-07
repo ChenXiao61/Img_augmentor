@@ -3,20 +3,20 @@ Installation
 
 Installation is via ``pip``:
 
-.. code-block:: python
+.. code-block:: bash
 
     pip install Augmentor
 
 If you have to use ``sudo`` it is recommended that you use the ``-H`` flag:
 
-.. code-block:: python
+.. code-block:: bash
 
     sudo -H pip install Augmentor
 
 Requirements
 ------------
 
-Augmentor requires ``terminaltables`` and ``Pillow``.
+Augmentor requires ``Pillow`` and ``tqdm``. Note that Pillow is a fork of PIL, but both packages cannot exist simultaneously. Uninstall PIL before installing Pillow.
 
 Building
 --------

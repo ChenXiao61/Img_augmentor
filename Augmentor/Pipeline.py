@@ -11,7 +11,7 @@ import random
 import uuid
 
 from tqdm import tqdm
-from PIL import Image
+from PIL import Image  # TODO: Check how to define Pillow vs. PIL in the requirements file.
 
 
 class Pipeline(object):
@@ -94,9 +94,27 @@ class Pipeline(object):
         progress_bar.close()
 
     def rotate90(self, probability):
+        """
+        Rotate an image by 90 degrees.
+
+        The function will rotate an image by 90 degrees, and will be performed with a user-specified probability.
+
+        :param probability: The probability that an image will have this operation applied when \
+         being passed through the pipeline.
+        :return: None
+        """
         self.operations.append(Rotate(probability=probability, rotation=90))
 
     def rotate180(self, probability):
+        """
+        Rotate an image by 180 degrees.
+
+        The function will rotate an image by 90 degrees, and will be performed with a user-specified probability.
+
+        :param probability: The probability that an image will have this operation applied when \
+         being passed through the pipeline.
+        :return:
+        """
         self.operations.append(Rotate(probability=probability, rotation=180))
 
     def rotate270(self, probability):
@@ -171,6 +189,12 @@ class Pipeline(object):
         if not os.path.exists(new_source_directory):
             raise IOError("The path does not appear to exist.")
         # TODO: Add this functionality later.
+        raise NotImplementedError
+
+    def apply_pipeline(self, image):
+        # Apply the current pipeline to a single image, returning the newly created image.
+        # Not yet implemented.
+
         raise NotImplementedError
 
 ########################################################################################################################

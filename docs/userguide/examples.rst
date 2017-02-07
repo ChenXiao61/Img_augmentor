@@ -1,7 +1,11 @@
 Examples
 ========
 
-A number of typical usage scenarios are desribed here. 
+A number of typical usage scenarios are described here.
+
+.. note::
+
+    A full list of operations can be found in the ``Operations`` module documentation.
 
 Initialising a pipeline
 -----------------------
@@ -10,37 +14,36 @@ Initialising a pipeline
     
      import Augmentor
 
-     path_to_data = "/home/bingolittle/images/dataset1/"
+     path_to_data = "/home/user/images/dataset1/"
 
      # Create a pipeline
-     pipe = Pipeline.Pipeline(path_to_data)
+     p = Augmentor.Pipeline(path_to_data)
 
 Adding operations to a pipeline
 -------------------------------
 
 .. code-block:: python
 
-    # Add some operations to an existing pipeline
-    # add addFlipY operation to the pipeline
-    pipe.addFlipY(1)
-    # add addCrop operation to the pipeline
-    pipe.addCrop(45, 45)
-    # add addRotatet90 operation to the pipeline
-    pipe.addRotate90()
+    # Add some operations to an existing pipeline.
+
+    # First, we add a horizontal flip operation to the pipeline:
+    p.flip_left_right(probability=0.4)
+
+    # Now we add a vertical flip operation to the pipeline:
+    p.flip_top_bottom(probability=0.8)
+
+    # Add a rotate90 operation to the pipeline:
+    p.rotate90(probability=0.1)
 
 Executing a pipeline
 --------------------
 
 .. code-block:: python
 
-    try:
-        pipe.execute()
-    except pipe.ProgramFinishedException as e:
-        print(str(e))
-    
-    # Or set a limit
-    number_of_images = 12
-    try:
-        pipe.execute(number_of_images)
-    except pipe.ProgramFinishedException as e:
-        print(str(e))
+    # Here we sample 100,000 images from the pipeline.
+
+    # It is often useful to use scientific notation for specify large numbers with trailing zeros.
+    num_of_samples = int(1e5)
+
+    # Now we can sample from the pipeline:
+    p.sample(num_of_samples)

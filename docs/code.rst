@@ -6,39 +6,17 @@ Auto Generated Documentation
 Module by Module Documentation
 ==============================
 
-Documentation of the ``Utilities`` module.
+Documentation of the ``Pipeline`` module.
 ------------------------------------------
 
-.. automodule:: Augmentor.Utilities
+.. automodule:: Augmentor.Pipeline
     :members:
     :undoc-members:
 
-Documentation of the ``ImageSource`` module.
+Documentation of the ``Operations`` module.
 --------------------------------------------
 
-.. automodule:: Augmentor.ImageSource
+.. automodule:: Augmentor.Operations
     :members:
     :undoc-members:
 
-Documentation of the ``ImageDetails`` module.
----------------------------------------------
-
-.. automodule:: Augmentor.ImageDetails
-    :members:
-    :undoc-members:
-
-
-Documentation of the ``ImageOperations`` module.
-------------------------------------------------
-
-.. automodule:: Augmentor.ImageOperations
-    :members:
-    :undoc-members:
-
-
-Documentation of the ``ImageFormat`` module.
---------------------------------------------
-
-.. automodule:: Augmentor.ImageFormat
-    :members:
-    :undoc-members:
