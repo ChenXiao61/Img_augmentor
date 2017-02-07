@@ -7,7 +7,7 @@ Extending Augmentor to add new functionality is quite simple.
 2) This new class must inherit from the ``Operation`` superclass.
 3) You must overload the ``perform_operation`` method belonging to the superclass.
 
-For example, to add a new operation called FoldImage, you would add this code:
+For example, to add a new operation called ``FoldImage``, you would add this code:
 
 .. code-block:: python
 
