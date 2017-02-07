@@ -9,10 +9,21 @@ Image augmentation library in Python for machine learning. A Julia version of th
 Complete documentation can be found on Read the Docs: <http://augmentor.readthedocs.io/>
 
 ## Installation
-Install via pip:
+
+Currently, the PyPI version is out of date. Therefore it is currently recommended that you clone the package and install it manually.
+
 ```
-pip install Augmentor
+git clone https://github.com/mdbloice/Augmentor.git
 ```
+
+Enter the newly created `Augmentor` directory and build the package:
+
+```
+cd Augmentor
+python setup.py install
+```
+
+Installing via `pip` and PyPI will be restored in a future version.
 
 ## Quick Start Guide and Usage
 The purpose of _Augmentor_ is to automate image augmentation (artificial data generation) in order to expand datasets as input for machine learning algorithms, especially neural networks and deep learning.
