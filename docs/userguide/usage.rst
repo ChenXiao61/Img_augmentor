@@ -8,7 +8,7 @@ Getting Started
 
 To use Augmentor, the following general procedure is followed:
 
-1. You instantiate a :class:`.Pipeline` object pointing to a directory containing your initial image data set.
+1. You instantiate a :class:`~Augmentor.Pipeline.Pipeline` object pointing to a directory containing your initial image data set.
 2. You define a number of operations to perform on this data set using your :class:`~Augmentor.Pipeline.Pipeline` object.
 3. You execute these operations by calling the :class:`~Augmentor.Pipeline.Pipeline`'s :func:`~Augmentor.Pipeline.Pipeline.sample` method.
 
@@ -30,7 +30,7 @@ The variable ``p`` now contains a :class:`~Augmentor.Pipeline.Pipeline` object, 
 Step 2: Add Operations to the Pipeline
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once you have created a :class:`~Augmentor.Pipeline.Pipeline`, :attr:`p`, we can begin by adding operations to :attr:`p`. For example, we shall begin by adding a :func:`~Augmentor.Pipeline.Pipeline.rotate` operation:
+Once you have created a :class:`~Augmentor.Pipeline.Pipeline`, ``p``, we can begin by adding operations to ``p``. For example, we shall begin by adding a :func:`~Augmentor.Pipeline.Pipeline.rotate` operation:
 
 .. code-block:: python
 
