@@ -39,15 +39,14 @@ class HistogramEqualisation(Operation):
     def __init__(self, probability):
         Operation.__init__(self, probability)
 
+    # TODO: We may need to apply this to each channel:
+    # This might be a color image.
+    # The histogram will be computed on the flattened image.
+    # You can instead apply this function to each color channel.
+    # with warnings.catch_warnings():
+    #    warnings.simplefilter("ignore")
     def perform_operation(self, image):
         return ImageOps.equalize(image)
-
-        # TODO: We may need to apply this to each channel:
-        # This might be a color image.
-        # The histogram will be computed on the flattened image.
-        # You can instead apply this function to each color channel.
-        # with warnings.catch_warnings():
-        #    warnings.simplefilter("ignore")
 
 
 class Greyscale(Operation):
@@ -143,7 +142,6 @@ class Flip(Operation):
 
 
 class Crop(Operation):
-    # TODO: Fix this Crop class to work with images and not paths.
     def __init__(self, probability, width, height, centre):
         Operation.__init__(self, probability)
         self.width = width
@@ -167,28 +165,31 @@ class Crop(Operation):
 
 
 class Scale(Operation):
-    # Resize by a certain factor (*not* dimensions - which would uniformly resize all
-    # images to X*Y while scale depends on the size of the input)
+    """
+    Class to increase or decrease images by a certain factor. The ``Resize`` class handles images \
+    that need to be re-sized with different **dimensions**, which may not maintain aspect ratio.
+    """
     def __init__(self, probability, x_scale_factor, y_scale_factor):
         Operation.__init__(self, probability)
         self.x_scale_factor = x_scale_factor
         self.y_scale_factor = y_scale_factor
 
+    # Resize by a certain factor (*not* dimensions - which would uniformly resize all
+    # images to X*Y while scale depends on the size of the input)
     def perform_operation(self, image):
         pass
 
 
 class Distort(Operation):
-    def __init__(self, probability, grid_size, scale, smoothing):
+    def __init__(self, probability, approximate_grid_size, sigma):
         Operation.__init__(self, probability)
-        self.grid_size = grid_size
-        self.scale = scale
-        self.smooth = smoothing
+        self.approximate_grid_size = approximate_grid_size
+        self.sigma = sigma
 
     def perform_operation(self, image):
-        # 2x2 Grid in this case
         w, h = image.size
-        dx, dy = 200, 200
+        dx = self.approximate_grid_size
+        dy = self.approximate_grid_size
         return image.transform(image.size, Image.MESH,
                             [((0, 0, w // 2, h // 2),  # Specifies xy top left, xy bottom right DESTINATION
                               (0, 0, 0, h // 2,

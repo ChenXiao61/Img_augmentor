@@ -5,7 +5,7 @@ A number of typical usage scenarios are described here.
 
 .. note::
 
-    A full list of operations can be found in the ``Operations`` module documentation.
+    A full list of operations can be found in the :mod:`.Operations` module documentation.
 
 Initialising a pipeline
 -----------------------
