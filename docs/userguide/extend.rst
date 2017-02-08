@@ -5,8 +5,8 @@ Extending Augmentor to add new functionality is quite simple, and is performed i
 
 Both steps are outlined in the proceeding sub-sections.
 
-Step 1: Create a New Operation Type
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Step 1: Create a New Operation Subclass
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To create a custom operation and extend Augmentor:
 

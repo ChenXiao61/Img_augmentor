@@ -15,14 +15,26 @@ from PIL import Image  # TODO: Check how to define Pillow vs. PIL in the require
 
 
 class Pipeline(object):
-
     def __init__(self, source_directory, recursive_scan=False, output_directory="output",
-                 save_format="JPEG", seed=None):
+                 save_format="JPEG"):
+        """
+        Create a new Pipeline object pointing to a directory containing your original image dataset.
 
-        if seed:
-            random.seed(seed)  # This will hash strings to set a seed, but some hashing is non-deterministic!
-        else:
-            random.seed()  # Set this to blank to use /dev/random or the time if that does not exist.
+        Create a new Pipeline object, using the :attr:`source_directory` parameter as a source directory \
+         where your original images are stored. This folder will be scanned, and any valid file files \
+         will be collected and used as the original dataset that should be augmented. The scan will \
+         find any image files with the extensions JPEG/JPG, PNG, and GIF (case insensitive).
+
+        :param source_directory: A directory on your filesystem where your original images are stored.
+        :param recursive_scan: Whether the :attr:`source_directory` should be recursively scanned. Default \
+         is False.
+        :param output_directory: Specifies where augmented images should be saved to the disk. Default \
+         is the directory **source** relative to the path where the original image set was specified. If it \
+         does not exist it will be created.
+        :param save_format: The file format to use when saving newly created, augmented images. Default is \
+         JPEG. Legal options are BMP, PNG, and GIF.
+        """
+        random.seed()
 
         self.image_counter = 0
 
@@ -92,6 +104,9 @@ class Pipeline(object):
                     progress_bar.update(1)
                 i += 1
         progress_bar.close()
+
+    def set_seed(self, seed):
+        random.seed(seed)
 
     def rotate90(self, probability):
         """

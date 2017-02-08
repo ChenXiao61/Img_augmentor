@@ -26,6 +26,8 @@ for blops in sys.path:
     print(blops)
 print("END MY MESSAGES")
 
+autoclass_content = 'both'
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
