@@ -9,6 +9,7 @@ from .ImageUtilities import scan_directory
 import os
 import random
 import uuid
+import string
 
 from tqdm import tqdm
 from PIL import Image  # TODO: Check how to define Pillow vs. PIL in the requirements file.
@@ -235,6 +236,18 @@ class Pipeline(object):
 ########################################################################################################################
 # To be implemented                                                                                                    #
 ########################################################################################################################
+    def new_operation(self, operation, parameters):
+        # Add ability to add a new operation at runtime.
+
+        function_name = string.lower(operation.__name__)
+        class_name = string.capwords(operation.__name__)
+
+        dyn_class = type(class_name, (object,), parameters)
+
+        # globals()[]
+
+        raise NotImplementedError
+
     def add_further_directory(self, new_source_directory, recursive_scan=False):
         if not os.path.exists(new_source_directory):
             raise IOError("The path does not appear to exist.")
