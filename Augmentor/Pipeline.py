@@ -198,6 +198,13 @@ class Pipeline(object):
         """
         self.operations.append(Crop(probability=1.0, width=width, height=height, centre=centre))
 
+    def crop_by_number_of_tiles(self, number_of_crops_per_image):
+        # In this function we want to crop images, based on the a number of crops per image
+        raise NotImplementedError
+
+    def crop_by_percentage(self, percent_size_of_crop, from_center=True):
+        raise NotImplementedError
+
     def histogram_equalisation(self, probability=1.0):
         self.operations.append(HistogramEqualisation(probability=probability))
 
@@ -257,13 +264,6 @@ class Pipeline(object):
         # Apply the current pipeline to a single image, returning the newly created image.
         # Not yet implemented.
 
-        raise NotImplementedError
-
-    def crop_by_number_of_tiles(self, number_of_crops_per_image):
-        # In this function we want to crop images, based on the a number of crops per image
-        raise NotImplementedError
-
-    def crop_by_percentage(self, percent_size_of_crop, from_center=True):
         raise NotImplementedError
 
     def skew(self):

@@ -92,8 +92,8 @@ class Rotate(Operation):
 class RotateRange(Operation):
     def __init__(self, probability, rotate_range):
         Operation.__init__(self, probability)
-        self.max_left_rotation = rotate_range[0]
-        self.max_right_rotation = rotate_range[1]
+        self.max_left_rotation = -abs(rotate_range[0])  # Ensure always negative
+        self.max_right_rotation = abs(rotate_range[1])  # Ensure always positive
 
     def perform_operation(self, image):
         # This may be of use: http://stackoverflow.com/questions/34747946/rotating-a-square-in-pil
@@ -148,20 +148,21 @@ class Crop(Operation):
         self.height = height
         self.centre = centre
 
-    def perform_operation(self, image_path):
-        file_name, extension, root_path = extract_paths_and_extensions(image_path)
-        im = Image.open(image_path)
-        w, h = im.size
-        # TODO: Check if this is correct and see the Zoom class for a better implementation.
-        im = im.crop((floor((w - self.width)/2),
-                      floor((h - self.height)/2),
-                      floor((w + self.width)/2),
-                      floor((h + self.height)/2)
-                      ))
-        new_file_name = file_name + "_crop_" + str(self.width) + "_" + str(self.height) + extension
-        new_file_path = os.path.join(root_path, new_file_name)
-        im.save(new_file_path, im.format)
-        return new_file_path
+    def perform_operation(self, image):
+        new_width = self.width / 2.
+        new_height = self.height / 2.
+
+        half_the_width = image.size[0] / 2
+        half_the_height = image.size[1] / 2
+
+        return image.crop(
+            (
+                half_the_width - ceil(new_width),
+                half_the_height - ceil(new_height),
+                half_the_width + floor(new_width),
+                half_the_height + floor(new_height)
+            )
+        )
 
 
 class Scale(Operation):
