@@ -82,7 +82,7 @@ class Pipeline(object):
     def probabilistic(self, image):
         self.image_counter += 1
         for operation in self.operations:
-            r = round(random.random(), 1)
+            r = round(random.random(), 1)  # TODO: Very important: this is being sampled from a Gaussian distribution!
             if r <= operation.probability:
                 image = operation.perform_operation(image)
         # file_name = str(self.image_counter) + "." + self.save_format
@@ -106,6 +106,25 @@ class Pipeline(object):
                 i += 1
         progress_bar.close()
 
+    def add_operation(self, operation):
+        """
+        Add an operation directly to the pipeline. Can be used to add custom
+        operations a pipeline.
+
+        To add customer operations to a pipeline, subclass from
+        Operation, overload its methods, and insert it into the pipeline
+        using this method.
+
+        .. seealso:: The :class:`Operation` class documentation.
+
+        :param operation: An object of the operation you wish to add to the
+        pipeline. Will accept custom operations written at run-time.
+        :type operation: Operation
+        :return: None
+        """
+        self.operations.append(operation)
+
+    @staticmethod
     def set_seed(self, seed):
         random.seed(seed)
 
@@ -120,6 +139,7 @@ class Pipeline(object):
         :return: None
         """
         self.operations.append(Rotate(probability=probability, rotation=90))
+        self.add_operation(Rotate(probability=probability, rotation=90))
 
     def rotate180(self, probability):
         """
@@ -180,9 +200,6 @@ class Pipeline(object):
     def zoom(self, probability, min_factor=1.05, max_factor=1.2):
         self.operations.append(Zoom(probability=probability, min_factor=min_factor, max_factor=max_factor))
 
-    def __add_operation(self, operation):
-        self.operations.append(operation)
-
     def crop_by_size(self, width, height, centre=True):
         """
         Crop an image by a set of dimensions.
@@ -197,6 +214,10 @@ class Pipeline(object):
         :return: None
         """
         self.operations.append(Crop(probability=1.0, width=width, height=height, centre=centre))
+
+    def crop_randomly_by_percentage(self, probability, percent_to_crop):
+
+        self.operations.append(Crop(probability=1.0))
 
     def crop_by_number_of_tiles(self, number_of_crops_per_image):
         # In this function we want to crop images, based on the a number of crops per image
@@ -267,6 +288,13 @@ class Pipeline(object):
         raise NotImplementedError
 
     def skew(self):
+        # Perspective skew an image.
+        # Not yet implemented.
+        raise NotImplementedError
+
+    def pad(self):
+        # Functionality to pad a non-square image with borders to make it a certain aspect ratio.
+        # Not yet implemented.
         raise NotImplementedError
 
 ########################################################################################################################

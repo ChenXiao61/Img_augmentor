@@ -7,10 +7,10 @@ from .ImageUtilities import extract_paths_and_extensions
 from math import floor, ceil
 
 # Python 2-3 compatibility - not currently needed.
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+# try:
+#    from StringIO import StringIO
+# except ImportError:
+#    from io import StringIO
 
 import os
 import random
@@ -163,6 +163,16 @@ class Crop(Operation):
                 half_the_height + floor(new_height)
             )
         )
+
+
+class Skew(Operation):
+    def __init__(self, probability, max_skew_left, max_skew_right):
+        Operation.__init__(self, probability)
+        self.max_skew_left = max_skew_left
+        self.max_skew_right = max_skew_right
+
+    def perform_operation(self, image):
+        pass
 
 
 class Scale(Operation):
