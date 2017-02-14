@@ -20,14 +20,14 @@ class Pipeline(object):
                  save_format="JPEG"):
         """
         Create a new Pipeline object pointing to a directory containing your
-        original image dataset.
+         original image dataset.
 
         Create a new Pipeline object, using the :attr:`source_directory`
-        parameter as a source directory where your original images are
-        stored. This folder will be scanned, and any valid file files
-        will be collected and used as the original dataset that should
-        be augmented. The scan will find any image files with the extensions
-        JPEG/JPG, PNG, and GIF (case insensitive).
+         parameter as a source directory where your original images are
+         stored. This folder will be scanned, and any valid file files
+         will be collected and used as the original dataset that should
+         be augmented. The scan will find any image files with the extensions
+         JPEG/JPG, PNG, and GIF (case insensitive).
 
         :param source_directory: A directory on your filesystem where your
          original images are stored.
