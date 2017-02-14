@@ -22,7 +22,8 @@ For example, to add a new operation called ``FoldImage``, you would add this cod
     class FoldImage(Operation):
         # Here you can accept as many custom parameters as required:
         def __init__(self, probability, num_of_folds):
-            # Call the superclass's constructor (meaning you must supply a probability value):
+            # Call the superclass's constructor (meaning you must
+            # supply a probability value):
             Operation.__init__(self, probability)
             # Set your custom operation's member variables here as required:
             self.num_of_folds = num_of_folds

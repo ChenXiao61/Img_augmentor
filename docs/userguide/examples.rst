@@ -42,7 +42,8 @@ Executing a pipeline
 
     # Here we sample 100,000 images from the pipeline.
 
-    # It is often useful to use scientific notation for specify large numbers with trailing zeros.
+    # It is often useful to use scientific notation for specify
+    # large numbers with trailing zeros.
     num_of_samples = int(1e5)
 
     # Now we can sample from the pipeline:
