@@ -80,7 +80,7 @@ class Pipeline(object):
 
         self.source_directory = source_directory
         self.image_list = scan_directory(self.source_directory, recursive_scan)
-        self.total_files = list(self.image_list)  # Ensure we get a new list and not a link.
+        # self.total_files = list(self.image_list)  # Ensure we get a new list and not a link.
         self.operations = []
 
         print("Initialised with %s images found in selected directory." % len(self.image_list))
@@ -151,8 +151,8 @@ class Pipeline(object):
     def apply_current_pipeline(self, image, save_to_disk=False):
         """
         Apply the current pipeline to a single image, returning the
-        transformed image. The transformed image is not saved to
-        disk by default.
+        transformed image. By default, the transformed image is not saved to
+        disk.
 
         This method can be used to pass a single image through the
         pipeline, but will not save the transformed to disk by
@@ -259,11 +259,41 @@ class Pipeline(object):
                                        rotate_range=(max_left_rotation, max_right_rotation)))
 
     def flip_top_bottom(self, probability):
-        # Flip top to bottom (vertically)
+        """
+        Flip (mirror) the image along its vertical axis, i.e. from top to
+        bottom.
+
+        This function mirrors the image along an axis, and is not a rotation
+        transform. Mirroring can also be applied along the horizontal axis.
+
+        .. seealso:: The :func:`flip_left_right` function.
+
+        .. seealso:: The :func:`rotate` function.
+
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :type probability: Float
+        :return: None
+        """
         self.add_operation(Flip(probability=probability, top_bottom_left_right="TOP_BOTTOM"))
 
     def flip_left_right(self, probability):
-        # Flip lef to right (horizontally)
+        """
+        Flip (mirror) the image along its horizontal axis, i.e. from left to
+        right.
+
+        This function mirrors the image along an axis, and is not a rotation
+        transform. Mirroring can also be applied along the vertical axis.
+
+        .. seealso:: The :func:`flip_top_bottom` function.
+
+        .. seealso:: The :func:`rotate` function.
+
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :type probability: Float
+        :return: None
+        """
         self.add_operation(Flip(probability=probability, top_bottom_left_right="LEFT_RIGHT"))
 
     def random_distortion(self, approximate_grid_size, sigma, probability=1.0):
