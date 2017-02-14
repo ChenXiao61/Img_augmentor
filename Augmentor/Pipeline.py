@@ -19,21 +19,27 @@ class Pipeline(object):
     def __init__(self, source_directory, recursive_scan=False, output_directory="output",
                  save_format="JPEG"):
         """
-        Create a new Pipeline object pointing to a directory containing your original image dataset.
+        Create a new Pipeline object pointing to a directory containing your
+        original image dataset.
 
-        Create a new Pipeline object, using the :attr:`source_directory` parameter as a source directory \
-         where your original images are stored. This folder will be scanned, and any valid file files \
-         will be collected and used as the original dataset that should be augmented. The scan will \
-         find any image files with the extensions JPEG/JPG, PNG, and GIF (case insensitive).
+        Create a new Pipeline object, using the :attr:`source_directory`
+        parameter as a source directory where your original images are
+        stored. This folder will be scanned, and any valid file files
+        will be collected and used as the original dataset that should
+        be augmented. The scan will find any image files with the extensions
+        JPEG/JPG, PNG, and GIF (case insensitive).
 
-        :param source_directory: A directory on your filesystem where your original images are stored.
-        :param recursive_scan: Whether the :attr:`source_directory` should be recursively scanned. Default \
-         is False.
-        :param output_directory: Specifies where augmented images should be saved to the disk. Default \
-         is the directory **source** relative to the path where the original image set was specified. If it \
-         does not exist it will be created.
-        :param save_format: The file format to use when saving newly created, augmented images. Default is \
-         JPEG. Legal options are BMP, PNG, and GIF.
+        :param source_directory: A directory on your filesystem where your
+        original images are stored.
+        :param recursive_scan: Whether the :attr:`source_directory` should
+        be recursively scanned. Default is False.
+        :param output_directory: Specifies where augmented images should be
+        saved to the disk. Default is the directory **source** relative to
+        the path where the original image set was specified. If it does not
+        exist it will be created.
+        :param save_format: The file format to use when saving newly created,
+        augmented images. Default is JPEG. Legal options are BMP, PNG, and
+        GIF.
         """
         random.seed()
 
@@ -72,17 +78,10 @@ class Pipeline(object):
         #     except IOError:
         #             self.image_list.remove(file_check)
 
-    def execute(self):
-        for operation in self.operations:
-            new_files = []
-            for image in tqdm(self.image_list, desc=str(operation)):
-                operation.perform_operation(image)
-            self.total_files.extend(new_files)
-
-    def probabilistic(self, image):
+    def __execute(self, image):
         self.image_counter += 1
         for operation in self.operations:
-            r = round(random.random(), 1)  # TODO: Very important: this is being sampled from a Gaussian distribution!
+            r = round(random.uniform(0, 1), 1)
             if r <= operation.probability:
                 image = operation.perform_operation(image)
         # file_name = str(self.image_counter) + "." + self.save_format
@@ -94,13 +93,15 @@ class Pipeline(object):
         return image
 
     def sample(self, n):
-        # TODO: Check if there are any images in self.image_list as if there are 0, it will hang.
+        if len(self.image_list) is 0:
+            raise IndexError("There are no images in the pipeline. Add a directory using add_directory(path).")
+
         i = 1
         progress_bar = tqdm(total=n, desc="Executing Pipeline", unit=' Image Operations')
         while i <= n:
             for image_path in self.image_list:
                 if i <= n:
-                    self.probabilistic(Image.open(image_path))
+                    self.__execute(Image.open(image_path))
                     progress_bar.set_description("Processing %s" % os.path.split(image_path)[1])
                     progress_bar.update(1)
                 i += 1
