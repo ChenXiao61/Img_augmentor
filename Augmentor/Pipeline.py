@@ -16,18 +16,23 @@ from PIL import Image  # TODO: Check how to define Pillow vs. PIL in the require
 
 
 class Pipeline(object):
+    """
+    The Pipeline class handles the creation of augmentation pipelines
+    and the generation of augmented data by applying operations to
+    this pipeline.
+    """
     def __init__(self, source_directory, recursive_scan=False, output_directory="output",
                  save_format="JPEG"):
         """
         Create a new Pipeline object pointing to a directory containing your
-         original image dataset.
+        original image dataset.
 
         Create a new Pipeline object, using the :attr:`source_directory`
-         parameter as a source directory where your original images are
-         stored. This folder will be scanned, and any valid file files
-         will be collected and used as the original dataset that should
-         be augmented. The scan will find any image files with the extensions
-         JPEG/JPG, PNG, and GIF (case insensitive).
+        parameter as a source directory where your original images are
+        stored. This folder will be scanned, and any valid file files
+        will be collected and used as the original dataset that should
+        be augmented. The scan will find any image files with the extensions
+        JPEG/JPG, PNG, and GIF (case insensitive).
 
         :param source_directory: A directory on your filesystem where your
          original images are stored.
@@ -40,6 +45,7 @@ class Pipeline(object):
         :param save_format: The file format to use when saving newly created,
          augmented images. Default is JPEG. Legal options are BMP, PNG, and
          GIF.
+        :return: A :class:`Pipeline` object.
         """
         random.seed()
 
@@ -110,13 +116,13 @@ class Pipeline(object):
     def add_operation(self, operation):
         """
         Add an operation directly to the pipeline. Can be used to add custom
-         operations a pipeline.
+        operations a pipeline.
 
         .. seealso:: The :class:`Operation` class.
 
         To add customer operations to a pipeline, subclass from
-         Operation, overload its methods, and insert it into the pipeline
-         using this method.
+        Operation, overload its methods, and insert it into the pipeline
+        using this method.
 
         :param operation: An object of the operation you wish to add to the
          pipeline. Will accept custom operations written at run-time.
