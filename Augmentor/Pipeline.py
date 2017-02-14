@@ -118,8 +118,8 @@ class Pipeline(object):
 
         .. seealso:: The :class:`Operation` class documentation.
 
-        :param operation: An object of the operation you wish to add to the \
-        pipeline. Will accept custom operations written at run-time.
+        :param operation: An object of the operation you wish to add to the
+         pipeline. Will accept custom operations written at run-time.
         :type operation: Operation
         :return: None
         """
