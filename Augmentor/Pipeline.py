@@ -30,16 +30,16 @@ class Pipeline(object):
         JPEG/JPG, PNG, and GIF (case insensitive).
 
         :param source_directory: A directory on your filesystem where your
-        original images are stored.
+         original images are stored.
         :param recursive_scan: Whether the :attr:`source_directory` should
-        be recursively scanned. Default is False.
+         be recursively scanned. Default is False.
         :param output_directory: Specifies where augmented images should be
-        saved to the disk. Default is the directory **source** relative to
-        the path where the original image set was specified. If it does not
-        exist it will be created.
+         saved to the disk. Default is the directory **source** relative to
+         the path where the original image set was specified. If it does not
+         exist it will be created.
         :param save_format: The file format to use when saving newly created,
-        augmented images. Default is JPEG. Legal options are BMP, PNG, and
-        GIF.
+         augmented images. Default is JPEG. Legal options are BMP, PNG, and
+         GIF.
         """
         random.seed()
 
@@ -110,13 +110,13 @@ class Pipeline(object):
     def add_operation(self, operation):
         """
         Add an operation directly to the pipeline. Can be used to add custom
-        operations a pipeline.
+         operations a pipeline.
 
         .. seealso:: The :class:`Operation` class.
 
         To add customer operations to a pipeline, subclass from
-        Operation, overload its methods, and insert it into the pipeline
-        using this method.
+         Operation, overload its methods, and insert it into the pipeline
+         using this method.
 
         :param operation: An object of the operation you wish to add to the
          pipeline. Will accept custom operations written at run-time.
@@ -205,13 +205,13 @@ class Pipeline(object):
         """
         Crop an image by a set of dimensions.
 
-        Crop each image according to ``width`` and ``height``, by default in the centre of each image,
-        otherwise at a random location within the image.
+        Crop each image according to `width` and `height`, by default in the centre of each image,
+         otherwise at a random location within the image.
 
         :param width: The width of the desired crop.
         :param height: The height of the desired crop.
         :param centre: If **True**, crops from the centre of the image, otherwise crops at a random location
-        within the image, maintaining the dimensions specified.
+         within the image, maintaining the dimensions specified.
         :return: None
         """
         self.operations.append(Crop(probability=1.0, width=width, height=height, centre=centre))
