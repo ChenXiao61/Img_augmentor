@@ -116,8 +116,6 @@ class Pipeline(object):
         Operation, overload its methods, and insert it into the pipeline
         using this method.
 
-        .. seealso:: The :class:`Operation` class documentation.
-
         :param operation: An object of the operation you wish to add to the
          pipeline. Will accept custom operations written at run-time.
         :type operation: Operation
