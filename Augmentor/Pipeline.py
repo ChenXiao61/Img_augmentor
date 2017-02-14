@@ -112,6 +112,8 @@ class Pipeline(object):
         Add an operation directly to the pipeline. Can be used to add custom
         operations a pipeline.
 
+        .. seealso:: The :class:`Operation` class.
+
         To add customer operations to a pipeline, subclass from
         Operation, overload its methods, and insert it into the pipeline
         using this method.
