@@ -118,7 +118,7 @@ class Pipeline(object):
 
         .. seealso:: The :class:`Operation` class documentation.
 
-        :param operation: An object of the operation you wish to add to the
+        :param operation: An object of the operation you wish to add to the \
         pipeline. Will accept custom operations written at run-time.
         :type operation: Operation
         :return: None
@@ -205,13 +205,13 @@ class Pipeline(object):
         """
         Crop an image by a set of dimensions.
 
-        Crop each image according to ``width`` and ``height``, by default in the centre of each image, \
-         otherwise at a random location within the image.
+        Crop each image according to ``width`` and ``height``, by default in the centre of each image,
+        otherwise at a random location within the image.
 
         :param width: The width of the desired crop.
         :param height: The height of the desired crop.
-        :param centre: If **True**, crops from the centre of the image, otherwise crops at a random location \
-         within the image, maintaining the dimensions specified.
+        :param centre: If **True**, crops from the centre of the image, otherwise crops at a random location
+        within the image, maintaining the dimensions specified.
         :return: None
         """
         self.operations.append(Crop(probability=1.0, width=width, height=height, centre=centre))
