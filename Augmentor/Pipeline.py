@@ -139,10 +139,11 @@ class Pipeline(object):
         """
         Rotate an image by 90 degrees.
 
-        The operation will rotate an image by 90 degrees, and will be performed with a specified probability.
+        The operation will rotate an image by 90 degrees, and will be
+        performed with a specified probability.
 
-        :param probability: The probability that an image will have this operation applied when \
-         being passed through the pipeline.
+        :param probability: The probability that an image will have this
+         operation applied when being passed through the pipeline.
         :return: None
         """
         self.operations.append(Rotate(probability=probability, rotation=90))
@@ -152,10 +153,11 @@ class Pipeline(object):
         """
         Rotate an image by 180 degrees.
 
-        The operation will rotate an image by 180 degrees, and will be performed with a specified probability.
+        The operation will rotate an image by 180 degrees, and will be
+        performed with a specified probability.
 
-        :param probability: The probability that an image will have this operation applied when \
-         being passed through the pipeline.
+        :param probability: The probability that an image will have this
+         operation applied when being passed through the pipeline.
         :return: None
         """
         self.operations.append(Rotate(probability=probability, rotation=180))
@@ -164,11 +166,12 @@ class Pipeline(object):
         """
         Rotate an image by 270 degrees.
 
-        The operation will rotate an image by 270 degrees, and will be performed with a specified probability, \
-         defined by the ``probability`` parameter.
+        The operation will rotate an image by 270 degrees, and will be
+        performed with a specified probability, defined by the
+        :attr:`probability` parameter.
 
-        :param probability: The probability that an image will have this operation applied when \
-         being passed through the pipeline.
+        :param probability: The probability that an image will have this
+         operation applied when being passed through the pipeline.
         :return: None
         """
         self.operations.append(Rotate(probability=probability, rotation=270))
@@ -177,15 +180,18 @@ class Pipeline(object):
         """
         Rotate an image by an arbitrary amount.
 
-        The operation will rotate an image by an random amount, within a range specified. The parameters \
-         ``max_left_rotation`` and ``max_right_rotation`` allow you to control this range. If you wish to rotate \
-         the images by an exact number of  degrees, set both ``max_left_rotation`` and ``max_right_rotation`` to \
-         the same value.
+        The operation will rotate an image by an random amount, within a range
+        specified. The parameters :attr:`max_left_rotation` and
+        :attr:`max_right_rotation` allow you to control this range. If you
+        wish to rotate the images by an exact number of  degrees, set both
+        ``max_left_rotation`` and ``max_right_rotation`` to the same value.
 
-        :param max_left_rotation: The maximum number of degrees the image can be rotated to the left.
-        :param max_right_rotation: The maximum number of degrees the image can be rotated to the left.
-        :param probability: The probability that an image will have this operation applied when \
-         being passed through the pipeline.
+        :param max_left_rotation: The maximum number of degrees the image can
+         be rotated to the left.
+        :param max_right_rotation: The maximum number of degrees the image can
+         be rotated to the left.
+        :param probability: The probability that an image will have this
+         operation applied when being passed through the pipeline.
         :return: None
         """
         if max_left_rotation < 180 & max_right_rotation < 180:
@@ -211,13 +217,14 @@ class Pipeline(object):
         """
         Crop an image by a set of dimensions.
 
-        Crop each image according to `width` and `height`, by default in the centre of each image,
-         otherwise at a random location within the image.
+        Crop each image according to `width` and `height`, by default in the
+        centre of each image, otherwise at a random location within the image.
 
         :param width: The width of the desired crop.
         :param height: The height of the desired crop.
-        :param centre: If **True**, crops from the centre of the image, otherwise crops at a random location
-         within the image, maintaining the dimensions specified.
+        :param centre: If **True**, crops from the centre of the image,
+         otherwise crops at a random location within the image, maintaining
+         the dimensions specified.
         :return: None
         """
         self.operations.append(Crop(probability=1.0, width=width, height=height, centre=centre))
@@ -248,19 +255,24 @@ class Pipeline(object):
 
     def sample_from_new_image_source(self, image_source, n, output_directory="output"):
         """
-        Uses the current pipeline to generate images from a different image source.
+        Uses the current pipeline to generate images from a different image
+        source.
 
-        This function allows you to use the current pipeline to generate samples on a different image source, \
-         defined by the :attr:`image_source` parameter. The ``image_source`` can either be a path to a single \
-         image, or a path to a folder containing any number of images.
+        This function allows you to use the current pipeline to generate
+        samples on a different image source, defined by the
+        :attr:`image_source` parameter. The ``image_source`` can either be a
+        path to a single image, or a path to a folder containing any number
+        of images.
 
         .. seealso:: The :func:`sample` function.
 
-        :param image_source: Either a path to a single image, or a path to a folder containing any number of \
-         images to be passed through the current pipeline.
+        :param image_source: Either a path to a single image, or a path to a
+         folder containing any number of images to be passed through the
+         current pipeline.
         :param n: The number of samples to generate from the current pipeline.
-        :param output_directory: Optional parameter allowing you to supply a path for where to save \
-         generated images. By default this is a directory named output relative to the source of the image(s).
+        :param output_directory: Optional parameter allowing you to supply a
+         path for where to save generated images. By default this is a
+         directory named output relative to the source of the image(s).
         :type image_source: String
         :type n: Int
         :type output_directory: String
@@ -308,15 +320,17 @@ class Pipeline(object):
 # Utility Functions                                                                                                    #
 ########################################################################################################################
     @staticmethod
-    def extract_paths_and_extensions(self, image_path):
+    def extract_paths_and_extensions(image_path):
         """
-        Extract an image's file name, its extension, and its root path (the entire path without the file name).
+        Extract an image's file name, its extension, and its root path (the
+        image's absolute path without the file name).
 
         :param image_path: The path to the image.
         :type image_path: String
-        :return: The image's file name (file_name), extension (extension), and root path (root_path).
+        :return: A tuple containing the image's file name, extension, and
+         root path.
         """
         file_name, extension = os.path.splitext(image_path)
         root_path = os.path.dirname(image_path)
 
-        return file_name, extension, root_path
+        return (file_name, extension, root_path)
