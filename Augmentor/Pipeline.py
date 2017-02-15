@@ -129,6 +129,7 @@ class Pipeline(object):
         path defined during the pipeline's instantiation.
 
         :param n: The number of new samples to produce.
+        :type n: Int
         :return: None
         """
         if len(self.image_list) is 0:
@@ -191,7 +192,14 @@ class Pipeline(object):
             raise TypeError("Must be of type Operation to be added to the pipeline.")
 
     @staticmethod
-    def set_seed(self, seed):
+    def set_seed(seed):
+        """
+        Set the seed of Python's internal random number generator.
+
+        :param seed: The seed to use. Strings or other objects will be hashed.
+        :type seed: Object
+        :return: None
+        """
         random.seed(seed)
 
     def rotate90(self, probability):
@@ -297,7 +305,8 @@ class Pipeline(object):
         self.add_operation(Flip(probability=probability, top_bottom_left_right="LEFT_RIGHT"))
 
     def random_distortion(self, approximate_grid_size, sigma, probability=1.0):
-        self.add_operation(Distort())
+        raise NotImplementedError
+        # self.add_operation(Distort())  # Currently not reachable.
 
     def zoom(self, probability, min_factor=1.05, max_factor=1.2):
         self.add_operation(Zoom(probability=probability, min_factor=min_factor, max_factor=max_factor))
@@ -319,8 +328,26 @@ class Pipeline(object):
         """
         self.add_operation(Crop(probability=1.0, width=width, height=height, centre=centre))
 
-    def crop_randomly_by_percentage(self, probability, percent_to_crop):
-        self.add_operation(Crop(probability=1.0))
+    def crop_random(self, probability, percentage_area):
+        """
+        Crop a random area of an image, based on the percentage area to be
+        returned.
+
+        This function crops a random area from an image, based on the area you
+        specify using :attr:`percentage_area`.
+
+        :param probability: The probability that the function will execute
+         when the image is passed through the pipeline.
+        :param percentage_area: The area, as a percentage of the current
+         image's area, to crop.
+        :type probability: Float
+        :type percentage_area: Float
+        :return: None
+        """
+        self.add_operation(CropRandom(probability=probability, percentage_area=percentage_area))
+
+    def crop_random_absolute(self, probability, width, height):
+        raise NotImplementedError
 
     def crop_by_number_of_tiles(self, number_of_crops_per_image):
         # In this function we want to crop images, based on the a number of crops per image
@@ -332,8 +359,11 @@ class Pipeline(object):
     def histogram_equalisation(self, probability=1.0):
         self.add_operation(HistogramEqualisation(probability=probability))
 
+    def resize_by_percentage(self, percentage_resize):
+        raise NotImplementedError
+
     def resize(self, width, height, probability=1.0, resample_filter="NEAREST"):
-        # TODO: Make this automatic by default, i.e. ANTIALIAS if very small downsampling, BICUBIC if upsampling.
+        # TODO: Make this automatic by default, i.e. ANTIALIAS if downsampling, BICUBIC if upsampling.
         legal_filters = ["NEAREST", "BICUBIC", "ANTIALIAS", "BILINEAR"]
         if resample_filter in legal_filters:
             self.add_operation(Resize(probability=probability, width=width,
@@ -374,6 +404,7 @@ class Pipeline(object):
 ########################################################################################################################
     def new_operation(self, operation, parameters):
         # Add ability to add a new operation at runtime.
+        raise NotImplementedError
 
         function_name = string.lower(operation.__name__)
         class_name = string.capwords(operation.__name__)
@@ -382,7 +413,7 @@ class Pipeline(object):
 
         # globals()[]
 
-        raise NotImplementedError
+
 
     def add_further_directory(self, new_source_directory, recursive_scan=False):
         if not os.path.exists(new_source_directory):

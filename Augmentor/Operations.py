@@ -142,11 +142,11 @@ class Flip(Operation):
 
 
 class Crop(Operation):
-    def __init__(self, probability, width, height, centre):
+    def __init__(self, probability, width, height, centred):
         Operation.__init__(self, probability)
         self.width = width
         self.height = height
-        self.centre = centre
+        self.centred = centred
 
     def perform_operation(self, image):
         new_width = self.width / 2.
@@ -163,6 +163,23 @@ class Crop(Operation):
                 half_the_height + floor(new_height)
             )
         )
+
+
+class CropRandom(Operation):
+    def __init__(self, probability, percentage_area):
+        Operation.__init__(self, probability)
+        self.percentage_area = percentage_area
+
+    def perform_operation(self, image):
+        w, h = image.size
+
+        w_new = int(floor(w * self.percentage_area))  # TODO: Floor might return 0, so we need to check this.
+        h_new = int(floor(h * self.percentage_area))
+
+        random_left_shift = random.randint(0, (w - w_new))  # Note: randint() is from uniform distribution.
+        random_down_shift = random.randint(0, (h - h_new))
+
+        return image.crop((random_left_shift, random_down_shift, w_new + random_left_shift, h_new + random_down_shift))
 
 
 class Skew(Operation):
