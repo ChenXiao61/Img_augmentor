@@ -6,18 +6,22 @@ from PIL import Image, ImageOps
 from .ImageUtilities import extract_paths_and_extensions
 from math import floor, ceil
 
+import os
+import random
+
 # Python 2-3 compatibility - not currently needed.
 # try:
 #    from StringIO import StringIO
 # except ImportError:
 #    from io import StringIO
 
-import os
-import random
 
-
-# Superclass for all the operation classes
 class Operation(object):
+    """
+    The class :class:`Operation` represents the Base class for all operations
+    that can be performed. Inherit from :class:`Operation`, overload its
+    methods, and instantiate super to create a new operation.
+    """
     def __init__(self, probability):
         self.probability = probability
 
@@ -25,7 +29,7 @@ class Operation(object):
         return self.__class__.__name__
 
     def perform_operation(self, image):
-        raise NotImplementedError("Illegal call to superclass perform_operation() function.")
+        raise NotImplementedError("Illegal call to base class.")
 
     @staticmethod
     def extract_paths_and_extensions(image_path):
@@ -119,15 +123,6 @@ class Resize(Operation):
         # TODO: Automatically change this to ANTIALIAS or BICUBIC depending on the size of the file
         return image.resize((self.width, self.height), eval("Image.%s" % self.resample_filter))
 
-    def perform_operation_deprecated(self, image_path):
-        file_name, extension, root_path = extract_paths_and_extensions(image_path)
-        im = Image.open(image_path)
-        im = im.resize((self.width, self.height))
-        new_file_name = file_name + "_resize_" + str(self.width) + "_" + str(self.height) + extension
-        new_file_path = os.path.join(root_path, new_file_name)
-        im.save(new_file_path, im.format, filter=self.resample_filter)
-        return new_file_path
-
 
 class Flip(Operation):
     def __init__(self, probability, top_bottom_left_right):
@@ -165,6 +160,27 @@ class Crop(Operation):
         )
 
 
+class CropPercentage(Operation):
+    def __init__(self, probability, percentage_area, centre):
+        Operation.__init__(self, probability)
+        self.percentage_area = percentage_area
+        self.centre = centre
+
+    def perform_operation(self, image):
+        w, h = image.size
+        w_new = int(floor(w * self.percentage_area))  # TODO: Floor might return 0, so we need to check this.
+        h_new = int(floor(h * self.percentage_area))
+
+        if self.centre:
+            left_shift = floor(w_new / 2.)
+            down_shift = floor(h_new / 2.)
+            return image.crop((left_shift, down_shift, w_new + left_shift, h_new + down_shift))
+        else:
+            random_left_shift = random.randint(0, (w - w_new))  # Note: randint() is from uniform distribution.
+            random_down_shift = random.randint(0, (h - h_new))
+            return image.crop((random_left_shift, random_down_shift, w_new + random_left_shift, h_new + random_down_shift))
+
+
 class CropRandom(Operation):
     def __init__(self, probability, percentage_area):
         Operation.__init__(self, probability)
@@ -173,6 +189,7 @@ class CropRandom(Operation):
     def perform_operation(self, image):
         w, h = image.size
 
+        # TODO: Fix this, as it is currently 1/4 of the area for 0.5 rather than 1/2.
         w_new = int(floor(w * self.percentage_area))  # TODO: Floor might return 0, so we need to check this.
         h_new = int(floor(h * self.percentage_area))
 
@@ -247,12 +264,13 @@ class Zoom(Operation):
     def perform_operation(self, image):
         factor = round(random.uniform(self.min_factor, self.max_factor), 2)
         original_width, original_height = image.size
+        # TODO: Join these two functions together so that we don't have this image_zoom variable lying around.
         image_zoomed = image.resize((int(round(image.size[0] * factor)), int(round(image.size[1] * factor))))
 
         # Return the centre of the zoomed image, so that it is the same dimensions as the original image
         half_the_width = image_zoomed.size[0] / 2
         half_the_height = image_zoomed.size[1] / 2
-        im_cropped = image_zoomed.crop(
+        return image_zoomed.crop(
             (
                 half_the_width - ceil((original_width / 2.)),
                 half_the_height - ceil((original_height / 2.)),
@@ -260,31 +278,3 @@ class Zoom(Operation):
                 half_the_height + floor((original_height / 2.))
             )
         )
-        return im_cropped
-
-
-class Fold(Operation):
-    def __init__(self, probability, fuzziness):
-        Operation.__init__(self, probability)
-        self.probability = probability
-        self.fuzziness = fuzziness
-
-    def perform_operation(self, image):
-        pass
-
-
-class Generic(Operation):
-    def __init__(self, probability, width, height, save_filter):
-        Operation.__init__(self, probability)
-        self.width = width
-        self.height = height
-        self.save_filter = save_filter
-
-    def perform_operation(self, image_path):
-        file_name, extension, root_path = extract_paths_and_extensions(image_path)
-        im = Image.open(image_path)
-        im = im.resize((self.width, self.height))
-        new_file_name = file_name + "_resize_" + str(self.width) + "_" + str(self.height) + extension
-        new_file_path = os.path.join(root_path, new_file_name)
-        im.save(new_file_path, im.format, filter=self.save_filter)
-        return new_file_path

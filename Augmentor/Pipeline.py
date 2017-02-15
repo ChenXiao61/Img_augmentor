@@ -80,8 +80,17 @@ class Pipeline(object):
 
         self.source_directory = source_directory
         self.image_list = scan_directory(self.source_directory, recursive_scan)
-        # self.total_files = list(self.image_list)  # Ensure we get a new list and not a link.
         self.operations = []
+
+        # Scan the images to collect information about the dimensions of each of the images
+        self.unique_dimensions = set()
+        for image in self.image_list:
+            try:
+                self.unique_dimensions.add(Image.open(image).size)
+            except IOError:
+                print("There is a problem with image %s in your source directory. "
+                      "It is unreadable and will not be included when augmenting." % image)
+                self.image_list.remove(image)
 
         print("Initialised with %s images found in selected directory." % len(self.image_list))
         print("Output directory set to %s." % self.output_directory)
@@ -313,11 +322,14 @@ class Pipeline(object):
 
     def crop_by_size(self, width, height, centre=True):
         """
-        Crop an image by a set of dimensions.
+        Crop an image according to a set of dimensions.
 
         Crop each image according to :attr:`width` and :attr:`height`, by
-        default in the centre of each image, otherwise at a random location
+        default at the centre of each image, otherwise at a random location
         within the image.
+
+        .. seealso:: See :func:`crop_random` to crop a random, non-centred
+         area of the image.
 
         :param width: The width of the desired crop.
         :param height: The height of the desired crop.
@@ -327,6 +339,9 @@ class Pipeline(object):
         :return: None
         """
         self.add_operation(Crop(probability=1.0, width=width, height=height, centre=centre))
+
+    def crop_centre(self, probability, percentage_area):
+        self.add_operation(CropPercentage(probability=probability, percentage_area=percentage_area, centre=True))
 
     def crop_random(self, probability, percentage_area):
         """
@@ -344,7 +359,7 @@ class Pipeline(object):
         :type percentage_area: Float
         :return: None
         """
-        self.add_operation(CropRandom(probability=probability, percentage_area=percentage_area))
+        self.add_operation(CropPercentage(probability=probability, percentage_area=percentage_area, centre=False))
 
     def crop_random_absolute(self, probability, width, height):
         raise NotImplementedError
@@ -362,7 +377,7 @@ class Pipeline(object):
     def resize_by_percentage(self, percentage_resize):
         raise NotImplementedError
 
-    def resize(self, width, height, probability=1.0, resample_filter="NEAREST"):
+    def resize(self, probability, width, height, resample_filter="NEAREST"):
         # TODO: Make this automatic by default, i.e. ANTIALIAS if downsampling, BICUBIC if upsampling.
         legal_filters = ["NEAREST", "BICUBIC", "ANTIALIAS", "BILINEAR"]
         if resample_filter in legal_filters:
