@@ -78,7 +78,7 @@ In [7]: p.crop_random(probability=1, percentage_area=0.5)
 In [8]: p.resize(probability=1.0, width=120, height=120)
 
 In [9]: p.sample(100)
-Processing ISIC_0000000_s.jpg: 100%|██████████████████| 100/100 [00:01<00:00, 235.08 Samples/s]
+Processing ISIC_0000000.jpg: 100%|██████████████████| 100/100 [00:01<00:00, 235.08 Samples/s]
 ```
 
 Some sample output:
@@ -86,3 +86,15 @@ Some sample output:
 | Input Image                                                                                           | Augmented Images                                                                                      |
 |-------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
 | ![Original](https://cloud.githubusercontent.com/assets/16042756/23019262/b696e3a6-f441-11e6-958d-17f18f2cd35e.jpg) | ![Augmented](https://cloud.githubusercontent.com/assets/16042756/23018832/cda6967e-f43f-11e6-9082-765c291f1fd6.gif) |
+
+The augmented images may be useful for a region detection task, for example.
+
+Image obtained from the ISIC Archive (image id = 5436e3abbae478396759f0cf download: <https://isic-archive.com:443/api/v1/image/5436e3abbae478396759f0cf/download>)
+
+Get it to reproduce the augmented images above like so:
+
+```python
+import urllib
+In [2]: urllib.urlretrieve("https://isic-archive.com:443/api/v1/image/5436e3abbae478396759f0cf/download", "ISIC_0000000.jpg")
+Out[2]: ('ISIC_0000000.jpg', <httplib.HTTPMessage instance at 0x7f7bd949a950>)
+```
