@@ -85,4 +85,4 @@ Some sample output:
 
 | Input Image                                                                                           | Augmented Images (100 shown here)                                                                     |
 |-------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| https://cloud.githubusercontent.com/assets/16042756/23018902/21f0b598-f440-11e6-9f19-1149aae2d778.jpg | https://cloud.githubusercontent.com/assets/16042756/23018832/cda6967e-f43f-11e6-9082-765c291f1fd6.gif |
+| ![Original](https://cloud.githubusercontent.com/assets/16042756/23018902/21f0b598-f440-11e6-9f19-1149aae2d778.jpg) | ![Augmented](https://cloud.githubusercontent.com/assets/16042756/23018832/cda6967e-f43f-11e6-9082-765c291f1fd6.gif) |
