@@ -53,3 +53,35 @@ p.sample(10000)
 ```
 
 which will generate 10,000 augmented images based on your specifications. By default these will be written to the disk in a directory named `output` relative to the path specified when initialising the `p` pipeline object above.
+
+## Example
+
+Let's perform an augmentation task on a single image, demonstrating the pipeline and several features of Augmentor:
+
+```python
+In [1]: import Augmentor
+
+In [2]: p = Augmentor.Pipeline("/home/user/augmentor_data_tests")
+Initialised with 1 images found in selected directory.
+Output directory set to /home/user/Documents/augmentor_data_tests/output.
+
+In [3]: p.rotate90(probability=0.5)
+
+In [4]: p.rotate270(probability=0.5)
+
+In [5]: p.flip_left_right(probability=0.8)
+
+In [6]: p.flip_top_bottom(probability=0.3)
+
+In [7]: p.crop_random(probability=1, percentage_area=0.5)
+
+In [8]: p.resize(probability=1.0, width=120, height=120)
+
+In [9]: p.sample(1000)
+Processing ISIC_0000000.jpg: 100%|████████████████████████| 1000/1000 [00:27<00:00, 35.99 Samples/s]
+```
+
+Some sample output:
+| Input Image                                                                                                            | Augmented Images (100 shown here)                                                                                   |
+|------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| ![isic_0000000](https://cloud.githubusercontent.com/assets/16042756/23018902/21f0b598-f440-11e6-9f19-1149aae2d778.jpg) | ![optimised](https://cloud.githubusercontent.com/assets/16042756/23018832/cda6967e-f43f-11e6-9082-765c291f1fd6.gif) |

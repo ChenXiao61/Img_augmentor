@@ -81,6 +81,15 @@ class BlackAndWhite(Operation):
         return image
 
 
+class Shear(Operation):
+    def __init__(self, probability, angle):
+        Operation.__init__(self, probability)
+        self.angle = angle
+
+    def perform_operation(self, image):
+        pass
+
+
 class Rotate(Operation):
     def __init__(self, probability, rotation):
         Operation.__init__(self, probability)
@@ -90,7 +99,7 @@ class Rotate(Operation):
         return "Rotate " + str(self.rotation)
 
     def perform_operation(self, image):
-        return image.rotate(self.rotation)
+        return image.rotate(self.rotation, expand=True)  # TODO: We are gonna have to check for 90 and 270 deg rotations
 
 
 class RotateRange(Operation):

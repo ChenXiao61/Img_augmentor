@@ -148,7 +148,7 @@ class Pipeline(object):
 
         sample_count = 1
 
-        progress_bar = tqdm(total=n, desc="Executing Pipeline", unit=' Image Operations')
+        progress_bar = tqdm(total=n, desc="Executing Pipeline", unit=' Samples')
         while sample_count <= n:
             for image_path in self.image_list:
                 if sample_count <= n:
