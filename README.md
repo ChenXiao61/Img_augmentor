@@ -77,12 +77,12 @@ In [7]: p.crop_random(probability=1, percentage_area=0.5)
 
 In [8]: p.resize(probability=1.0, width=120, height=120)
 
-In [9]: p.sample(1000)
-Processing ISIC_0000000.jpg: 100%|████████████████████████| 1000/1000 [00:27<00:00, 35.99 Samples/s]
+In [9]: p.sample(100)
+Processing ISIC_0000000_s.jpg: 100%|████████████████████████████████████| 100/100 [00:01<00:00, 235.08 Samples/s]
 ```
 
 Some sample output:
 
-| Input Image                                                                                           | Augmented Images (100 shown here)                                                                     |
+| Input Image                                                                                           | Augmented Images                                                                                      |
 |-------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
 | ![Original](https://cloud.githubusercontent.com/assets/16042756/23019262/b696e3a6-f441-11e6-958d-17f18f2cd35e.jpg) | ![Augmented](https://cloud.githubusercontent.com/assets/16042756/23018832/cda6967e-f43f-11e6-9082-765c291f1fd6.gif) |
