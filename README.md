@@ -89,9 +89,13 @@ Some sample output:
 
 The augmented images may be useful for a region detection task, for example.
 
+## Licence and Acknowledgements
+
+Augmentor is made available under the terms of the MIT Licence. See [`Licence.md`] (https://github.com/mdbloice/Augmentor/blob/master/LICENSE.md).
+
 Image obtained from the ISIC Archive (image id = 5436e3abbae478396759f0cf download: <https://isic-archive.com:443/api/v1/image/5436e3abbae478396759f0cf/download>)
 
-Get it to reproduce the augmented images above like so:
+Get it to reproduce the augmented images above:
 
 ```python
 In [1]: import urllib
