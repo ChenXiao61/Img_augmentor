@@ -78,7 +78,7 @@ In [7]: p.crop_random(probability=1, percentage_area=0.5)
 In [8]: p.resize(probability=1.0, width=120, height=120)
 
 In [9]: p.sample(100)
-Processing ISIC_0000000_s.jpg: 100%|████████████████████████████████████| 100/100 [00:01<00:00, 235.08 Samples/s]
+Processing ISIC_0000000_s.jpg: 100%|██████████████████| 100/100 [00:01<00:00, 235.08 Samples/s]
 ```
 
 Some sample output:
