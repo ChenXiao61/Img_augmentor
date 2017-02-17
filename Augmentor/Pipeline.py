@@ -141,7 +141,7 @@ class Pipeline(object):
         :type n: Int
         :return: None
         """
-        if len(self.image_list) is 0:
+        if len(self.image_list) == 0:
             raise IndexError("There are no images in the pipeline. "
                              "Add a directory using add_directory(), "
                              "pointing it to a directory containing images.")
@@ -251,6 +251,24 @@ class Pipeline(object):
         """
         self.add_operation(Rotate(probability=probability, rotation=270))
 
+    def rotate_random_90(self, probability):
+        """
+        Rotate an image by either 90, 180, or 270 degrees, selected randomly.
+
+        This function will rotate by either 90, 180, or 270 degrees. This is
+        useful to avoid scenarios where images may be rotated back to their
+        original positions (such as a rotate90() + rotate270() performed
+        directly afterwards. The random rotation is chosen uniformly from
+        90, 180, or 270. The probability controls the chance of the operation
+        being performed at all, and does not affect the rotation degree.
+
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :type probability: Float
+        :return:
+        """
+        self.add_operation(Rotate(probability=probability, rotation=-1))
+
     def rotate(self, max_left_rotation=10, max_right_rotation=10, probability=1.0):
         """
         Rotate an image by an arbitrary amount.
@@ -312,6 +330,21 @@ class Pipeline(object):
         :return: None
         """
         self.add_operation(Flip(probability=probability, top_bottom_left_right="LEFT_RIGHT"))
+
+    def flip_random(self, probability):
+        """
+        Flip (mirror) the image along **either** its horizontal or vertical
+        axis.
+
+        This function mirrors the image along either the horizontal axis or
+        the vertical access. The axis is selected randomly.
+
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :type probability: Float
+        :return: None
+        """
+        self.add_operation(Flip(probability=probability, top_bottom_left_right="RANDOM"))
 
     def random_distortion(self, approximate_grid_size, sigma, probability=1.0):
         raise NotImplementedError

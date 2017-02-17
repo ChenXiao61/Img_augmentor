@@ -99,7 +99,11 @@ class Rotate(Operation):
         return "Rotate " + str(self.rotation)
 
     def perform_operation(self, image):
-        return image.rotate(self.rotation, expand=True)  # TODO: We are gonna have to check for 90 and 270 deg rotations
+        if self.rotation == -1:
+            random_factor = random.randint(1, 3)
+            return image.rotate(90 * random_factor, expand=True)
+        else:
+            return image.rotate(self.rotation, expand=True)  # TODO: We are gonna have to check for 90 and 270 deg rots
 
 
 class RotateRange(Operation):
@@ -117,7 +121,7 @@ class RotateRange(Operation):
 
         if left_or_right == 0:
             return image.rotate(random_left)
-        if left_or_right == 1:
+        elif left_or_right == 1:
             return image.rotate(random_right)
 
 
@@ -143,6 +147,12 @@ class Flip(Operation):
             return image.transpose(Image.FLIP_LEFT_RIGHT)
         elif self.top_bottom_left_right == "TOP_BOTTOM":
             return image.transpose(Image.FLIP_TOP_BOTTOM)
+        elif self.top_bottom_left_right == "RANDOM":
+            random_axis = random.randint(0, 1)
+            if random_axis == 0:
+                return image.transpose(Image.FLIP_LEFT_RIGHT)
+            elif random_axis == 1:
+                return image.transpose(Image.FLIP_TOP_BOTTOM)
 
 
 class Crop(Operation):
