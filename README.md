@@ -62,7 +62,7 @@ Let's perform an augmentation task on a single image, demonstrating the pipeline
 In [1]: import Augmentor
 
 In [2]: p = Augmentor.Pipeline("/home/user/augmentor_data_tests")
-Initialised with 1 images found in selected directory.
+Initialised with 1 image(s) found in selected directory.
 Output directory set to /home/user/Documents/augmentor_data_tests/output.
 
 In [3]: p.rotate90(probability=0.5)

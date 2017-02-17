@@ -233,15 +233,17 @@ class Scale(Operation):
     Class to increase or decrease images by a certain factor. The ``Resize`` class handles images \
     that need to be re-sized with different **dimensions**, which may not maintain aspect ratio.
     """
-    def __init__(self, probability, x_scale_factor, y_scale_factor):
+    def __init__(self, probability, scale_factor):
         Operation.__init__(self, probability)
-        self.x_scale_factor = x_scale_factor
-        self.y_scale_factor = y_scale_factor
+        self.scale_factor = scale_factor
 
     # Resize by a certain factor (*not* dimensions - which would uniformly resize all
     # images to X*Y while scale depends on the size of the input)
     def perform_operation(self, image):
-        pass
+        h, w = image.size
+        new_h = h * int(floor(self.scale_factor))
+        new_w = w * int(floor(self.scale_factor))
+        return image.resize((new_w, new_h))
 
 
 class Distort(Operation):

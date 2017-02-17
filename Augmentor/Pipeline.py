@@ -92,7 +92,7 @@ class Pipeline(object):
                       "It is unreadable and will not be included when augmenting." % image)
                 self.image_list.remove(image)
 
-        print("Initialised with %s images found in selected directory." % len(self.image_list))
+        print("Initialised with %s image(s) found in selected directory." % len(self.image_list))
         print("Output directory set to %s." % self.output_directory)
 
         # TODO: check each file to make sure it can be opened by PIL, perhaps like so:
@@ -409,6 +409,18 @@ class Pipeline(object):
 
     def resize_by_percentage(self, percentage_resize):
         raise NotImplementedError
+
+    def scale(self, probabilty, scale_factor):
+        """
+        Scale an image, while maintaining its aspect ratio.
+
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :param scale_factor: The a value larger than 1.0 as a factor to scale by.
+        :return:
+        """
+        raise UserWarning("This function currently behaves erratically.")
+        self.add_operation(Scale(probability=probabilty, scale_factor=scale_factor))
 
     def resize(self, probability, width, height, resample_filter="NEAREST"):
         # TODO: Make this automatic by default, i.e. ANTIALIAS if downsampling, BICUBIC if upsampling.
