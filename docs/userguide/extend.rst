@@ -1,11 +1,14 @@
 Extending Augmentor
 ===================
 
-Extending Augmentor to add new functionality is quite simple, and is performed in two steps: 1) create a custom class which subclasses from the :class:`.Operation` base class, and 2) add an object of your new class to the pipeline using the :func:`add_operation` function.
+Extending Augmentor to add new functionality is quite simple, and is performed in two steps:
+
+1) create a custom class which subclasses from the :class:`.Operation` base class, and
+2) add an object of your new class to the pipeline using the :func:`~Augmentor.Pipeline.Pipeline.add_operation` function.
 
 This allows you to add custom functionality at run-time. Of course, if you have written an operation that may be of benefit to the community, you can of course make a pull request on the GitHub repository.
 
-The following sections describe extending Augmentor in two steps. Step 1 is creating a new :class:`Operation` subclass, and step 2 is using an object of your new custom operation in a pipeline.
+The following sections describe extending Augmentor in two steps. Step 1 is creating a new :class:`.Operation` subclass, and step 2 is using an object of your new custom operation in a pipeline.
 
 Step 1: Create a New Operation Subclass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -44,12 +47,12 @@ This code should be placed in the :mod:`.Operations` module. You will see that y
 
 .. hint::
 
-    You can also overload the superclass's :func:`~Augmentor.Operations.Operation.__str__` function to return a custom string for the object's description text. This is useful for some methods that display information about the current operation being applied.
+    You can also overload the superclass's :func:`~Augmentor.Operations.Operation.__str__` function to return a custom string for the object's description text. This is useful for some methods that display information about the operation, such as the :func:`~Augmentor.Pipeline.Pipeline.status` method.
 
-Step 2: Add a New Function to the Pipeline Class
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Step 2: Add a Object to the Pipeline Manually
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once you have a new operation which is of type :class:`Operation`, you can add an object of you new operation to an existing pipeline.
+Once you have a new operation which is of type :class:`.Operation`, you can add an object of you new operation to an existing pipeline.
 
 .. code-block:: python
 
@@ -62,4 +65,4 @@ Once you have a new operation which is of type :class:`Operation`, you can add a
     # Executed the pipeline as normal, and your custom operation will be executed
     p.sample(1000)
 
-As you can see, adding custom operations at run-time is possible by subclassing the :class:`Operation` class and adding an object of this class to the pipeline manually using the :func:`add_operation` function.
+As you can see, adding custom operations at run-time is possible by subclassing the :class:`.Operation` class and adding an object of this class to the pipeline manually using the :func:`~Augmentor.Pipeline.Pipeline.add_operation` function.
