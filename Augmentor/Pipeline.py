@@ -82,11 +82,14 @@ class Pipeline(object):
         self.image_list = scan_directory(self.source_directory, recursive_scan)
         self.operations = []
 
-        # Scan the images to collect information about the dimensions of each of the images
-        self.unique_dimensions = set()
+        # Scan the images to collect information about each image.
+        self.distinct_dimensions = set()
+        self.distinct_formats = set()
         for image in self.image_list:
             try:
-                self.unique_dimensions.add(Image.open(image).size)
+                with Image.open(image) as opened_image:
+                    self.distinct_dimensions.add(opened_image.size)
+                    self.distinct_formats.add(opened_image.format)
             except IOError:
                 print("There is a problem with image %s in your source directory. "
                       "It is unreadable and will not be included when augmenting." % image)
@@ -199,6 +202,21 @@ class Pipeline(object):
             self.operations.append(operation)
         else:
             raise TypeError("Must be of type Operation to be added to the pipeline.")
+
+    def status(self):
+        print("There are %s operation(s) in the current pipeline." % len(self.operations))
+        for operation in self.operations:
+            print("Operation %s (probability: %s):" % (operation, operation.probability))
+            for operation_attribute, operation_value in operation.__dict__.items():
+                print ("\tAttribute: %s (%s)" % (operation_attribute, operation_value))
+        print()
+        print("There are %s image(s) in the source directory." % len(self.image_list))
+        print("Dimensions:")
+        for distinct_dimension in self.distinct_dimensions:
+            print("\tWidth: %s Height: %s" % (distinct_dimension[0], distinct_dimension[1]))
+        print("Formats:")
+        for distinct_format in self.distinct_formats:
+            print("\t %s" % distinct_format)
 
     @staticmethod
     def set_seed(seed):
@@ -348,7 +366,7 @@ class Pipeline(object):
 
     def random_distortion(self, approximate_grid_size, sigma, probability=1.0):
         raise NotImplementedError
-        # self.add_operation(Distort())  # Currently not reachable.
+        # self.add_operation(Distort())
 
     def zoom(self, probability, min_factor=1.05, max_factor=1.2):
         self.add_operation(Zoom(probability=probability, min_factor=min_factor, max_factor=max_factor))
@@ -410,7 +428,7 @@ class Pipeline(object):
     def resize_by_percentage(self, percentage_resize):
         raise NotImplementedError
 
-    def scale(self, probabilty, scale_factor):
+    def scale(self, probability, scale_factor):
         """
         Scale an image, while maintaining its aspect ratio.
 
@@ -419,8 +437,7 @@ class Pipeline(object):
         :param scale_factor: The a value larger than 1.0 as a factor to scale by.
         :return:
         """
-        raise UserWarning("This function currently behaves erratically.")
-        self.add_operation(Scale(probability=probabilty, scale_factor=scale_factor))
+        self.add_operation(Scale(probability=probability, scale_factor=scale_factor))
 
     def resize(self, probability, width, height, resample_filter="NEAREST"):
         # TODO: Make this automatic by default, i.e. ANTIALIAS if downsampling, BICUBIC if upsampling.
@@ -466,14 +483,12 @@ class Pipeline(object):
         # Add ability to add a new operation at runtime.
         raise NotImplementedError
 
-        function_name = string.lower(operation.__name__)
-        class_name = string.capwords(operation.__name__)
-
-        dyn_class = type(class_name, (object,), parameters)
-
+        # We will not need to do any of this, users will be required to add operations
+        # to the pipeline manually.
+        # function_name = string.lower(operation.__name__)
+        # class_name = string.capwords(operation.__name__)
+        # dyn_class = type(class_name, (object,), parameters)
         # globals()[]
-
-
 
     def add_further_directory(self, new_source_directory, recursive_scan=False):
         if not os.path.exists(new_source_directory):
