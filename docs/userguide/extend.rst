@@ -1,9 +1,11 @@
 Extending Augmentor
 ===================
 
-Extending Augmentor to add new functionality is quite simple, and is performed in two steps: 1) create a custom class which subclasses from the :class:`.Operation` base class, and 2) add a user facing function in the :class:`.Pipeline` class to handle parameters.
+Extending Augmentor to add new functionality is quite simple, and is performed in two steps: 1) create a custom class which subclasses from the :class:`.Operation` base class, and 2) add an object of your new class to the pipeline using the :func:`add_operation` function.
 
-Both steps are outlined in the proceeding sub-sections.
+This allows you to add custom functionality at run-time. Of course, if you have written an operation that may be of benefit to the community, you can of course make a pull request on the GitHub repository.
+
+The following sections describe extending Augmentor in two steps. Step 1 is creating a new :class:`Operation` subclass, and step 2 is using an object of your new custom operation in a pipeline.
 
 Step 1: Create a New Operation Subclass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -47,23 +49,17 @@ This code should be placed in the :mod:`.Operations` module. You will see that y
 Step 2: Add a New Function to the Pipeline Class
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-After a new class has been written, you must create the interface by which users will interact with it by plugging a function into the :class:`.Pipeline` class (part of the :mod:`Augmentor.Pipeline` **module**).
-
-This function must:
-
-1) Handle the parameters, if any, of your new operation. At a minimum you must accept a :attr:`probability` parameter.
-2) Append an object of your new operation to the :class:`.Pipeline`'s :attr:`operations` member variable.
-
-An example of this is shown below:
+Once you have a new operation which is of type :class:`Operation`, you can add an object of you new operation to an existing pipeline.
 
 .. code-block:: python
 
-    def fold(probability, folds):
-        # Handle anything regarding user input, i.e. the minimum number of folds.
-        if len(folds) > 10:
-            pass
+    # Instantiate a new object of your custom operation
+    fold = Fold(probability = 0.75, num_of_folds = 4)
 
-        # Append an object of the Fold class to the operations member variable.
-        self.operations.append(Fold(probability=probability, folds=folds))
+    # Add this to the current pipeline
+    p.add_operation(fold)
 
-Note, the new function :func:`fold` is inserted into the :class:`.Pipeline` class, This allows you to handle how parameters are dealt with, and so on.
+    # Executed the pipeline as normal, and your custom operation will be executed
+    p.sample(1000)
+
+As you can see, adding custom operations at run-time is possible by subclassing the :class:`Operation` class and adding an object of this class to the pipeline manually using the :func:`add_operation` function.

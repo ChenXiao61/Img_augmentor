@@ -204,6 +204,17 @@ class Pipeline(object):
             raise TypeError("Must be of type Operation to be added to the pipeline.")
 
     def status(self):
+        """
+        Prints the status of the pipeline to the console.
+
+        The status includes the number of operations currently attached to
+        pipeline, each operation's parameters, the number of images in the
+        pipeline, and a summary of the images' properties, such as their
+        dimensions and formats.
+
+        :return: None
+        """
+        # TODO: Return this as a dictionary of some kind and print from the dict
         print("There are %s operation(s) in the current pipeline." % len(self.operations))
         for operation in self.operations:
             print("Operation %s (probability: %s):" % (operation, operation.probability))
