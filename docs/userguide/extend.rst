@@ -69,3 +69,22 @@ Once you have a new operation which is of type :class:`.Operation`, you can add 
     p.sample(1000)
 
 As you can see, adding custom operations at run-time is possible by subclassing the :class:`.Operation` class and adding an object of this class to the pipeline manually using the :func:`~Augmentor.Pipeline.Pipeline.add_operation` function.
+
+Using non-PIL Image Objects
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Images can be converted to their raw formats for custom operations, for example by using NumPy:
+
+.. code-block:: python
+    import numpy
+
+    ...
+
+    def perform_operation(image):
+        image_array = numpy.array(image)
+
+        # Perform your custom operations here
+
+        image = PIL.Image.fromarray(image_array)
+
+        return image
