@@ -59,25 +59,25 @@ which will generate 10,000 augmented images based on your specifications. By def
 Let's perform an augmentation task on a single image, demonstrating the pipeline and several features of Augmentor:
 
 ```python
->>> import Augmentor
+In [1]: import Augmentor
 
->>> p = Augmentor.Pipeline("/home/user/augmentor_data_tests")
+In [2]: p = Augmentor.Pipeline("/home/user/augmentor_data_tests")
 Initialised with 1 image(s) found in selected directory.
 Output directory set to /home/user/Documents/augmentor_data_tests/output.
 
->>> p.rotate90(probability=0.5)
+In [3]: p.rotate90(probability=0.5)
 
->>> p.rotate270(probability=0.5)
+In [4]: p.rotate270(probability=0.5)
 
->>> p.flip_left_right(probability=0.8)
+In [5]: p.flip_left_right(probability=0.8)
 
->>> p.flip_top_bottom(probability=0.3)
+In [6]: p.flip_top_bottom(probability=0.3)
 
->>> p.crop_random(probability=1, percentage_area=0.5)
+In [7]: p.crop_random(probability=1, percentage_area=0.5)
 
->>> p.resize(probability=1.0, width=120, height=120)
+In [8]: p.resize(probability=1.0, width=120, height=120)
 
->>> p.sample(100)
+In [9]: p.sample(100)
 Processing ISIC_0000000.jpg: 100%|██████████████████| 100/100 [00:01<00:00, 235.08 Samples/s]
 ```
 
