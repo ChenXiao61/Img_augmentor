@@ -8,15 +8,14 @@ Extending Augmentor to add new functionality is quite simple, and is performed i
 
 This allows you to add custom functionality and extend Augmentor at run-time. Of course, if you have written an operation that may be of benefit to the community, you can make a pull request on the GitHub repository.
 
-The following sections describe extending Augmentor in two steps. Step 1 is creating a new :class:`.Operation` subclass, and step 2 is using an object of your new custom operation in a pipeline.
+The following sections describe extending Augmentor in two steps. Step 1 involves creating a new :class:`.Operation` subclass, and step 2 involves using an object of your new custom operation in a pipeline.
 
 Step 1: Create a New Operation Subclass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To create a custom operation and extend Augmentor:
 
-1) First you must create a new class in the :mod:`.Operations` module.
-2) This new class must inherit from the :class:`.Operation` base class.
+1) You create a new class that inherits from the :class:`.Operation` base class.
 3) You must overload the :func:`~Augmentor.Operations.Operation.perform_operation` method belonging to the superclass.
 4) You must call the superclass's :func:`__init__` constructor.
 5) You must return an object of type :class:`PIL.Image`.
