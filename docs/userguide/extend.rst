@@ -76,6 +76,7 @@ Using non-PIL Image Objects
 Images can be converted to their raw formats for custom operations, for example by using NumPy:
 
 .. code-block:: python
+
     import numpy
 
     # Custom class declaration
