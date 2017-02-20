@@ -78,7 +78,7 @@ Images can be converted to their raw formats for custom operations, for example 
 .. code-block:: python
     import numpy
 
-    ...
+    # Custom class declaration
 
     def perform_operation(image):
         image_array = numpy.array(image)
