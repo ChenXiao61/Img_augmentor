@@ -46,7 +46,7 @@ For example, to add a new operation called ``FoldImage``, you would write this c
 
 You have seen that you need to implement the :func:`~Augmentor.Operations.Operation.perform_operation` function and you must call the superclass's constructor which requires a :attr:`probability` value to be set. Ensure you return a PIL Image as a return value.
 
-If you wish to make these changes permanent, place your code in the :module:`~Augmentor.Operations` **module**.
+If you wish to make these changes permanent, place your code in the :mod:`~Augmentor.Operations` **module**.
 
 .. hint::
 
