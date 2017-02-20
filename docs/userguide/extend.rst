@@ -52,8 +52,8 @@ If you wish to make these changes permanent, place your code in the :mod:`~Augme
 
     You can also overload the superclass's :func:`~Augmentor.Operations.Operation.__str__` function to return a custom string for the object's description text. This is useful for some methods that display information about the operation, such as the :func:`~Augmentor.Pipeline.Pipeline.status` method.
 
-Step 2: Add a Object to the Pipeline Manually
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Step 2: Add an Object to the Pipeline Manually
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Once you have a new operation which is of type :class:`.Operation`, you can add an object of you new operation to an existing pipeline.
 
