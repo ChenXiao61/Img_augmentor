@@ -185,13 +185,13 @@ class Pipeline(object):
     def add_operation(self, operation):
         """
         Add an operation directly to the pipeline. Can be used to add custom
-        operations a pipeline.
-
-        .. seealso:: The :class:`Operation` class.
+        operations to a pipeline.
 
         To add customer operations to a pipeline, subclass from
         Operation, overload its methods, and insert it into the pipeline
         using this method.
+
+         .. seealso:: The :class:`.Operation` class.
 
         :param operation: An object of the operation you wish to add to the
          pipeline. Will accept custom operations written at run-time.
