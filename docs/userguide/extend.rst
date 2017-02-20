@@ -16,9 +16,9 @@ Step 1: Create a New Operation Subclass
 To create a custom operation and extend Augmentor:
 
 1) You create a new class that inherits from the :class:`.Operation` base class.
-3) You must overload the :func:`~Augmentor.Operations.Operation.perform_operation` method belonging to the superclass.
-4) You must call the superclass's :func:`__init__` constructor.
-5) You must return an object of type :class:`PIL.Image`.
+2) You must overload the :func:`~Augmentor.Operations.Operation.perform_operation` method belonging to the superclass.
+3) You must call the superclass's :func:`__init__` constructor.
+4) You must return an object of type :class:`PIL.Image`.
 
 For example, to add a new operation called ``FoldImage``, you would write this code:
 
