@@ -6,7 +6,7 @@ Extending Augmentor to add new functionality is quite simple, and is performed i
 1) Create a custom class which subclasses from the :class:`.Operation` base class, and
 2) Add an object of your new class to the pipeline using the :func:`~Augmentor.Pipeline.Pipeline.add_operation` function.
 
-This allows you to add custom functionality and extend Augmentor at run-time. Of course, if you have written an operation that may be of benefit to the community, you can of course make a pull request on the GitHub repository.
+This allows you to add custom functionality and extend Augmentor at run-time. Of course, if you have written an operation that may be of benefit to the community, you can make a pull request on the GitHub repository.
 
 The following sections describe extending Augmentor in two steps. Step 1 is creating a new :class:`.Operation` subclass, and step 2 is using an object of your new custom operation in a pipeline.
 
@@ -18,8 +18,10 @@ To create a custom operation and extend Augmentor:
 1) First you must create a new class in the :mod:`.Operations` module.
 2) This new class must inherit from the :class:`.Operation` base class.
 3) You must overload the :func:`~Augmentor.Operations.Operation.perform_operation` method belonging to the superclass.
+4) You must call the superclass's :func:`__init__` constructor.
+5) You must return an object of type :class:`PIL.Image`.
 
-For example, to add a new operation called ``FoldImage``, you would add this code:
+For example, to add a new operation called ``FoldImage``, you would write this code:
 
 .. code-block:: python
 
@@ -43,7 +45,9 @@ For example, to add a new operation called ``FoldImage``, you would add this cod
             # Return the image so that it can further processed in the pipeline:
             return image
 
-This code should be placed in the :mod:`.Operations` module. You will see that you need to implement the :func:`~Augmentor.Operations.Operation.perform_operation` function and you must call the superclass's constructor which requires a :attr:`probability` value to be set. Ensure you return a PIL Image as a return value.
+You have seen that you need to implement the :func:`~Augmentor.Operations.Operation.perform_operation` function and you must call the superclass's constructor which requires a :attr:`probability` value to be set. Ensure you return a PIL Image as a return value.
+
+If you wish to make these changes permanent, place your code in the :module:`~Augmentor.Operations` **module**.
 
 .. hint::
 
