@@ -299,3 +299,37 @@ class Zoom(Operation):
                 half_the_height + floor((original_height / 2.))
             )
         )
+
+
+class Custom(Operation):
+    """
+    Class that allows for a custom operation to be performed.
+    """
+    def __init__(self, probability, custom_function, **function_arguments):
+        """
+        Creates a custom operation that can be added to a pipeline.
+
+        To add a custom operation you can instantiate this class, passing
+        a function pointer :attr:`custom_function` followed by an arbitrarily
+        long list keyword arguments :attr:`**function_arguments`.
+
+        .. seealso:: The :func:`~Augmentor.Pipeline.Pipeline.add_operation`
+         function.
+
+        :param probability: The probability that the operation will be
+         performed.
+        :param custom_function: The name of function that performs your custom
+         code. Must return an Image object and accept an Image object as its
+         first parameter.
+        :param function_arguments: The arguments for your customer operation's
+         code.
+        """
+        Operation.__init__(self, probability)
+        self.custom_function = custom_function
+        self.function_arguments = function_arguments
+
+    def __str__(self):
+        return "Custom (" + self.custom_function.__name__ + ")"
+
+    def perform_operation(self, image):
+        return self.function_name(image, **self.function_arguments)

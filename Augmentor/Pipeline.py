@@ -214,7 +214,7 @@ class Pipeline(object):
 
         :return: None
         """
-        # TODO: Return this as a dictionary of some kind and print from the dict
+        # TODO: Return this as a dictionary of some kind and print from the dict if in console
         print("There are %s operation(s) in the current pipeline." % len(self.operations))
         for operation in self.operations:
             print("Operation %s (probability: %s):" % (operation, operation.probability))
@@ -539,4 +539,4 @@ class Pipeline(object):
         file_name, extension = os.path.splitext(image_path)
         root_path = os.path.dirname(image_path)
 
-        return (file_name, extension, root_path)
+        return file_name, extension, root_path
