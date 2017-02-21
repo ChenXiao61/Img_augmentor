@@ -310,8 +310,8 @@ class Custom(Operation):
         Creates a custom operation that can be added to a pipeline.
 
         To add a custom operation you can instantiate this class, passing
-        a function pointer :attr:`custom_function` followed by an arbitrarily
-        long list keyword arguments :attr:`**function_arguments`.
+        a function pointer, :attr:`custom_function`, followed by an
+        arbitrarily long list keyword arguments, :attr:`**function_arguments`.
 
         .. seealso:: The :func:`~Augmentor.Pipeline.Pipeline.add_operation`
          function.
@@ -321,7 +321,7 @@ class Custom(Operation):
         :param custom_function: The name of function that performs your custom
          code. Must return an Image object and accept an Image object as its
          first parameter.
-        :param function_arguments: The arguments for your customer operation's
+        :param function_arguments: The arguments for your custom operation's
          code.
         """
         Operation.__init__(self, probability)

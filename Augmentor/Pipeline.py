@@ -203,6 +203,21 @@ class Pipeline(object):
         else:
             raise TypeError("Must be of type Operation to be added to the pipeline.")
 
+    def remove_operation(self, operation_index=-1):
+        """
+        Remove the operation specified by :attr:`operation_index`. if
+        supplied, otherwise it will remove the newest operation added to the
+        pipeline.
+
+         .. seealso:: Use :func:`status` function to find an operation's
+          index.
+
+        :param operation_index: The operation to remove.
+        :return: The removed operation. You can add this to the end of the
+         pipeline using :func:`add_operation` if required.
+        """
+        self.operations.pop(operation_index)
+
     def status(self):
         """
         Prints the status of the pipeline to the console.
@@ -216,10 +231,12 @@ class Pipeline(object):
         """
         # TODO: Return this as a dictionary of some kind and print from the dict if in console
         print("There are %s operation(s) in the current pipeline." % len(self.operations))
+        operation_index = 0
         for operation in self.operations:
-            print("Operation %s (probability: %s):" % (operation, operation.probability))
+            print("Index %s. Operation %s (probability: %s):" % (operation_index, operation, operation.probability))
             for operation_attribute, operation_value in operation.__dict__.items():
                 print ("\tAttribute: %s (%s)" % (operation_attribute, operation_value))
+            operation_index += 1
         print()
         print("There are %s image(s) in the source directory." % len(self.image_list))
         print("Dimensions:")
