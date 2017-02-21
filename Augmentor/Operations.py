@@ -318,15 +318,19 @@ class Custom(Operation):
 
         :param probability: The probability that the operation will be
          performed.
-        :param custom_function: The name of function that performs your custom
-         code. Must return an Image object and accept an Image object as its
-         first parameter.
+        :param custom_function: The name of the function that performs your
+         custom code. Must return an Image object and accept an Image object
+         as its first parameter.
         :param function_arguments: The arguments for your custom operation's
          code.
+         :type probability: Float
+         :type custom_function: *Function
+         :type function_arguments: dict
         """
         Operation.__init__(self, probability)
         self.custom_function = custom_function
         self.function_arguments = function_arguments
+        # TODO: find the names of the argument types above, is that a function pointer???
 
     def __str__(self):
         return "Custom (" + self.custom_function.__name__ + ")"
