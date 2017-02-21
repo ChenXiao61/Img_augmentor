@@ -205,15 +205,15 @@ class Pipeline(object):
 
     def remove_operation(self, operation_index=-1):
         """
-        Remove the operation specified by :attr:`operation_index`. if
+        Remove the operation specified by :attr:`operation_index`, if
         supplied, otherwise it will remove the newest operation added to the
         pipeline.
 
-         .. seealso:: Use :func:`status` function to find an operation's
+         .. seealso:: Use the :func:`status` function to find an operation's
           index.
 
-        :param operation_index: The operation to remove.
-        :return: The removed operation. You can add this to the end of the
+        :param operation_index: The index of the operation to remove.
+        :return: The removed operation. You can reinsert this at end of the
          pipeline using :func:`add_operation` if required.
         """
         self.operations.pop(operation_index)

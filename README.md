@@ -102,6 +102,7 @@ You can use `urllib` to obtain the image in order to reproduce the augmented ima
 
 ```python
 In [1]: import urllib
-In [2]: urllib.urlretrieve("https://isic-archive.com:443/api/v1/image/5436e3abbae478396759f0cf/download", "ISIC_0000000.jpg")
-Out[2]: ('ISIC_0000000.jpg', <httplib.HTTPMessage instance at 0x7f7bd949a950>)
+In [2]: im_url = "https://isic-archive.com:443/api/v1/image/5436e3abbae478396759f0cf/download"
+In [3]: urllib.urlretrieve(im_url, "ISIC_0000000.jpg")
+Out[3]: ('ISIC_0000000.jpg', <httplib.HTTPMessage instance at 0x7f7bd949a950>)
 ```
