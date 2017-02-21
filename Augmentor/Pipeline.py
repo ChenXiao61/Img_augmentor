@@ -206,7 +206,7 @@ class Pipeline(object):
     def remove_operation(self, operation_index=-1):
         """
         Remove the operation specified by :attr:`operation_index`, if
-        supplied, otherwise it will remove the newest operation added to the
+        supplied, otherwise it will remove the latest operation added to the
         pipeline.
 
          .. seealso:: Use the :func:`status` function to find an operation's
