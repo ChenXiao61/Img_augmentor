@@ -62,7 +62,7 @@ class Pipeline(object):
 
         # TODO: No need to place this in __init__ - move later.
         # See: https://infohost.nmt.edu/tcc/help/pubs/pil/formats.html
-        valid_formats = ["PNG", "BMP", "GIF", "JPEG"]
+        self._valid_formats = ["PNG", "BMP", "GIF", "JPEG"]
 
         self.save_format = save_format
 
@@ -106,7 +106,7 @@ class Pipeline(object):
         #     except IOError:
         #             self.image_list.remove(file_check)
 
-    def __execute(self, image, save_to_disk=True):
+    def _execute(self, image, save_to_disk=True):
         """
         Private method. Used to pass an image through the current pipeline,
         and return the augmented image.
@@ -155,7 +155,7 @@ class Pipeline(object):
         while sample_count <= n:
             for image_path in self.image_list:
                 if sample_count <= n:
-                    self.__execute(Image.open(image_path))
+                    self._execute(Image.open(image_path))
                     progress_bar.set_description("Processing %s" % os.path.split(image_path)[1])
                     progress_bar.update(1)
                 sample_count += 1
@@ -180,7 +180,7 @@ class Pipeline(object):
         :return: The transformed image.
         """
 
-        return self.__execute(image, save_to_disk)
+        return self._execute(image, save_to_disk)
 
     def add_operation(self, operation):
         """
