@@ -109,4 +109,4 @@ Out[3]: ('ISIC_0000000.jpg', <httplib.HTTPMessage instance at 0x7f7bd949a950>)
 
 ## Asciicast
 
-[![asciicast](https://asciinema.org/a/105368.png)](https://asciinema.org/a/105368)
+[![asciicast](https://asciinema.org/a/105368.png)](https://asciinema.org/a/105368?autoplay=1)
