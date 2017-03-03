@@ -106,3 +106,7 @@ In [2]: im_url = "https://isic-archive.com:443/api/v1/image/5436e3abbae478396759
 In [3]: urllib.urlretrieve(im_url, "ISIC_0000000.jpg")
 Out[3]: ('ISIC_0000000.jpg', <httplib.HTTPMessage instance at 0x7f7bd949a950>)
 ```
+
+## Asciicast
+
+[![asciicast](https://asciinema.org/a/105368.png)](https://asciinema.org/a/105368)
