@@ -253,26 +253,133 @@ class Distort(Operation):
         self.sigma = sigma
 
     def perform_operation(self, image):
+
+        # Calculate grid
         w, h = image.size
-        dx = self.approximate_grid_size
-        dy = self.approximate_grid_size
-        return image.transform(image.size, Image.MESH,
-                            [((0, 0, w // 2, h // 2),  # Specifies xy top left, xy bottom right DESTINATION
-                              (0, 0, 0, h // 2,
-                               w // 2 + dx, h // 2 + dy, w // 2, 0)),  # SOURCE polygon of xy top left, xy bottom left, xy bottom right, xy top right
 
-                             ((w // 2, 0, w, h // 2),
-                              (w // 2, 0, w // 2 + dx, h // 2 + dy,
-                               w, h // 2, w, 0)),
+        horizontal_tiles = 4
+        vertical_tiles = 4
 
-                             ((0, h // 2, w // 2, h),
-                              (0, h // 2, 0, h,
-                               w // 2, h, w // 2 + dx, h // 2 + dy)),
+        width_of_square = int(floor(w / float(horizontal_tiles)))
+        height_of_square = int(floor(h / float(vertical_tiles)))
 
-                             ((w // 2, h // 2, w, h),
-                              (w // 2 + dx, h // 2 + dy, w // 2, h,
-                               w, h, w, h // 2))],
-                            )
+        width_of_last_square = w - (width_of_square * (horizontal_tiles - 1))
+        height_of_last_square = h - (height_of_square * (vertical_tiles - 1))
+
+        dimensions = []
+
+        for vertical_tile in range(vertical_tiles):
+            for horizontal_tile in range(horizontal_tiles):
+                if vertical_tile == (vertical_tiles - 1) and horizontal_tile == (horizontal_tiles - 1):
+                    dimensions.append([horizontal_tile * width_of_square,
+                                       vertical_tile * height_of_square,
+                                       width_of_last_square + (horizontal_tile * width_of_square),
+                                       height_of_last_square + (height_of_square * vertical_tile)])
+                elif vertical_tile == (vertical_tiles - 1):
+                    dimensions.append([horizontal_tile * width_of_square,
+                                       vertical_tile * height_of_square,
+                                       width_of_square + (horizontal_tile * width_of_square),
+                                       height_of_last_square + (height_of_square * vertical_tile)])
+                elif horizontal_tile == (horizontal_tiles - 1):
+                    dimensions.append([horizontal_tile * width_of_square,
+                                       vertical_tile * height_of_square,
+                                       width_of_last_square + (horizontal_tile * width_of_square),
+                                       height_of_square + (height_of_square * vertical_tile)])
+                else:
+                    dimensions.append([horizontal_tile * width_of_square,
+                                       vertical_tile * height_of_square,
+                                       width_of_square + (horizontal_tile * width_of_square),
+                                       height_of_square + (height_of_square * vertical_tile)])
+
+        # Make the MESH data structure
+        polygons = []
+        for x1, y1, x2, y2 in dimensions:
+            polygons.append([x1, y1, x1, y2, x2, y2, x2, y1])
+
+        polygons = []
+        polygon_counter = 0
+
+        for x1, y1, x2, y2 in dimensions:
+            if polygon_counter == 0:
+                polygons.append([x1, y1,
+                                 x1, y2,
+                                 x2, y2,
+                                 x2, y1])
+            elif polygon_counter == 1:
+                polygons.append([x1, y1,
+                                 x1, y2,
+                                 x2, y2,
+                                 x2, y1])
+            elif polygon_counter == 2:
+                polygons.append([x1, y1,
+                                 x1, y2,
+                                 x2, y2,
+                                 x2, y1])
+            elif polygon_counter == 3:
+                polygon_counter = -1
+                polygons.append([x1, y1,
+                                 x1, y2,
+                                 x2, y2,
+                                 x2, y1])
+
+            polygon_counter += 1
+
+        mesh = []
+        for i in range(len(dimensions)):
+            mesh.append([dimensions[i], polygons[i]])
+
+        # Make an empty matrix of the correct size for storing polygons
+        # matrix = [[0 for x in range(horizontal_tiles)] for y in range(vertical_tiles)]
+
+        # i = 0
+        # for w_i in range(vertical_tiles):
+        #    # print("Row %s:" % w_i),
+        #    for h_i in range(horizontal_tiles):
+        #        matrix[w_i][h_i] = tuple(MESH[i])
+        #
+        #        # print("%s\t" % (i)),
+        #        i+=1
+
+        last_row = range((horizontal_tiles * vertical_tiles) - vertical_tiles, horizontal_tiles * vertical_tiles)
+        last_column = []
+
+        for i in range(horizontal_tiles):
+            last_column.append((vertical_tiles - 1) + horizontal_tiles * i)
+
+        polygon_indices = []
+        for i in range((vertical_tiles * horizontal_tiles) - 1):
+            if i not in last_row and i not in last_column:
+                polygon_indices.append([i, i + 1, i + vertical_tiles, i + 1 + vertical_tiles])
+
+        for a, b, c, d in polygon_indices:
+            dx_test = random.randint(10, 20)
+            dy_test = random.randint(10, 20)
+
+            x1, y1, x1, y2, x2, y2, x2, y1 = polygons[a]
+            mesh[a] = [dimensions[a], [x1, y1,
+                                       x1, y2,
+                                       x2 + dx_test, y2 + dy_test,
+                                       x2, y1]]
+
+            x1, y1, x1, y2, x2, y2, x2, y1 = polygons[b]
+            mesh[b] = [dimensions[b], [x1, y1,
+                                       x1 + dx_test, y2 + dy_test,
+                                       x2, y2,
+                                       x2, y1]]
+
+            x1, y1, x1, y2, x2, y2, x2, y1 = polygons[c]
+            mesh[c] = [dimensions[c], [x1, y1,
+                                       x1, y2,
+                                       x2, y2,
+                                       x2 + dx_test, y1 + dy_test]]
+
+            x1, y1, x1, y2, x2, y2, x2, y1 = polygons[d]
+            mesh[d] = [dimensions[d], [x1 + dx_test, y1 + dy_test,
+                                       x1, y2,
+                                       x2, y2,
+                                       x2, y1]]
+
+        return image.transform(image.size, Image.MESH, mesh)
 
 
 class Zoom(Operation):
