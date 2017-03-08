@@ -412,7 +412,7 @@ class Pipeline(object):
         :param sigma: The magnitude of the distortions.
         :param randomise_magnitude: Specifies whether sigma should be used as
          a range if True, or as a constant value, if False.
-        :return:
+        :return: None
         """
         self.add_operation(Distort(probability=probability, grid_width=grid_width,
                                    grid_height=grid_height, sigma=sigma, randomise_magnitude=randomise_magnitude))
