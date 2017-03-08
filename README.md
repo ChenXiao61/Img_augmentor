@@ -83,9 +83,9 @@ Processing ISIC_0000000.jpg: 100%|███████████████�
 
 Some sample output:
 
-| Input Image                                                                                           | Augmented Images                                                                                      |
-|-------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| ![Original](https://cloud.githubusercontent.com/assets/16042756/23019262/b696e3a6-f441-11e6-958d-17f18f2cd35e.jpg) | ![Augmented](https://cloud.githubusercontent.com/assets/16042756/23018832/cda6967e-f43f-11e6-9082-765c291f1fd6.gif) |
+| Input Image                                                                                           |   | Augmented Images                                                                                      |
+|-------------------------------------------------------------------------------------------------------|---|-------------------------------------------------------------------------------------------------------|
+| ![Original](https://cloud.githubusercontent.com/assets/16042756/23019262/b696e3a6-f441-11e6-958d-17f18f2cd35e.jpg) | → | ![Augmented](https://cloud.githubusercontent.com/assets/16042756/23018832/cda6967e-f43f-11e6-9082-765c291f1fd6.gif) |
 
 The augmented images may be useful for a boundary detection task, for example.
 
