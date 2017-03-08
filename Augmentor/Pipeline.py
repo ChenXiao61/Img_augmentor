@@ -392,9 +392,30 @@ class Pipeline(object):
         """
         self.add_operation(Flip(probability=probability, top_bottom_left_right="RANDOM"))
 
-    def random_distortion(self, approximate_grid_size, sigma, probability=1.0):
-        raise NotImplementedError
-        # self.add_operation(Distort())
+    def random_distortion(self, probability, grid_width, grid_height, sigma, randomise_magnitude=True):
+        """
+        Performs a random, elastic distortion on an image.
+
+        This function performs a randomised, elastic distortion controlled
+        by the parameters specified. The grid width and height controls how
+        fine the distortions are. Smaller sizes will result in larger, more
+        pronounced, and less granular distortions. Larger numbers will result
+        in finer, more granular distortions. The magnitude of the distortions
+        can be controlled using sigma. This can be random or fixed.
+
+        :param probability: The probability that the function will execute
+         when the image is passed through the pipeline.
+        :param grid_width: The number of rectangles in the grid's horizontal
+         axis.
+        :param grid_height: The number of rectangles in the grid's vertical
+         axis.
+        :param sigma: The magnitude of the distortions.
+        :param randomise_magnitude: Specifies whether sigma should be used as
+         a range if True, or as a constant value, if False.
+        :return:
+        """
+        self.add_operation(Distort(probability=probability, grid_width=grid_width,
+                                   grid_height=grid_height, sigma=sigma, randomise_magnitude=randomise_magnitude))
 
     def zoom(self, probability, min_factor=1.05, max_factor=1.2):
         self.add_operation(Zoom(probability=probability, min_factor=min_factor, max_factor=max_factor))

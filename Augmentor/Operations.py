@@ -247,18 +247,20 @@ class Scale(Operation):
 
 
 class Distort(Operation):
-    def __init__(self, probability, approximate_grid_size, sigma):
+    def __init__(self, probability, grid_width, grid_height, sigma, randomise_magnitude):
         Operation.__init__(self, probability)
-        self.approximate_grid_size = approximate_grid_size
-        self.sigma = sigma
+        self.grid_width = grid_width
+        self.grid_height = grid_height
+        self.sigma = abs(sigma)
+        randomise_magnitude = True  # TODO: Fix code below to handle FALSE state.
+        self.randomise_magnitude = randomise_magnitude
 
     def perform_operation(self, image):
 
-        # Calculate grid
         w, h = image.size
 
-        horizontal_tiles = 4
-        vertical_tiles = 4
+        horizontal_tiles = self.grid_width
+        vertical_tiles = self.grid_height
 
         width_of_square = int(floor(w / float(horizontal_tiles)))
         height_of_square = int(floor(h / float(vertical_tiles)))
@@ -291,95 +293,59 @@ class Distort(Operation):
                                        width_of_square + (horizontal_tile * width_of_square),
                                        height_of_square + (height_of_square * vertical_tile)])
 
-        # Make the MESH data structure
+        # For loop that generates polygons could be rewritten, but maybe harder to read?
+        # polygons = [x1,y1, x1,y2, x2,y2, x2,y1 for x1,y1, x2,y2 in dimensions]
+
+        # List comprehension below is easier to read than this?
+        # last_column = []
+        # for i in range(vertical_tiles):
+        #    last_column.append((horizontal_tiles-1)+horizontal_tiles*i)
+
+        last_row = range((horizontal_tiles * vertical_tiles) - horizontal_tiles, horizontal_tiles * vertical_tiles)
+        last_column = [(horizontal_tiles - 1) + horizontal_tiles * i for i in range(vertical_tiles)]
+
         polygons = []
         for x1, y1, x2, y2 in dimensions:
             polygons.append([x1, y1, x1, y2, x2, y2, x2, y1])
 
-        polygons = []
-        polygon_counter = 0
-
-        for x1, y1, x2, y2 in dimensions:
-            if polygon_counter == 0:
-                polygons.append([x1, y1,
-                                 x1, y2,
-                                 x2, y2,
-                                 x2, y1])
-            elif polygon_counter == 1:
-                polygons.append([x1, y1,
-                                 x1, y2,
-                                 x2, y2,
-                                 x2, y1])
-            elif polygon_counter == 2:
-                polygons.append([x1, y1,
-                                 x1, y2,
-                                 x2, y2,
-                                 x2, y1])
-            elif polygon_counter == 3:
-                polygon_counter = -1
-                polygons.append([x1, y1,
-                                 x1, y2,
-                                 x2, y2,
-                                 x2, y1])
-
-            polygon_counter += 1
-
-        mesh = []
-        for i in range(len(dimensions)):
-            mesh.append([dimensions[i], polygons[i]])
-
-        # Make an empty matrix of the correct size for storing polygons
-        # matrix = [[0 for x in range(horizontal_tiles)] for y in range(vertical_tiles)]
-
-        # i = 0
-        # for w_i in range(vertical_tiles):
-        #    # print("Row %s:" % w_i),
-        #    for h_i in range(horizontal_tiles):
-        #        matrix[w_i][h_i] = tuple(MESH[i])
-        #
-        #        # print("%s\t" % (i)),
-        #        i+=1
-
-        last_row = range((horizontal_tiles * vertical_tiles) - vertical_tiles, horizontal_tiles * vertical_tiles)
-        last_column = []
-
-        for i in range(horizontal_tiles):
-            last_column.append((vertical_tiles - 1) + horizontal_tiles * i)
-
         polygon_indices = []
         for i in range((vertical_tiles * horizontal_tiles) - 1):
             if i not in last_row and i not in last_column:
-                polygon_indices.append([i, i + 1, i + vertical_tiles, i + 1 + vertical_tiles])
+                polygon_indices.append([i, i + 1, i + horizontal_tiles, i + 1 + horizontal_tiles])
 
         for a, b, c, d in polygon_indices:
-            dx_test = random.randint(10, 20)
-            dy_test = random.randint(10, 20)
+            dx = random.randint(-self.sigma, self.sigma)
+            dy = random.randint(-self.sigma, self.sigma)
 
-            x1, y1, x1, y2, x2, y2, x2, y1 = polygons[a]
-            mesh[a] = [dimensions[a], [x1, y1,
-                                       x1, y2,
-                                       x2 + dx_test, y2 + dy_test,
-                                       x2, y1]]
+            x1, y1, x2, y2, x3, y3, x4, y4 = polygons[a]
+            polygons[a] = [x1, y1,
+                           x2, y2,
+                           x3 + dx, y3 + dy,
+                           x4, y4]
 
-            x1, y1, x1, y2, x2, y2, x2, y1 = polygons[b]
-            mesh[b] = [dimensions[b], [x1, y1,
-                                       x1 + dx_test, y2 + dy_test,
-                                       x2, y2,
-                                       x2, y1]]
+            x1, y1, x2, y2, x3, y3, x4, y4 = polygons[b]
+            polygons[b] = [x1, y1,
+                           x2 + dx, y2 + dy,
+                           x3, y3,
+                           x4, y4]
 
-            x1, y1, x1, y2, x2, y2, x2, y1 = polygons[c]
-            mesh[c] = [dimensions[c], [x1, y1,
-                                       x1, y2,
-                                       x2, y2,
-                                       x2 + dx_test, y1 + dy_test]]
+            x1, y1, x2, y2, x3, y3, x4, y4 = polygons[c]
+            polygons[c] = [x1, y1,
+                           x2, y2,
+                           x3, y3,
+                           x4 + dx, y4 + dy]
 
-            x1, y1, x1, y2, x2, y2, x2, y1 = polygons[d]
-            mesh[d] = [dimensions[d], [x1 + dx_test, y1 + dy_test,
-                                       x1, y2,
-                                       x2, y2,
-                                       x2, y1]]
+            x1, y1, x2, y2, x3, y3, x4, y4 = polygons[d]
+            polygons[d] = [x1 + dx, y1 + dy,
+                           x2, y2,
+                           x3, y3,
+                           x4, y4]
 
-        return image.transform(image.size, Image.MESH, mesh)
+        generated_mesh = []
+        for i in range(len(dimensions)):
+            generated_mesh.append([dimensions[i], polygons[i]])
+
+        return image.transform(image.size, Image.MESH, generated_mesh)
 
 
 class Zoom(Operation):
