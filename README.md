@@ -91,9 +91,13 @@ The augmented images may be useful for a boundary detection task, for example.
 
 ## Elastic Distortions
 
-| Input Image                                                                                                                |   | Augmented Images                                                                                                 |
-|----------------------------------------------------------------------------------------------------------------------------|---|------------------------------------------------------------------------------------------------------------------|
-| ![eight_hand_drawn](https://cloud.githubusercontent.com/assets/16042756/23696032/38749382-03e2-11e7-9cf3-01c27e69abed.png) | → | ![eights](https://cloud.githubusercontent.com/assets/16042756/23696035/3f85ba84-03e2-11e7-94e7-452123db623d.gif) |
+Using elastic distortions, one image can be used to generate many images that are real-world feasible and label preserving:
+
+| Input Image                                                                                                                       |   | Augmented Images                                                                                                        |
+|-----------------------------------------------------------------------------------------------------------------------------------|---|-------------------------------------------------------------------------------------------------------------------------|
+| ![eight_hand_drawn_border](https://cloud.githubusercontent.com/assets/16042756/23697279/79850d52-03e7-11e7-9445-475316b702a3.png) | → | ![eights_border](https://cloud.githubusercontent.com/assets/16042756/23697283/802698a6-03e7-11e7-94b7-f0b61977ef33.gif) |
+
+The input image has a 1 pixel black border to emphasise that only the interior of the image is being distorted.
 
 ## Licence and Acknowledgements
 
