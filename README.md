@@ -91,7 +91,7 @@ The augmented images may be useful for a boundary detection task, for example.
 
 ## Elastic Distortions
 
-| Input Image                                                                                                                |   | Augmented Images (100 shown here)                                                                                |
+| Input Image                                                                                                                |   | Augmented Images                                                                                                 |
 |----------------------------------------------------------------------------------------------------------------------------|---|------------------------------------------------------------------------------------------------------------------|
 | ![eight_hand_drawn](https://cloud.githubusercontent.com/assets/16042756/23696032/38749382-03e2-11e7-9cf3-01c27e69abed.png) | → | ![eights](https://cloud.githubusercontent.com/assets/16042756/23696035/3f85ba84-03e2-11e7-94e7-452123db623d.gif) |
 
