@@ -23,7 +23,7 @@ cd Augmentor
 python setup.py install
 ```
 
-Installing via `pip` and PyPI will be restored in a future version.
+Installation via `pip` and PyPI will be restored in a future version.
 
 ## Quick Start Guide and Usage
 The purpose of _Augmentor_ is to automate image augmentation (artificial data generation) in order to expand datasets as input for machine learning algorithms, especially neural networks and deep learning.
@@ -63,7 +63,7 @@ In [1]: import Augmentor
 
 In [2]: p = Augmentor.Pipeline("/home/user/augmentor_data_tests")
 Initialised with 1 image(s) found in selected directory.
-Output directory set to /home/user/Documents/augmentor_data_tests/output.
+Output directory set to /home/user/augmentor_data_tests/output.
 
 In [3]: p.rotate90(probability=0.5)
 
@@ -78,7 +78,7 @@ In [7]: p.crop_random(probability=1, percentage_area=0.5)
 In [8]: p.resize(probability=1.0, width=120, height=120)
 
 In [9]: p.sample(100)
-Processing ISIC_0000000.jpg: 100%|***************| 100/100 [00:01<00:00, 235.08 Samples/s]
+Processing ISIC_0000000.jpg: 100%|***************| 100/100 [235.08 Samples/s]
 ```
 
 Some sample output:
