@@ -296,13 +296,12 @@ class Distort(Operation):
         # For loop that generates polygons could be rewritten, but maybe harder to read?
         # polygons = [x1,y1, x1,y2, x2,y2, x2,y1 for x1,y1, x2,y2 in dimensions]
 
-        # List comprehension below is easier to read than this?
-        # last_column = []
-        # for i in range(vertical_tiles):
-        #    last_column.append((horizontal_tiles-1)+horizontal_tiles*i)
+        # last_column = [(horizontal_tiles - 1) + horizontal_tiles * i for i in range(vertical_tiles)]
+        last_column = []
+        for i in range(vertical_tiles):
+            last_column.append((horizontal_tiles-1)+horizontal_tiles*i)
 
         last_row = range((horizontal_tiles * vertical_tiles) - horizontal_tiles, horizontal_tiles * vertical_tiles)
-        last_column = [(horizontal_tiles - 1) + horizontal_tiles * i for i in range(vertical_tiles)]
 
         polygons = []
         for x1, y1, x2, y2 in dimensions:
@@ -345,7 +344,7 @@ class Distort(Operation):
         for i in range(len(dimensions)):
             generated_mesh.append([dimensions[i], polygons[i]])
 
-        return image.transform(image.size, Image.MESH, generated_mesh)
+        return image.transform(image.size, Image.MESH, generated_mesh, resample=Image.LINEAR)
 
 
 class Zoom(Operation):
