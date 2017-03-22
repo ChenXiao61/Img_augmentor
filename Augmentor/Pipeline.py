@@ -125,6 +125,9 @@ class Pipeline(object):
         if save_to_disk:
             file_name = str(uuid.uuid4()) + "." + self.save_format
             try:
+                # A strange error is forcing me to do this at the moment, but will fix later properly
+                if image.mode != "RGB":
+                    image = image.convert("RGB")
                 image.save(os.path.join(self.output_directory, file_name), self.save_format)
             except IOError:
                 print("Error writing %s." % file_name)
