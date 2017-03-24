@@ -10,13 +10,13 @@ Complete documentation can be found on Read the Docs: <http://augmentor.readthed
 
 ## Installation
 
-Currently, the PyPI version is out of date. Therefore it is currently recommended that you clone the package and install it manually.
+Use `pip`
 
 ```
-git clone https://github.com/mdbloice/Augmentor.git
+pip install Augmentor
 ```
 
-Enter the newly created `Augmentor` directory and build the package:
+See the documentation for building from source.
 
 ```
 cd Augmentor
