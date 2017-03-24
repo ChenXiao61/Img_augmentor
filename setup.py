@@ -1,10 +1,11 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='Augmentor',
-    packages=['Augmentor'],
-    version='0.1.1', # PEP440 says I need 0.1.0 or similar. Change this.
+    packages=find_packages(),
+    version='0.1.1',  # PEP440 says I need 0.1.0 or similar. Change this.
     description='Image augmentation library for Machine Learning',
+    long_description='Image augmentation library for Machine Learning',
     license='MIT',
     author='Marcus D. Bloice',
     author_email='marcus.bloice@medunigraz.at',
@@ -20,7 +21,6 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6', # Remove this.
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',

@@ -221,6 +221,29 @@ class Pipeline(object):
         """
         self.operations.pop(operation_index)
 
+    def add_ground_truth_directory(self, ground_truth_directory, halt_on_non_match=True):
+        """
+        Add a directory containing the ground truth for your current set of
+        images.
+
+        This function allows you to add ground truth images that relate to
+        the images currently in pipeline. It will scan a folder and collate
+        images in the pipeline with the ground truth images in the new
+        ground truth directory by *file name*, ignoring file extension.
+        This means you can use the same directory if the file names are
+        differentiable only be extension.
+
+        :param ground_truth_directory: The new directory to scan.
+        :param halt_on_non_match: Do not halt on non-match and throw away
+         any images if :attr:`False`. Otherwise halt on non-match, if
+         :attr:`True`.
+        :exception: IOError if no ground truth images found or if
+         :attr:`halt_on_non_match` is :attr:`True`.
+        :return: None
+        """
+
+        raise NotImplementedError
+
     def status(self):
         """
         Prints the status of the pipeline to the console.
