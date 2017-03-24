@@ -1,8 +1,8 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name='Augmentor',
-    packages=find_packages(),
+    packages=['Augmentor'],
     version='0.1.1',  # PEP440 says I need 0.1.0 or similar. Change this.
     description='Image augmentation library for Machine Learning',
     long_description='Image augmentation library for Machine Learning',
