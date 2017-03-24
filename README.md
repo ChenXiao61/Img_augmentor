@@ -10,20 +10,13 @@ Complete documentation can be found on Read the Docs: <http://augmentor.readthed
 
 ## Installation
 
-Use `pip`
+Install using `pip` from the command line:
 
 ```
 pip install Augmentor
 ```
 
 See the documentation for building from source.
-
-```
-cd Augmentor
-python setup.py install
-```
-
-Installation via `pip` and PyPI will be restored in a future version.
 
 ## Quick Start Guide and Usage
 The purpose of _Augmentor_ is to automate image augmentation (artificial data generation) in order to expand datasets as input for machine learning algorithms, especially neural networks and deep learning.
