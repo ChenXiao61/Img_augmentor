@@ -12,7 +12,7 @@ Complete documentation can be found on Read the Docs: <http://augmentor.readthed
 
 Install using `pip` from the command line:
 
-```
+```python
 pip install Augmentor
 ```
 
@@ -94,7 +94,7 @@ The input image has a 1 pixel black border to emphasise that only the interior o
 
 ## Licence and Acknowledgements
 
-Augmentor is made available under the terms of the MIT Licence. See [`Licence.md`] (https://github.com/mdbloice/Augmentor/blob/master/LICENSE.md).
+Augmentor is made available under the terms of the MIT Licence. See [`Licence.md`](https://github.com/mdbloice/Augmentor/blob/master/LICENSE.md).
 
 [1] Skin lesion image obtained from the ISIC Archive:
 
