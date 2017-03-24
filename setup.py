@@ -10,7 +10,7 @@ setup(
     author='Marcus D. Bloice',
     author_email='marcus.bloice@medunigraz.at',
     url='https://github.com/mdbloice/Augmentor',                        # URL to GitHub repo
-    download_url='https://github.com/mdbloice/Augmentor/tarball/0.1',   # Get this using git tag
+    # download_url='https://github.com/mdbloice/Augmentor/tarball/0.1.1',   # Get this using git tag
     keywords=['image', 'augmentation', 'artificial', 'generation', 'machine', 'learning'],
     include_package_data=True,  # This will include all files in MANIFEST.in in the package when installing.
     classifiers=[
