@@ -82,7 +82,8 @@ Images can be converted to their raw formats for custom operations, for example 
     # Custom class declaration
 
     def perform_operation(image):
-        image_array = numpy.array(image)
+
+        image_array = numpy.array(image).astype('uint8')
 
         # Perform your custom operations here
 
