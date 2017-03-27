@@ -4,10 +4,6 @@
 
 Image augmentation library in Python for machine learning. A Julia version of the package is also being developed as a sister project and is available [here](https://github.com/Evizero/Augmentor.jl).
 
-## Documentation
-
-Complete documentation can be found on Read the Docs: <http://augmentor.readthedocs.io/>
-
 ## Installation
 
 Install using `pip` from the command line:
@@ -17,6 +13,10 @@ pip install Augmentor
 ```
 
 See the documentation for building from source.
+
+## Documentation
+
+Complete documentation can be found on Read the Docs: <http://augmentor.readthedocs.io/>
 
 ## Quick Start Guide and Usage
 The purpose of _Augmentor_ is to automate image augmentation (artificial data generation) in order to expand datasets as input for machine learning algorithms, especially neural networks and deep learning.
@@ -111,5 +111,7 @@ Out[3]: ('ISIC_0000000.jpg', <httplib.HTTPMessage instance at 0x7f7bd949a950>)
 ```
 
 ## Asciicast
+
+Click the preview below to view a video demonstration of Augmentor in use:
 
 [![asciicast](https://asciinema.org/a/105368.png)](https://asciinema.org/a/105368?autoplay=1)

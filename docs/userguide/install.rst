@@ -35,3 +35,7 @@ Then enter the ``Augmentor`` directory and build the package:
     python setup.py install 
 
 Alternatively you can first run ``python setup.py build`` followed by ``python setup.py install``. This can be useful for debugging.
+
+.. attention::
+
+    If you are compiling from source you may need to compile the dependencies also, including Pillow. On Linux this means having libpng (``libpng-dev``) and zlib (``zlib1g-dev``) installed.
