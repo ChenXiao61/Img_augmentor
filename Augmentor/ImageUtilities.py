@@ -7,8 +7,49 @@ import glob
 
 
 class AugmentorImage(object):
-    def __init__(self, image_path):
+    def __init__(self, image_path, output_directory):
+        # Just to stop Pylint complaining about initialising these outside
+        # of __init__ which it isn't actually doing but whatevers.
+        self._ground_truth = None
+        self._image_path = None
+        self._output_directory = None
+        # This actually makes code much more likely to have bugs as this
+        # HAS to be be fore any calls to the properties below...
+
         self.image_path = image_path
+        self.output_directory = output_directory
+
+    @property
+    def output_directory(self):
+        return self._output_directory
+
+    @output_directory.setter
+    def output_directory(self, value):
+        self._output_directory = value
+
+    @property
+    def image_path(self):
+        return self._image_path
+
+    @image_path.setter
+    def image_path(self, value):
+        if os.path.exists(value):
+            self._image_path = value
+        else:
+            raise IOError("The file specified does not exist.")
+
+    @property
+    def image_file_name(self):
+        return os.path.basename(self.image_path)
+
+    @property
+    def ground_truth(self):
+        return self._ground_truth
+
+    @ground_truth.setter
+    def ground_truth(self, value):
+        if os.path.exists(value):
+            self._ground_truth = value
 
 
 def extract_paths_and_extensions(image_path):
@@ -18,9 +59,12 @@ def extract_paths_and_extensions(image_path):
     return file_name, extension, root_path
 
 
-def scan_directory(source_directory, recursive_scan=False):
+def scan_directory(source_directory):
     file_types = ['*.jpg', '*.bmp', '*.jpeg', '*.gif', '*.img', '*.png']
-    file_types.extend([str.upper(x) for x in file_types])
+
+    # Also include the uppercase versions of the file extensions.
+    # TODO: We might need to catch .Jpeg and .Png perhaps?
+    file_types.extend([str.upper(str(x)) for x in file_types])
 
     list_of_files = []
 

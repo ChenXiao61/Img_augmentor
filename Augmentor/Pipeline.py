@@ -8,12 +8,11 @@ from __future__ import (absolute_import, division,
 from builtins import *
 
 from .Operations import *
-from .ImageUtilities import scan_directory
+from .ImageUtilities import scan_directory, AugmentorImage
 
 import os
 import random
 import uuid
-import string
 
 from tqdm import tqdm
 from PIL import Image  # TODO: Check how to define Pillow vs. PIL in the requirements file.
@@ -31,7 +30,7 @@ class Pipeline(object):
     and the generation of augmented data by applying operations to
     this pipeline.
     """
-    def __init__(self, source_directory, recursive_scan=False, output_directory="output", save_format="JPEG"):
+    def __init__(self, source_directory, ground_truth_directory=None, output_directory="output", save_format="JPEG"):
         """
         Create a new Pipeline object pointing to a directory containing your
         original image dataset.
@@ -45,8 +44,6 @@ class Pipeline(object):
 
         :param source_directory: A directory on your filesystem where your
          original images are stored.
-        :param recursive_scan: Whether the :attr:`source_directory` should
-         be recursively scanned. Default is False.
         :param output_directory: Specifies where augmented images should be
          saved to the disk. Default is the directory **source** relative to
          the path where the original image set was specified. If it does not
@@ -59,17 +56,25 @@ class Pipeline(object):
         random.seed()
 
         self.image_counter = 0
+        self.augmentor_images = []
+        self.distinct_dimensions = set()
+        self.distinct_formats = set()
+        self.ground_truth_image_list = {}
 
-        # TODO: No need to place this in __init__ - move later.
-        # See: https://infohost.nmt.edu/tcc/help/pubs/pil/formats.html
+        # Now we populate some fields, which we may need to do again later if another
+        # directory is added, so we place it in a function of its own.
+        self._populate(source_directory=source_directory,
+                       output_directory=output_directory,
+                       ground_truth_directory=ground_truth_directory)
+
         self._valid_formats = ["PNG", "BMP", "GIF", "JPEG"]
-
         self.save_format = save_format
+        self.operations = []
 
+        """
         if not os.path.exists(source_directory):
-            raise IOError("The path does not appear to exist.")
+            raise IOError("The path specified does not exist.")
 
-        # TODO: Change this so that we just use the relative path to get the absolute path.
         self.output_directory = os.path.join(source_directory, output_directory)
 
         if not os.path.exists(self.output_directory):
@@ -79,8 +84,18 @@ class Pipeline(object):
                 raise exception
 
         self.source_directory = source_directory
-        self.image_list = scan_directory(self.source_directory, recursive_scan)
-        self.operations = []
+        self.image_list = scan_directory(self.source_directory)
+                
+        # Tests for replacing image_list with array of AugmentorImage objects
+        self.augmentor_images = []
+        for image_path in self.image_list:
+            a = AugmentorImage(image_path)
+            if ground_truth_directory:
+                # get the absolute path for the current ground truth directory
+                abs_ground_truth_directory = os.path.abspath(ground_truth_directory)
+                a.ground_truth = os.path.join(abs_ground_truth_directory, os.path.basename(image_path))
+            self.augmentor_images.append(a)
+        # End tests for replacing image_list
 
         # Scan the images to collect information about each image.
         self.distinct_dimensions = set()
@@ -94,17 +109,49 @@ class Pipeline(object):
                 print("There is a problem with image %s in your source directory. "
                       "It is unreadable and will not be included when augmenting." % image)
                 self.image_list.remove(image)
+        """
 
-        print("Initialised with %s image(s) found in selected directory." % len(self.image_list))
+        print("Initialised with %s image(s) found in selected directory." % len(self.augmentor_images))
         print("Output directory set to %s." % self.output_directory)
 
-        # TODO: check each file to make sure it can be opened by PIL, perhaps like so:
-        # for file_check in self.image_list:
-        #     try:
-        #         with Image.open(file_check) as im:
-        #             print(file_check, im.format, "%dx%d" % im.size, im.mode)
-        #     except IOError:
-        #             self.image_list.remove(file_check)
+    def _populate(self, source_directory, output_directory, ground_truth_directory):
+
+        if not os.path.exists(source_directory):
+            raise IOError("The source directory you specified does not exist.")
+
+        if ground_truth_directory:
+            if not os.path.exists(ground_truth_directory):
+                raise IOError("The ground truth source directory you specified does not exist.")
+
+        self.output_directory = os.path.join(source_directory, output_directory)
+
+        if not os.path.exists(self.output_directory):
+            try:
+                os.makedirs(self.output_directory)
+            except OSError as exception:
+                raise exception
+
+        self.image_list = scan_directory(source_directory)
+
+        for image_path in scan_directory(source_directory):
+            single_augmentor_image = AugmentorImage(image_path, ground_truth_directory)
+            if ground_truth_directory:
+                # The next line can be placed somewhere else, but leave it for now:
+                abs_ground_truth_directory = os.path.abspath(ground_truth_directory)
+                single_augmentor_image.ground_truth = os.path.join(abs_ground_truth_directory,
+                                                                   os.path.basename(image_path))
+            self.augmentor_images.append(single_augmentor_image)
+
+        for augmentor_image in self.augmentor_images:
+            try:
+                with Image.open(augmentor_image.image_path) as opened_image:
+                    self.distinct_dimensions.add(opened_image.size)
+                    self.distinct_formats.add(opened_image.format)
+            except IOError:
+                print("There is a problem with image %s in your source directory. "
+                      "It is unreadable and will not be included when augmenting."
+                      % os.path.basename(augmentor_image.image_path))
+                self.augmentor_images.remove(augmentor_image)
 
     def _execute(self, image, save_to_disk=True):
         """
@@ -112,7 +159,9 @@ class Pipeline(object):
         and return the augmented image.
 
         :param image: The image to pass through the pipeline.
+        :param save_to_disk: 
         :type image: :class:`PIL.Image`
+        :type save_to_disk: Boolean
         :return: The augmented image.
         """
         self.image_counter += 1
@@ -147,7 +196,7 @@ class Pipeline(object):
         :type n: Int
         :return: None
         """
-        if len(self.image_list) == 0:
+        if len(self.augmentor_images) == 0:
             raise IndexError("There are no images in the pipeline. "
                              "Add a directory using add_directory(), "
                              "pointing it to a directory containing images.")
@@ -156,10 +205,11 @@ class Pipeline(object):
 
         progress_bar = tqdm(total=n, desc="Executing Pipeline", unit=' Samples')
         while sample_count <= n:
-            for image_path in self.image_list:
+            for augmentor_image in self.augmentor_images:
                 if sample_count <= n:
-                    self._execute(Image.open(image_path))
-                    progress_bar.set_description("Processing %s" % os.path.split(image_path)[1])
+                    print(augmentor_image.image_path)
+                    self._execute(Image.open(augmentor_image.image_path))
+                    progress_bar.set_description("Processing %s" % os.path.basename(augmentor_image.image_path))
                     progress_bar.update(1)
                 sample_count += 1
         progress_bar.close()
@@ -167,8 +217,8 @@ class Pipeline(object):
     def apply_current_pipeline(self, image, save_to_disk=False):
         """
         Apply the current pipeline to a single image, returning the
-        transformed image. By default, the transformed image is not saved to
-        disk.
+        transformed image. By default, the transformed image is not saved 
+        to disk.
 
         This method can be used to pass a single image through the
         pipeline, but will not save the transformed to disk by
@@ -242,7 +292,24 @@ class Pipeline(object):
         :return: None
         """
 
-        raise NotImplementedError
+        # Scan a new directory for
+        ground_truth_file_paths = scan_directory(ground_truth_directory)
+
+        # The variable ground_truth_files contains paths, so we need to strip these away
+        ground_truth_file_names = \
+            [os.path.basename(x) for x in ground_truth_file_paths]
+        original_file_names = \
+            [os.path.basename(x) for x in self.image_list]
+
+        common_files = set(ground_truth_file_names).intersection(original_file_names)
+
+        # We can do some searching later using a list of missing files, but not for now.
+        # missing = set(ground_truth_file_names).difference(original_file_names)
+
+        for common_file in common_files:
+            self.ground_truth_image_list.append(os.path.abspath(os.path.join(ground_truth_directory, common_file)))
+
+        print(self.ground_truth_image_list)
 
     def status(self):
         """
@@ -257,20 +324,25 @@ class Pipeline(object):
         """
         # TODO: Return this as a dictionary of some kind and print from the dict if in console
         print("There are %s operation(s) in the current pipeline." % len(self.operations))
-        operation_index = 0
-        for operation in self.operations:
-            print("Index %s. Operation %s (probability: %s):" % (operation_index, operation, operation.probability))
-            for operation_attribute, operation_value in operation.__dict__.items():
-                print ("\tAttribute: %s (%s)" % (operation_attribute, operation_value))
-            operation_index += 1
-        print()
+
+        if len(self.operations) != 0:
+            operation_index = 0
+            for operation in self.operations:
+                print("Index %s. Operation %s (probability: %s):" % (operation_index, operation, operation.probability))
+                for operation_attribute, operation_value in operation.__dict__.items():
+                    print ("\tAttribute: %s (%s)" % (operation_attribute, operation_value))
+                operation_index += 1
+            print()
+
         print("There are %s image(s) in the source directory." % len(self.image_list))
-        print("Dimensions:")
-        for distinct_dimension in self.distinct_dimensions:
-            print("\tWidth: %s Height: %s" % (distinct_dimension[0], distinct_dimension[1]))
-        print("Formats:")
-        for distinct_format in self.distinct_formats:
-            print("\t %s" % distinct_format)
+
+        if len(self.image_list) != 0:
+            print("Dimensions:")
+            for distinct_dimension in self.distinct_dimensions:
+                print("\tWidth: %s Height: %s" % (distinct_dimension[0], distinct_dimension[1]))
+            print("Formats:")
+            for distinct_format in self.distinct_formats:
+                print("\t %s" % distinct_format)
 
     @staticmethod
     def set_seed(seed):
@@ -565,10 +637,11 @@ class Pipeline(object):
         # dyn_class = type(class_name, (object,), parameters)
         # globals()[]
 
-    def add_further_directory(self, new_source_directory, recursive_scan=False):
+    def add_further_directory(self, new_source_directory, new_ground_truth_source_directory=None):
         if not os.path.exists(new_source_directory):
             raise IOError("The path does not appear to exist.")
-        raise NotImplementedError
+
+        self.augmentor_images += scan_directory()
 
     def apply_pipeline(self, image):
         # Apply the current pipeline to a single image, returning the newly created image.
