@@ -57,10 +57,6 @@ First import the package and intialise a Pipeline object by pointing it to a dir
 import Augmentor
 
 p = Augmentor.Pipeline("/home/user/augmentor_data_tests")
-
-# Information about the images found in the directory is then shown:
-Initialised with 1 image(s) found in selected directory.
-Output directory set to /home/user/augmentor_data_tests/output.
 ```
 
 Now you can begin adding operations to the pipeline object:
@@ -78,9 +74,6 @@ Once you have added the operations you require, you can sample images from this 
 
 ```python
 p.sample(100)
-
-# A progress bar provides information about the status of the sampling:
-Processing ISIC_0000000.jpg: 100%|***************| 100/100 [235.08 Samples/s]
 ```
 
 Some sample output:
