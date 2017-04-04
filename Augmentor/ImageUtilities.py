@@ -9,13 +9,14 @@ import glob
 class AugmentorImage(object):
     def __init__(self, image_path, output_directory):
         # Just to stop Pylint complaining about initialising these outside
-        # of __init__ which it isn't actually doing but whatevers.
+        # of __init__ which is not actually happening, as the are being
+        # initialised in the setters, but anyway.
         self._ground_truth = None
         self._image_path = None
         self._output_directory = None
-        # This actually makes code much more likely to have bugs as this
-        # HAS to be be fore any calls to the properties below...
+        self._file_format = None  # TODO: pass this for each image.
 
+        # Now we call the setters that we require.
         self.image_path = image_path
         self.output_directory = output_directory
 
@@ -48,7 +49,7 @@ class AugmentorImage(object):
 
     @ground_truth.setter
     def ground_truth(self, value):
-        if os.path.exists(value):
+        if os.path.isfile(value):
             self._ground_truth = value
 
 

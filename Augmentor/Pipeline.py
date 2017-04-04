@@ -59,13 +59,15 @@ class Pipeline(object):
         self.augmentor_images = []
         self.distinct_dimensions = set()
         self.distinct_formats = set()
+        # TODO: Refactor this out
         self.ground_truth_image_list = {}
 
         # Now we populate some fields, which we may need to do again later if another
         # directory is added, so we place it in a function of its own.
         self._populate(source_directory=source_directory,
                        output_directory=output_directory,
-                       ground_truth_directory=ground_truth_directory)
+                       ground_truth_directory=ground_truth_directory,
+                       ground_truth_output_directory=output_directory)
 
         self._valid_formats = ["PNG", "BMP", "GIF", "JPEG"]
         self.save_format = save_format
@@ -111,37 +113,42 @@ class Pipeline(object):
                 self.image_list.remove(image)
         """
 
-        print("Initialised with %s image(s) found in selected directory." % len(self.augmentor_images))
-        print("Output directory set to %s." % self.output_directory)
+        # print("Initialised with %s image(s) found in selected directory." % len(self.augmentor_images))
+        # print("Output directory set to %s." % self.output_directory)
 
-    def _populate(self, source_directory, output_directory, ground_truth_directory):
+    def _populate(self, source_directory, output_directory, ground_truth_directory, ground_truth_output_directory):
 
+        # Check if the source directory for the original images to augment exists at all
         if not os.path.exists(source_directory):
             raise IOError("The source directory you specified does not exist.")
 
+        # If a ground truth directory is being specified we will check here if the path exists at all.
         if ground_truth_directory:
             if not os.path.exists(ground_truth_directory):
                 raise IOError("The ground truth source directory you specified does not exist.")
 
-        self.output_directory = os.path.join(source_directory, output_directory)
+        # Get the absolute path of the output directory specified.
+        abs_output_directory = os.path.join(source_directory, output_directory)
 
-        if not os.path.exists(self.output_directory):
+        # Check if the output directory exists, if it does not attempt to create it
+        # and raise an exception if this fails.
+        if not os.path.exists(abs_output_directory):
             try:
-                os.makedirs(self.output_directory)
-            except OSError as exception:
-                raise exception
+                os.makedirs(abs_output_directory)
+            except IOError:
+                print("Insufficient rights to read or write output directory (%s)" % abs_output_directory)
 
         self.image_list = scan_directory(source_directory)
 
         for image_path in scan_directory(source_directory):
-            single_augmentor_image = AugmentorImage(image_path, ground_truth_directory)
+            single_augmentor_image = AugmentorImage(image_path=image_path,
+                                                    output_directory=abs_output_directory)
             if ground_truth_directory:
-                # The next line can be placed somewhere else, but leave it for now:
-                abs_ground_truth_directory = os.path.abspath(ground_truth_directory)
-                single_augmentor_image.ground_truth = os.path.join(abs_ground_truth_directory,
+                single_augmentor_image.ground_truth = os.path.join(os.path.abspath(ground_truth_directory),
                                                                    os.path.basename(image_path))
             self.augmentor_images.append(single_augmentor_image)
 
+        # TODO: Check if all ground truth images are readable.
         for augmentor_image in self.augmentor_images:
             try:
                 with Image.open(augmentor_image.image_path) as opened_image:
@@ -153,18 +160,25 @@ class Pipeline(object):
                       % os.path.basename(augmentor_image.image_path))
                 self.augmentor_images.remove(augmentor_image)
 
-    def _execute(self, image, save_to_disk=True):
+        # Finally, we will print some informational messages.
+        print("Initialised with %s image(s) found in selected directory." % len(self.augmentor_images))
+        print("Output directory set to %s." % abs_output_directory)
+
+    def _execute(self, augmentor_image, save_to_disk=True):
         """
         Private method. Used to pass an image through the current pipeline,
         and return the augmented image.
 
-        :param image: The image to pass through the pipeline.
-        :param save_to_disk: 
-        :type image: :class:`PIL.Image`
+        :param augmentor_image: The image to pass through the pipeline.
+        :param save_to_disk: Whether to save the image to disk. Currently
+         fixed to true.
+        :type augmentor_image: :class:`ImageUtilities.AugmentorImage`
         :type save_to_disk: Boolean
         :return: The augmented image.
         """
         self.image_counter += 1
+
+        image = Image.open(augmentor_image.image_path)
 
         for operation in self.operations:
             r = round(random.uniform(0, 1), 1)
@@ -177,7 +191,7 @@ class Pipeline(object):
                 # A strange error is forcing me to do this at the moment, but will fix later properly
                 if image.mode != "RGB":
                     image = image.convert("RGB")
-                image.save(os.path.join(self.output_directory, file_name), self.save_format)
+                image.save(os.path.join(augmentor_image.output_directory, file_name), self.save_format)
             except IOError:
                 print("Error writing %s." % file_name)
 
@@ -207,9 +221,13 @@ class Pipeline(object):
         while sample_count <= n:
             for augmentor_image in self.augmentor_images:
                 if sample_count <= n:
-                    print(augmentor_image.image_path)
-                    self._execute(Image.open(augmentor_image.image_path))
-                    progress_bar.set_description("Processing %s" % os.path.basename(augmentor_image.image_path))
+                    self._execute(augmentor_image)
+                    file_name_to_print = os.path.basename(augmentor_image.image_path)
+                    # This is just to avoid printing very long file names
+                    if len(file_name_to_print) >= 30:
+                        file_name_to_print = file_name_to_print[0:10] + "..." + \
+                                             file_name_to_print[-10: len(file_name_to_print)]
+                    progress_bar.set_description("Processing %s" % file_name_to_print)
                     progress_bar.update(1)
                 sample_count += 1
         progress_bar.close()
@@ -292,7 +310,10 @@ class Pipeline(object):
         :return: None
         """
 
-        # Scan a new directory for
+        # Right now, it seems unlikely that we will need this function at all.
+        # Keeping it here for the meantime however.
+        raise NotImplementedError("This method is currently not implemented.")
+
         ground_truth_file_paths = scan_directory(ground_truth_directory)
 
         # The variable ground_truth_files contains paths, so we need to strip these away
@@ -308,8 +329,6 @@ class Pipeline(object):
 
         for common_file in common_files:
             self.ground_truth_image_list.append(os.path.abspath(os.path.join(ground_truth_directory, common_file)))
-
-        print(self.ground_truth_image_list)
 
     def status(self):
         """
@@ -637,11 +656,15 @@ class Pipeline(object):
         # dyn_class = type(class_name, (object,), parameters)
         # globals()[]
 
-    def add_further_directory(self, new_source_directory, new_ground_truth_source_directory=None):
+    def add_further_directory(self, new_source_directory, new_output_directory="output",
+                              new_ground_truth_source_directory=None):
+
         if not os.path.exists(new_source_directory):
             raise IOError("The path does not appear to exist.")
 
-        self.augmentor_images += scan_directory()
+        self.augmentor_images += self._populate(source_directory=new_source_directory,
+                                                output_directory=new_output_directory,
+                                                ground_truth_directory=new_ground_truth_source_directory)
 
     def apply_pipeline(self, image):
         # Apply the current pipeline to a single image, returning the newly created image.
