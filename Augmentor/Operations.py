@@ -122,9 +122,7 @@ class Rotate(Operation):
 
     def perform_operation(self, image):
         """
-        Rotate an image by an arbitrary amount. 
-
-        We use :math:`E = \frac{\frac{\sin{\theta_a}}{\sin{\theta_b}}\Big(X-\frac{\sin{\theta_a}}{\sin{\theta_b}} Y\Big)} {1-\frac{(\sin{\theta_a})^2}{(\sin{\theta_b})^2}}` for calculating the largest area triangle.
+        Rotate an image by an arbitrary amount.
 
         :param image: The image to rotate.
         :return: The rotated image.
