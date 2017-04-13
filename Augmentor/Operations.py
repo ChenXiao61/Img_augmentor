@@ -123,7 +123,15 @@ class Rotate(Operation):
     def perform_operation(self, image):
         """
         Rotate an image by an arbitrary amount.
+        
+        The source can be understood more easily by looking at the following equation: 
+        
+        .. math::
+           
+           E = \\frac{\\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}}\\Big(X-\\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}} Y\\Big)}{1-\\frac{(\\sin{\\theta_{a}})^2}{(\\sin{\\theta_{b}})^2}}
 
+        which describes how :math:`E` was derived, and then follows :math:`B = Y - E` and :math:`A = \\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}} B`.
+        
         :param image: The image to rotate.
         :return: The rotated image.
         """
