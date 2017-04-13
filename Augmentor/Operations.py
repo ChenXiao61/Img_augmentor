@@ -121,11 +121,50 @@ class Rotate(Operation):
         return "Rotate " + str(self.rotation)
 
     def perform_operation(self, image):
+        """
+        Rotate an image by an arbitrary amount. 
+
+        We use :math:`E = \frac{\frac{\sin{\theta_a}}{\sin{\theta_b}}\Big(X-\frac{\sin{\theta_a}}{\sin{\theta_b}} Y\Big)} {1-\frac{(\sin{\theta_a})^2}{(\sin{\theta_b})^2}}` for calculating the largest area triangle.
+
+        :param image: The image to rotate.
+        :return: The rotated image.
+        """
         if self.rotation == -1:
             random_factor = random.randint(1, 3)
-            return image.rotate(90 * random_factor, expand=True)
+            # TODO: Check if for a modulo 90 a resample is needed
+            return image.rotate(90 * random_factor, expand=True, resample=Image.BICUBIC)
         else:
-            return image.rotate(self.rotation, expand=True)  # TODO: We are gonna have to check for 90 and 270 deg rots
+            # Get size before we rotate
+            x = image.size[0]
+            y = image.size[1]
+
+            # Rotate, while expanding the canvas size
+            image = image.rotate(self.rotation, expand=True, resample=Image.BICUBIC)
+
+            # Get size after rotation, which includes the empty space
+            X = image.size[0]
+            Y = image.size[1]
+
+            # Get our two angles needed for the calculation of the largest area
+            angle_a = abs(self.rotation)
+            angle_b = 90 - angle_a
+
+            # Python deals in radians so get our radians
+            angle_a_rad = math.radians(angle_a)
+            angle_b_rad = math.radians(angle_b)
+
+            # Find the maximum area of the rectangle that could be cropped
+            E = (math.sin(angle_a_rad)) / (math.sin(angle_b_rad)) * \
+                (Y - X * (math.sin(angle_a_rad) / math.sin(angle_b_rad)))
+            E = E / 1 - (math.sin(angle_a_rad) ** 2 / math.sin(angle_b_rad) ** 2)
+            B = X - E
+            A = (math.sin(angle_a_rad) / math.sin(angle_b_rad)) * B
+
+            # Crop this area from the rotated image
+            image = image.crop((E, A, X - E, Y - A))
+
+            # Return the image, re-sized to the size of the image passed originally
+            return image.resize((x, y), resample=Image.BICUBIC)
 
 
 class RotateRange(Operation):
