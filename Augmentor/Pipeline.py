@@ -63,7 +63,7 @@ class Pipeline(object):
         self.ground_truth_image_list = {}
 
         # Now we populate some fields, which we may need to do again later if another
-        # directory is added, so we place it in a function of its own.
+        # directory is added, so we place it all in a function of its own.
         self._populate(source_directory=source_directory,
                        output_directory=output_directory,
                        ground_truth_directory=ground_truth_directory,
@@ -117,6 +117,12 @@ class Pipeline(object):
         # print("Output directory set to %s." % self.output_directory)
 
     def _populate(self, source_directory, output_directory, ground_truth_directory, ground_truth_output_directory):
+
+        ####
+        # A lot of this functionality, such as checking for paths that exist
+        # and that they are writable, etc., will be moved to the AugmentorImage class
+        # in the ImageUtilities module.
+        ####
 
         # Check if the source directory for the original images to augment exists at all
         if not os.path.exists(source_directory):
@@ -191,6 +197,8 @@ class Pipeline(object):
                 # A strange error is forcing me to do this at the moment, but will fix later properly
                 if image.mode != "RGB":
                     image = image.convert("RGB")
+                # For testing this cab be commented out to create only one output image.
+                # file_name = "test"
                 image.save(os.path.join(augmentor_image.output_directory, file_name), self.save_format)
             except IOError:
                 print("Error writing %s." % file_name)
@@ -232,7 +240,7 @@ class Pipeline(object):
                 sample_count += 1
         progress_bar.close()
 
-    def apply_current_pipeline(self, image, save_to_disk=False):
+    def apply_current_pipeline(self, image_path, save_to_disk=False):
         """
         Apply the current pipeline to a single image, returning the
         transformed image. By default, the transformed image is not saved 
@@ -243,15 +251,16 @@ class Pipeline(object):
         default. To save to disk, supply a :attr:`save_to_disk`
         argument set to True.
 
-        :param image: The image to pass through the current pipeline.
+        :param image_path: The path to the image to pass through the current 
+         pipeline.
         :param save_to_disk: Whether to save the image to disk. Defaults to
          False.
-        :type image: Image
+        :type image: String
         :type save_to_disk: Boolean
         :return: The transformed image.
         """
 
-        return self._execute(image, save_to_disk)
+        return self._execute(AugmentorImage(os.path.abspath(image_path), None), save_to_disk)
 
     def add_operation(self, operation):
         """
@@ -287,9 +296,10 @@ class Pipeline(object):
         :return: The removed operation. You can reinsert this at end of the
          pipeline using :func:`add_operation` if required.
         """
+
         self.operations.pop(operation_index)
 
-    def add_ground_truth_directory(self, ground_truth_directory, halt_on_non_match=True):
+    def add_ground_truth_directory(self, ground_truth_directory, halt_on_non_match=False):
         """
         Add a directory containing the ground truth for your current set of
         images.
@@ -314,21 +324,19 @@ class Pipeline(object):
         # Keeping it here for the meantime however.
         raise NotImplementedError("This method is currently not implemented.")
 
-        ground_truth_file_paths = scan_directory(ground_truth_directory)
+        # if not halt_on_non_match:
+        #     ground_truth_file_paths = scan_directory(ground_truth_directory)
 
         # The variable ground_truth_files contains paths, so we need to strip these away
-        ground_truth_file_names = \
-            [os.path.basename(x) for x in ground_truth_file_paths]
-        original_file_names = \
-            [os.path.basename(x) for x in self.image_list]
+        # ground_truth_file_names = \
+        #    [os.path.basename(x) for x in ground_truth_file_paths]
+        # original_file_names = \
+        #     [os.path.basename(x) for x in self.image_list]
 
-        common_files = set(ground_truth_file_names).intersection(original_file_names)
+        # common_files = set(ground_truth_file_names).intersection(original_file_names)
+        # missing_files = set(ground_truth_file_names).difference(original_file_names)
 
-        # We can do some searching later using a list of missing files, but not for now.
-        # missing = set(ground_truth_file_names).difference(original_file_names)
-
-        for common_file in common_files:
-            self.ground_truth_image_list.append(os.path.abspath(os.path.join(ground_truth_directory, common_file)))
+        # return common_files, missing_files
 
     def status(self):
         """
@@ -432,7 +440,7 @@ class Pipeline(object):
         """
         self.add_operation(Rotate(probability=probability, rotation=-1))
 
-    def rotate(self, max_left_rotation=10, max_right_rotation=10, probability=1.0):
+    def rotate(self, probability, max_left_rotation, max_right_rotation):
         """
         Rotate an image by an arbitrary amount.
 
@@ -509,7 +517,7 @@ class Pipeline(object):
         """
         self.add_operation(Flip(probability=probability, top_bottom_left_right="RANDOM"))
 
-    def random_distortion(self, probability, grid_width, grid_height, sigma, randomise_magnitude=True):
+    def random_distortion(self, probability, grid_width, grid_height, magnitude, randomise_magnitude=True):
         """
         Performs a random, elastic distortion on an image.
 
@@ -518,7 +526,7 @@ class Pipeline(object):
         fine the distortions are. Smaller sizes will result in larger, more
         pronounced, and less granular distortions. Larger numbers will result
         in finer, more granular distortions. The magnitude of the distortions
-        can be controlled using sigma. This can be random or fixed.
+        can be controlled using magnitude. This can be random or fixed.
 
         :param probability: The probability that the function will execute
          when the image is passed through the pipeline.
@@ -526,18 +534,18 @@ class Pipeline(object):
          axis.
         :param grid_height: The number of rectangles in the grid's vertical
          axis.
-        :param sigma: The magnitude of the distortions.
-        :param randomise_magnitude: Specifies whether sigma should be used as
-         a range if True, or as a constant value, if False.
+        :param magnitude: The magnitude of the distortions.
+        :param randomise_magnitude: Specifies whether the magnitude should be 
+         used as a range if True, or as a constant value, if False.
         :return: None
         """
         self.add_operation(Distort(probability=probability, grid_width=grid_width,
-                                   grid_height=grid_height, sigma=sigma, randomise_magnitude=randomise_magnitude))
+                                   grid_height=grid_height, magnitude=magnitude, randomise_magnitude=randomise_magnitude))
 
     def zoom(self, probability, min_factor=1.05, max_factor=1.2):
         self.add_operation(Zoom(probability=probability, min_factor=min_factor, max_factor=max_factor))
 
-    def crop_by_size(self, width, height, centre=True):
+    def crop_by_size(self, probability, width, height, centre=True):
         """
         Crop an image according to a set of dimensions.
 
@@ -547,7 +555,9 @@ class Pipeline(object):
 
         .. seealso:: See :func:`crop_random` to crop a random, non-centred
          area of the image.
-
+        
+        :param probability: The probability that the function will execute
+         when the image is passed through the pipeline.
         :param width: The width of the desired crop.
         :param height: The height of the desired crop.
         :param centre: If **True**, crops from the centre of the image,
@@ -555,7 +565,7 @@ class Pipeline(object):
          the dimensions specified.
         :return: None
         """
-        self.add_operation(Crop(probability=1.0, width=width, height=height, centre=centre))
+        self.add_operation(Crop(probability=probability, width=width, height=height, centre=centre))
 
     def crop_centre(self, probability, percentage_area):
         self.add_operation(CropPercentage(probability=probability, percentage_area=percentage_area, centre=True))
@@ -672,10 +682,8 @@ class Pipeline(object):
 
         raise NotImplementedError
 
-    def skew(self):
-        # Perspective skew an image.
-        # Not yet implemented.
-        raise NotImplementedError
+    def shear(self, probability, max_shear_left, max_shear_right):
+        self.add_operation(Shear(probability=probability, max_shear_left=max_shear_left, max_shear_right=max_shear_right))
 
     def pad(self):
         # Functionality to pad a non-square image with borders to make it a certain aspect ratio.

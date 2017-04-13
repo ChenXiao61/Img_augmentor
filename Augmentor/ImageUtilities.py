@@ -7,10 +7,14 @@ import glob
 
 
 class AugmentorImage(object):
+    """
+    Wrapper class containing paths to images that are used by the pipeline
+    to perform augmentation. 
+    """
     def __init__(self, image_path, output_directory):
         # Just to stop Pylint complaining about initialising these outside
         # of __init__ which is not actually happening, as the are being
-        # initialised in the setters, but anyway.
+        # initialised in the setters from init, but anyway.
         self._ground_truth = None
         self._image_path = None
         self._output_directory = None
@@ -49,6 +53,7 @@ class AugmentorImage(object):
 
     @ground_truth.setter
     def ground_truth(self, value):
+        # TODO: Include some kind of fuzzy search.
         if os.path.isfile(value):
             self._ground_truth = value
 

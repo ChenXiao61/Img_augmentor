@@ -4,10 +4,16 @@ from builtins import *
 
 from PIL import Image, ImageOps
 from .ImageUtilities import extract_paths_and_extensions
+import math
 from math import floor, ceil
+
+import numpy as np
+from skimage import img_as_ubyte
+from skimage import transform
 
 import os
 import random
+import warnings
 
 # Python 2-3 compatibility - not currently needed.
 # try:
@@ -29,7 +35,7 @@ class Operation(object):
         return self.__class__.__name__
 
     def perform_operation(self, image):
-        raise NotImplementedError("Illegal call to base class.")
+        raise RuntimeError("Illegal call to base class.")
 
     @staticmethod
     def extract_paths_and_extensions(image_path):
@@ -43,14 +49,14 @@ class HistogramEqualisation(Operation):
     def __init__(self, probability):
         Operation.__init__(self, probability)
 
-    # TODO: We may need to apply this to each channel:
-    # This might be a color image.
-    # The histogram will be computed on the flattened image.
-    # You can instead apply this function to each color channel.
-    # with warnings.catch_warnings():
-    #    warnings.simplefilter("ignore")
     def perform_operation(self, image):
-        return ImageOps.equalize(image)
+        # TODO: We may need to apply this to each channel:
+        # This might be a color image.
+        # The histogram will be computed on the flattened image.
+        # You can instead apply this function to each color channel.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            return ImageOps.equalize(image)
 
 
 class Greyscale(Operation):
@@ -81,13 +87,29 @@ class BlackAndWhite(Operation):
         return image
 
 
-class Shear(Operation):
-    def __init__(self, probability, angle):
+class Skew(Operation):
+    """
+    Perform perspective skewing on images.
+    """
+    def __init__(self, probability, magnitude):
         Operation.__init__(self, probability)
-        self.angle = angle
+        self.magnitude = magnitude
 
     def perform_operation(self, image):
-        pass
+        """
+        Skew an image across 4 points.
+        :param image: The image to transform.
+        :return: The transformed image.
+        """
+
+        # Use PIL to do this by generating the transform matrix
+
+        skew_matrix = [0,0, 1,100, 100,1, 100,100]
+
+        # To calculate the coefficients required by PIL for the perspective skew,
+        # see the following Stack Overflow discussion: https://goo.gl/sSgJdj
+
+        return image.transform(image.size, Image.PERSPECTIVE, skew_matrix, resample=Image.BICUBIC)
 
 
 class Rotate(Operation):
@@ -156,27 +178,42 @@ class Flip(Operation):
 
 
 class Crop(Operation):
-    def __init__(self, probability, width, height, centred):
+    def __init__(self, probability, width, height, centre):
         Operation.__init__(self, probability)
         self.width = width
         self.height = height
-        self.centred = centred
+        self.centre = centre
 
     def perform_operation(self, image):
-        new_width = self.width / 2.
-        new_height = self.height / 2.
 
-        half_the_width = image.size[0] / 2
-        half_the_height = image.size[1] / 2
+        w, h = image.size
 
-        return image.crop(
-            (
-                half_the_width - ceil(new_width),
-                half_the_height - ceil(new_height),
-                half_the_width + floor(new_width),
-                half_the_height + floor(new_height)
+        if self.centre:
+            new_width = self.width / 2.
+            new_height = self.height / 2.
+            half_the_width = w / 2
+            half_the_height = h / 2
+
+            return image.crop(
+                (
+                    half_the_width - ceil(new_width),
+                    half_the_height - ceil(new_height),
+                    half_the_width + floor(new_width),
+                    half_the_height + floor(new_height)
+                )
             )
-        )
+        else:
+            random_right_shift = random.randint(0, (w - self.width))
+            random_down_shift = random.randint(0, (h - self.height))
+
+            return image.crop(
+                (
+                    random_right_shift,
+                    random_down_shift,
+                    self.width+random_right_shift,
+                    self.height+random_down_shift
+                )
+            )
 
 
 class CropPercentage(Operation):
@@ -218,14 +255,57 @@ class CropRandom(Operation):
         return image.crop((random_left_shift, random_down_shift, w_new + random_left_shift, h_new + random_down_shift))
 
 
-class Skew(Operation):
-    def __init__(self, probability, max_skew_left, max_skew_right):
+class Shear(Operation):
+    def __init__(self, probability, max_shear_left, max_shear_right):
         Operation.__init__(self, probability)
-        self.max_skew_left = max_skew_left
-        self.max_skew_right = max_skew_right
+        # This is in radians, see
+        # http://scikit-image.org/docs/dev/api/skimage.transform.html
+        self.max_shear_left = max_shear_left
+        self.max_shear_right = max_shear_right
 
     def perform_operation(self, image):
-        pass
+
+        ######################################################################
+        # Old version which uses SciKit Image
+        ######################################################################
+        # We will use scikit-image for this so first convert to a matrix
+        # using NumPy
+        # amount_to_shear = round(random.uniform(self.max_shear_left, self.max_shear_right), 2)
+        # image_array = np.array(image)
+        # And here we are using SciKit Image's `transform` class.
+        # shear_transformer = transform.AffineTransform(shear=amount_to_shear)
+        # image_sheared = transform.warp(image_array, shear_transformer)
+
+        # Because of warnings
+        # with warnings.catch_warnings():
+        #     warnings.simplefilter("ignore")
+        #     return Image.fromarray(img_as_ubyte(image_sheared))
+        ######################################################################
+
+        width, height = image.size
+
+        angle_to_shear = int(random.uniform(self.max_shear_left, self.max_shear_right))
+
+        phi = math.tan(math.radians(angle_to_shear))
+
+        # Here we need the unknown b, where a is
+        # the height of the image and phi is the
+        # angle we want to shear (our knowns):
+        # b = tan(phi) * a
+        shift_in_pixels = phi * height
+
+        # Transformation matrices can be found here:
+        # https://en.wikipedia.org/wiki/Transformation_matrix
+        # The PIL affine transform expects the first two rows of
+        # any of the affine transformation matrices, seen here:
+        # https://en.wikipedia.org/wiki/Transformation_matrix#/media/File:2D_affine_transformation_matrix.svg
+
+        # Note: PIL expects the inverse scale, so 1/scale_factor for example.
+        return image.transform((int(round(width + shift_in_pixels)), height),
+                               Image.AFFINE,
+                               (1, phi, -shift_in_pixels,
+                                0, 1, 0),
+                               Image.BICUBIC)
 
 
 class Scale(Operation):
@@ -247,11 +327,11 @@ class Scale(Operation):
 
 
 class Distort(Operation):
-    def __init__(self, probability, grid_width, grid_height, sigma, randomise_magnitude):
+    def __init__(self, probability, grid_width, grid_height, magnitude, randomise_magnitude):
         Operation.__init__(self, probability)
         self.grid_width = grid_width
         self.grid_height = grid_height
-        self.sigma = abs(sigma)
+        self.magnitude = abs(magnitude)
         randomise_magnitude = True  # TODO: Fix code below to handle FALSE state.
         self.randomise_magnitude = randomise_magnitude
 
@@ -313,8 +393,8 @@ class Distort(Operation):
                 polygon_indices.append([i, i + 1, i + horizontal_tiles, i + 1 + horizontal_tiles])
 
         for a, b, c, d in polygon_indices:
-            dx = random.randint(-self.sigma, self.sigma)
-            dy = random.randint(-self.sigma, self.sigma)
+            dx = random.randint(-self.magnitude, self.magnitude)
+            dy = random.randint(-self.magnitude, self.magnitude)
 
             x1, y1, x2, y2, x3, y3, x4, y4 = polygons[a]
             polygons[a] = [x1, y1,
