@@ -67,46 +67,6 @@ class Pipeline(object):
         self.save_format = save_format
         self.operations = []
 
-        """
-        if not os.path.exists(source_directory):
-            raise IOError("The path specified does not exist.")
-
-        self.output_directory = os.path.join(source_directory, output_directory)
-
-        if not os.path.exists(self.output_directory):
-            try:
-                os.makedirs(self.output_directory)
-            except OSError as exception:
-                raise exception
-
-        self.source_directory = source_directory
-        self.image_list = scan_directory(self.source_directory)
-                
-        # Tests for replacing image_list with array of AugmentorImage objects
-        self.augmentor_images = []
-        for image_path in self.image_list:
-            a = AugmentorImage(image_path)
-            if ground_truth_directory:
-                # get the absolute path for the current ground truth directory
-                abs_ground_truth_directory = os.path.abspath(ground_truth_directory)
-                a.ground_truth = os.path.join(abs_ground_truth_directory, os.path.basename(image_path))
-            self.augmentor_images.append(a)
-        # End tests for replacing image_list
-
-        # Scan the images to collect information about each image.
-        self.distinct_dimensions = set()
-        self.distinct_formats = set()
-        for image in self.image_list:
-            try:
-                with Image.open(image) as opened_image:
-                    self.distinct_dimensions.add(opened_image.size)
-                    self.distinct_formats.add(opened_image.format)
-            except IOError:
-                print("There is a problem with image %s in your source directory. "
-                      "It is unreadable and will not be included when augmenting." % image)
-                self.image_list.remove(image)
-        """
-
         # print("Initialised with %s image(s) found in selected directory." % len(self.augmentor_images))
         # print("Output directory set to %s." % self.output_directory)
 
