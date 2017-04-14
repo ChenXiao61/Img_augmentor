@@ -8,8 +8,8 @@ import math
 from math import floor, ceil
 
 import numpy as np
-from skimage import img_as_ubyte
-from skimage import transform
+# from skimage import img_as_ubyte
+# from skimage import transform
 
 import os
 import random
