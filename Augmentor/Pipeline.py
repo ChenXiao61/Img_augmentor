@@ -15,13 +15,7 @@ import random
 import uuid
 
 from tqdm import tqdm
-from PIL import Image  # TODO: Check how to define Pillow vs. PIL in the requirements file.
-
-"""
-The Pipeline module, containing any classes relating to the pipeline
-functionality.
-"""
-__docformat__ = 'reStructuredText'
+from PIL import Image
 
 
 class Pipeline(object):
