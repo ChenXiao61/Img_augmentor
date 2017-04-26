@@ -91,8 +91,9 @@ class Skew(Operation):
     """
     Perform perspective skewing on images.
     """
-    def __init__(self, probability, magnitude):
+    def __init__(self, probability, skew_type="TILT", magnitude=None):
         Operation.__init__(self, probability)
+        self.skew_type = skew_type
         self.magnitude = magnitude
 
     def perform_operation(self, image):
@@ -102,14 +103,120 @@ class Skew(Operation):
         :return: The transformed image.
         """
 
-        # Use PIL to do this by generating the transform matrix
+        w, h = image.size
 
-        skew_matrix = [0,0, 1,100, 100,1, 100,100]
+        x1 = 0
+        x2 = h
+        y1 = 0
+        y2 = w
+
+        original_plane = [(y1, x1), (y2, x1), (y2, x2), (y1, x2)]
+
+        max_skew_amount = max(w, h)
+
+        if not self.magnitude:
+            skew_amount = random.randint(1, max_skew_amount)
+        elif self.magnitude:
+            max_skew_amount /= self.magnitude
+            skew_amount = max_skew_amount
+
+        # We have two choices now: we tilt in one of four directions
+        # or we skew a corner.
+
+        if self.skew_type == "TILT" or self.skew_type == "TILT_LEFT_RIGHT" or self.skew_type == "TILT_TOP_BOTTOM":
+
+            if self.skew_type == "TILT":
+                skew_direction = random.randint(0, 3)
+            elif self.skew_type == "TILT_LEFT_RIGHT":
+                skew_direction = random.randint(0, 1)
+            elif self.skew_type == "TILT_TOP_BOTTOM":
+                skew_direction = random.randint(2, 3)
+
+            if skew_direction == 0:
+                # Left Tilt
+                new_plane = [(y1, x1 - skew_amount),  # Top Left
+                             (y2, x1),                # Top Right
+                             (y2, x2),                # Bottom Right
+                             (y1, x2 + skew_amount)]  # Bottom Left
+            elif skew_direction == 1:
+                # Right Tilt
+                new_plane = [(y1, x1),                # Top Left
+                             (y2, x1 - skew_amount),  # Top Right
+                             (y2, x2 + skew_amount),  # Bottom Right
+                             (y1, x2)]                # Bottom Left
+            elif skew_direction == 2:
+                # Forward Tilt
+                new_plane = [(y1 - skew_amount, x1),  # Top Left
+                             (y2 + skew_amount, x1),  # Top Right
+                             (y2, x2),                # Bottom Right
+                             (y1, x2)]                # Bottom Left
+            elif skew_direction == 3:
+                # Backward Tilt
+                new_plane = [(y1, x1),                # Top Left
+                             (y2, x1),                # Top Right
+                             (y2 + skew_amount, x2),  # Bottom Right
+                             (y1 - skew_amount, x2)]  # Bottom Left
+
+        if self.skew_type == "CORNER":
+
+            skew_direction = random.randint(0, 7)
+
+            if skew_direction == 0:
+                # Skew possibility 0
+                new_plane = [(y1 - skew_amount, x1), (y2, x1), (y2, x2), (y1, x2)]
+            elif skew_direction == 1:
+                # Skew possibility 1
+                new_plane = [(y1, x1 - skew_amount), (y2, x1), (y2, x2), (y1, x2)]
+            elif skew_direction == 2:
+                # Skew possibility 2
+                new_plane = [(y1, x1), (y2 + skew_amount, x1), (y2, x2), (y1, x2)]
+            elif skew_direction == 3:
+                # Skew possibility 3
+                new_plane = [(y1, x1), (y2, x1 - skew_amount), (y2, x2), (y1, x2)]
+            elif skew_direction == 4:
+                # Skew possibility 4
+                new_plane = [(y1, x1), (y2, x1), (y2 + skew_amount, x2), (y1, x2)]
+            elif skew_direction == 5:
+                # Skew possibility 5
+                new_plane = [(y1, x1), (y2, x1), (y2, x2 + skew_amount), (y1, x2)]
+            elif skew_direction == 6:
+                # Skew possibility 6
+                new_plane = [(y1, x1), (y2, x1), (y2, x2), (y1 - skew_amount, x2)]
+            elif skew_direction == 7:
+                # Skew possibility 7
+                new_plane = [(y1, x1), (y2, x1), (y2, x2), (y1, x2 + skew_amount)]
+
+        if self.skew_type == "ALL":
+            # Not currently in use, as it makes little sense to skew by the same amount
+            # in every direction if we have set magnitude manually.
+            # It may make sense to keep this, if we ensure the skew_amount below is randomised
+            # and cannot be manually set by the user.
+            corners = dict()
+            corners["top_left"] = (y1 - random.randint(1, skew_amount), x1 - random.randint(1, skew_amount))
+            corners["top_right"] = (y2 + random.randint(1, skew_amount), x1 - random.randint(1, skew_amount))
+            corners["bottom_right"] = (y2 + random.randint(1, skew_amount), x2 + random.randint(1, skew_amount))
+            corners["bottom_left"] = (y1 - random.randint(1, skew_amount), x2 + random.randint(1, skew_amount))
+
+            new_plane = [corners["top_left"], corners["top_right"], corners["bottom_right"], corners["bottom_left"]]
 
         # To calculate the coefficients required by PIL for the perspective skew,
         # see the following Stack Overflow discussion: https://goo.gl/sSgJdj
+        matrix = []
 
-        return image.transform(image.size, Image.PERSPECTIVE, skew_matrix, resample=Image.BICUBIC)
+        for p1, p2 in zip(new_plane, original_plane):
+            matrix.append([p1[0], p1[1], 1, 0, 0, 0, -p2[0] * p1[0], -p2[0] * p1[1]])
+            matrix.append([0, 0, 0, p1[0], p1[1], 1, -p2[1] * p1[0], -p2[1] * p1[1]])
+
+        A = np.matrix(matrix, dtype=np.float)
+        B = np.array(original_plane).reshape(8)
+
+        perspective_skew_coefficients_matrix = np.dot(np.linalg.inv(A.T * A) * A.T, B)
+        perspective_skew_coefficients_matrix = np.array(perspective_skew_coefficients_matrix).reshape(8)
+
+        return image.transform(image.size,
+                               Image.PERSPECTIVE,
+                               perspective_skew_coefficients_matrix,
+                               resample=Image.BICUBIC)
 
 
 class Rotate(Operation):
@@ -129,7 +236,9 @@ class Rotate(Operation):
         
         :math:`E = \\frac{\\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}}\\Big(X-\\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}} Y\\Big)}{1-\\frac{(\\sin{\\theta_{a}})^2}{(\\sin{\\theta_{b}})^2}}`
 
-        which describes how :math:`E` is derived, and then follows :math:`B = Y - E` and :math:`A = \\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}} B`.
+        which describes how :math:`E` is derived, and then follows 
+        :math:`B = Y - E` and 
+        :math:`A = \\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}} B`.
         
         :param image: The image to rotate.
         :return: The rotated image.
@@ -154,41 +263,79 @@ class Rotate(Operation):
             angle_a = abs(self.rotation)
             angle_b = 90 - angle_a
 
-            # Python deals in radians so get our radians
-            angle_a_rad = math.radians(angle_a)
-            angle_b_rad = math.radians(angle_b)
+            # We need the sin of angle a and b a few times
+            sin_angle_a = math.sin(math.radians(angle_a))
+            sin_angle_b = math.sin(math.radians(angle_b))
 
-            # Find the maximum area of the rectangle that could be cropped
-            E = (math.sin(angle_a_rad)) / (math.sin(angle_b_rad)) * \
-                (Y - X * (math.sin(angle_a_rad) / math.sin(angle_b_rad)))
-            E = E / 1 - (math.sin(angle_a_rad) ** 2 / math.sin(angle_b_rad) ** 2)
+            # Now we find the maximum area of the rectangle that could be cropped
+            E = (sin_angle_a / sin_angle_b) * \
+                (Y - X * (sin_angle_a / sin_angle_b))
+            E = E / 1 - (sin_angle_a ** 2 / sin_angle_b ** 2)
             B = X - E
-            A = (math.sin(angle_a_rad) / math.sin(angle_b_rad)) * B
+            A = (sin_angle_a / sin_angle_b) * B
 
             # Crop this area from the rotated image
-            image = image.crop((E, A, X - E, Y - A))
+            image = image.crop((int(round(E)), int(round(A)), int(round(X - E)), int(round(Y - A))))
 
             # Return the image, re-sized to the size of the image passed originally
             return image.resize((x, y), resample=Image.BICUBIC)
 
 
 class RotateRange(Operation):
-    def __init__(self, probability, rotate_range):
+    def __init__(self, probability, max_left_rotation, max_right_rotation):
         Operation.__init__(self, probability)
-        self.max_left_rotation = -abs(rotate_range[0])  # Ensure always negative
-        self.max_right_rotation = abs(rotate_range[1])  # Ensure always positive
+        self.max_left_rotation = -abs(max_left_rotation)   # Ensure always negative
+        self.max_right_rotation = abs(max_right_rotation)  # Ensure always positive
 
     def perform_operation(self, image):
-        # This may be of use: http://stackoverflow.com/questions/34747946/rotating-a-square-in-pil
-        random_left = random.randint(self.max_left_rotation, -1)
-        random_right = random.randint(1, self.max_right_rotation)
+        random_left = random.randint(self.max_left_rotation, -5)
+        random_right = random.randint(5, self.max_right_rotation)
 
         left_or_right = random.randint(0, 1)
 
+        rotation = 0
+
         if left_or_right == 0:
-            return image.rotate(random_left)
+            rotation = random_left
         elif left_or_right == 1:
-            return image.rotate(random_right)
+            rotation = random_right
+
+        # Get size before we rotate
+        x = image.size[0]
+        y = image.size[1]
+
+        # Rotate, while expanding the canvas size
+        image = image.rotate(rotation, expand=True, resample=Image.BICUBIC)
+
+        # Get size after rotation, which includes the empty space
+        X = image.size[0]
+        Y = image.size[1]
+
+        # Get our two angles needed for the calculation of the largest area
+        angle_a = abs(rotation)
+        angle_b = 90 - angle_a
+
+        # Python deals in radians so get our radians
+        angle_a_rad = math.radians(angle_a)
+        angle_b_rad = math.radians(angle_b)
+
+        # Calculate the sins
+        angle_a_sin = math.sin(angle_a_rad)
+        angle_b_sin = math.sin(angle_b_rad)
+
+        # Find the maximum area of the rectangle that could be cropped
+        E = (math.sin(angle_a_rad)) / (math.sin(angle_b_rad)) * \
+            (Y - X * (math.sin(angle_a_rad) / math.sin(angle_b_rad)))
+        E = E / 1 - (math.sin(angle_a_rad) ** 2 / math.sin(angle_b_rad) ** 2)
+        B = X - E
+        A = (math.sin(angle_a_rad) / math.sin(angle_b_rad)) * B
+
+        # Crop this area from the rotated image
+        # image = image.crop((E, A, X - E, Y - A))
+        image = image.crop((int(round(E)), int(round(A)), int(round(X - E)), int(round(Y - A))))
+
+        # Return the image, re-sized to the size of the image passed originally
+        return image.resize((x, y), resample=Image.BICUBIC)
 
 
 class Resize(Operation):
@@ -319,7 +466,7 @@ class Shear(Operation):
         # And here we are using SciKit Image's `transform` class.
         # shear_transformer = transform.AffineTransform(shear=amount_to_shear)
         # image_sheared = transform.warp(image_array, shear_transformer)
-
+        #
         # Because of warnings
         # with warnings.catch_warnings():
         #     warnings.simplefilter("ignore")
@@ -328,15 +475,25 @@ class Shear(Operation):
 
         width, height = image.size
 
-        angle_to_shear = int(random.uniform(self.max_shear_left, self.max_shear_right))
+        max_shear_left = -20
+        max_shear_right = 20
 
+        angle_to_shear = int(random.uniform(max_shear_left - 1, max_shear_right + 1))
+        if angle_to_shear != -1: angle_to_shear += 1
+
+        # We use the angle phi in radians later
         phi = math.tan(math.radians(angle_to_shear))
 
-        # Here we need the unknown b, where a is
-        # the height of the image and phi is the
-        # angle we want to shear (our knowns):
-        # b = tan(phi) * a
-        shift_in_pixels = phi * height
+        # Alternative method
+        # Calculate our offset when cropping
+        # We know one angle, phi (angle_to_shear)
+        # We known theta = 180-90-phi
+        # We know one side, opposite (height of image)
+        # Adjacent is therefore:
+        # tan(theta) = opposite / adjacent
+        # A = opposite / tan(theta)
+        # theta = math.radians(180-90-angle_to_shear)
+        # A = height / math.tan(theta)
 
         # Transformation matrices can be found here:
         # https://en.wikipedia.org/wiki/Transformation_matrix
@@ -344,12 +501,64 @@ class Shear(Operation):
         # any of the affine transformation matrices, seen here:
         # https://en.wikipedia.org/wiki/Transformation_matrix#/media/File:2D_affine_transformation_matrix.svg
 
-        # Note: PIL expects the inverse scale, so 1/scale_factor for example.
-        return image.transform((int(round(width + shift_in_pixels)), height),
-                               Image.AFFINE,
-                               (1, phi, -shift_in_pixels,
-                                0, 1, 0),
-                               Image.BICUBIC)
+        directions = ["x", "y"]
+        direction = random.choice(directions)
+
+        if direction == "x":
+            # Here we need the unknown b, where a is
+            # the height of the image and phi is the
+            # angle we want to shear (our knowns):
+            # b = tan(phi) * a
+            shift_in_pixels = phi * height
+
+            if shift_in_pixels > 0:
+                shift_in_pixels = math.ceil(shift_in_pixels)
+            else:
+                shift_in_pixels = math.floor(shift_in_pixels)
+
+            # For negative tilts, we reverse phi and set offset to 0
+            # Also matrix offset differs from pixel shift for neg
+            # but not for pos so we will copy this value in case
+            # we need to change it
+            matrix_offset = shift_in_pixels
+            if angle_to_shear <= 0:
+                shift_in_pixels = abs(shift_in_pixels)
+                matrix_offset = 0
+                phi = abs(phi) * -1
+
+            # Note: PIL expects the inverse scale, so 1/scale_factor for example.
+            transform_matrix = (1, phi, -matrix_offset,
+                                0, 1, 0)
+
+            image = image.transform((int(round(width + shift_in_pixels)), height),
+                                    Image.AFFINE,
+                                    transform_matrix,
+                                    Image.BICUBIC)
+
+            image = image.crop((abs(shift_in_pixels), 0, width, height))
+
+            return image.resize((width, height), resample=Image.BICUBIC)
+
+        elif direction == "y":
+            shift_in_pixels = phi * width
+
+            matrix_offset = shift_in_pixels
+            if angle_to_shear <= 0:
+                shift_in_pixels = abs(shift_in_pixels)
+                matrix_offset = 0
+                phi = abs(phi) * -1
+
+            transform_matrix = (1, 0, 0,
+                                phi, 1, -matrix_offset)
+
+            image = image.transform((width, int(round(height + shift_in_pixels))),
+                                    Image.AFFINE,
+                                    transform_matrix,
+                                    Image.BICUBIC)
+
+            image = image.crop((0, abs(shift_in_pixels), width, height))
+
+            return image.resize((width, height), resample=Image.BICUBIC)
 
 
 class Scale(Operation):

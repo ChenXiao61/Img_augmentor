@@ -49,6 +49,8 @@ class Pipeline(object):
         """
         random.seed()
 
+        # TODO: Allow a single image to be added when initialising.
+
         self.image_counter = 0
         self.augmentor_images = []
         self.distinct_dimensions = set()
@@ -179,7 +181,7 @@ class Pipeline(object):
 
         sample_count = 1
 
-        progress_bar = tqdm(total=n, desc="Executing Pipeline", unit=' Samples')
+        progress_bar = tqdm(total=n, desc="Executing Pipeline", unit=' Samples', leave=False)
         while sample_count <= n:
             for augmentor_image in self.augmentor_images:
                 if sample_count <= n:
@@ -415,8 +417,8 @@ class Pipeline(object):
         """
         if max_left_rotation < 180 & max_right_rotation < 180:
             raise ValueError("The max_left_rotation and max_right_rotation values cannot exceed 180.")
-        self.add_operation(RotateRange(probability=probability,
-                                       rotate_range=(max_left_rotation, max_right_rotation)))
+        self.add_operation(RotateRange(probability=probability, max_left_rotation=max_left_rotation,
+                                       max_right_rotation=max_right_rotation))
 
     def flip_top_bottom(self, probability):
         """
@@ -567,17 +569,45 @@ class Pipeline(object):
         :param scale_factor: The a value larger than 1.0 as a factor to scale by.
         :return:
         """
-        self.add_operation(Scale(probability=probability, scale_factor=scale_factor))
+        self.add_operation(Scale(probability=probability,
+                                 scale_factor=scale_factor))
 
-    def resize(self, probability, width, height, resample_filter="NEAREST"):
+    def resize(self, probability, width, height, resample_filter="BICUBIC"):
         # TODO: Make this automatic by default, i.e. ANTIALIAS if downsampling, BICUBIC if upsampling.
         legal_filters = ["NEAREST", "BICUBIC", "ANTIALIAS", "BILINEAR"]
         if resample_filter in legal_filters:
-            self.add_operation(Resize(probability=probability, width=width,
-                                      height=height, resample_filter=resample_filter))
+            self.add_operation(Resize(probability=probability,
+                                      width=width,
+                                      height=height,
+                                      resample_filter=resample_filter))
         else:
             print("The save_filter parameter must be one of ", legal_filters)
-            print("E.g. save_filter(800, 600, \'NEAREST\')")
+            print("E.g. save_filter(800, 600, \'BICUBIC\')")
+
+    def skew_left_right(self, probability, magnitude=None):
+        self.add_operation(Skew(probability=probability,
+                                skew_type="TILT_LEFT_RIGHT",
+                                magnitude=magnitude))
+
+    def skew_top_bottom(self, probability, magnitude=None):
+        self.add_operation(Skew(probability=probability,
+                                skew_type="TILT_TOP_BOTTOM",
+                                magnitude=magnitude))
+
+    def skew_tilt(self, probability, magnitude=None):
+        self.add_operation(Skew(probability=probability,
+                                skew_type="TILT",
+                                magnitude=magnitude))
+
+    def skew_corner(self, probability, magnitude=None):
+        self.add_operation(Skew(probability=probability,
+                                skew_type="CORNER",
+                                magnitude=magnitude))
+
+    def skew(self, probability, magnitude=None):
+        self.add_operation(Skew(probability=probability,
+                                skew_type=random.choice(["TILT", "CORNER"]),
+                                magnitude=magnitude))
 
     def sample_from_new_image_source(self, image_source, n, output_directory="output"):
         """
@@ -637,7 +667,22 @@ class Pipeline(object):
         raise NotImplementedError
 
     def shear(self, probability, max_shear_left, max_shear_right):
-        self.add_operation(Shear(probability=probability, max_shear_left=max_shear_left, max_shear_right=max_shear_right))
+        """
+        Shear the image by a specified number of degrees.
+        
+        :param probability: The probability that the operation is performed. 
+        :param max_shear_left: The max number of degrees to shear to the left.
+         Cannot be larger than 90 degrees.
+        :param max_shear_right: The max number of degrees to shear to the 
+         right. Cannot be larger than 90 degrees.
+        :return: None
+        """
+        if max_shear_left >= 90 or max_shear_right >= 90:
+            print("Cannot have a value larger than 90 degrees for angle.")
+        else:
+            self.add_operation(Shear(probability=probability,
+                                     max_shear_left=max_shear_left,
+                                     max_shear_right=max_shear_right))
 
     def pad(self):
         # Functionality to pad a non-square image with borders to make it a certain aspect ratio.
