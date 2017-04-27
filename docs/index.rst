@@ -22,6 +22,7 @@ The documentation is organised as follows:
     :maxdepth: 3
     :caption: User Guide
 
+    userguide/mainfeatures
     userguide/install
     userguide/usage
     userguide/examples

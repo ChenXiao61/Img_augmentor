@@ -13,6 +13,7 @@ from .ImageUtilities import scan_directory, AugmentorImage
 import os
 import random
 import uuid
+import warnings
 
 from tqdm import tqdm
 from PIL import Image
@@ -66,6 +67,7 @@ class Pipeline(object):
                        ground_truth_output_directory=output_directory)
 
         self._valid_formats = ["PNG", "BMP", "GIF", "JPEG"]
+        self._legal_filters = ["NEAREST", "BICUBIC", "ANTIALIAS", "BILINEAR"]
         self.save_format = save_format
         self.operations = []
 
@@ -498,7 +500,15 @@ class Pipeline(object):
         self.add_operation(Distort(probability=probability, grid_width=grid_width,
                                    grid_height=grid_height, magnitude=magnitude, randomise_magnitude=randomise_magnitude))
 
-    def zoom(self, probability, min_factor=1.05, max_factor=1.2):
+    def zoom(self, probability, min_factor, max_factor):
+        """
+        Zoom in to an image, while maintaining its aspect ratio.
+        
+        :param probability: 
+        :param min_factor: 
+        :param max_factor: 
+        :return: 
+        """
         self.add_operation(Zoom(probability=probability, min_factor=min_factor, max_factor=max_factor))
 
     def crop_by_size(self, probability, width, height, centre=True):
@@ -555,6 +565,8 @@ class Pipeline(object):
         raise NotImplementedError
 
     def histogram_equalisation(self, probability=1.0):
+        if probability != 1:
+            warnings.warn("For resizing, it is recommended that the probability is set to 1.", stacklevel=1)
         self.add_operation(HistogramEqualisation(probability=probability))
 
     def resize_by_percentage(self, percentage_resize):
@@ -569,32 +581,86 @@ class Pipeline(object):
         :param scale_factor: The a value larger than 1.0 as a factor to scale by.
         :return:
         """
-        self.add_operation(Scale(probability=probability,
-                                 scale_factor=scale_factor))
+
+        if scale_factor < 1.0:
+            print("The scale cannot be lower than 1.0. Operation not added to pipeline.")
+        else:
+            self.add_operation(Scale(probability=probability,
+                                     scale_factor=scale_factor))
 
     def resize(self, probability, width, height, resample_filter="BICUBIC"):
-        # TODO: Make this automatic by default, i.e. ANTIALIAS if downsampling, BICUBIC if upsampling.
-        legal_filters = ["NEAREST", "BICUBIC", "ANTIALIAS", "BILINEAR"]
-        if resample_filter in legal_filters:
+        """
+        Resize an image according to a set of dimensions. 
+        
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed. For resizing,
+         it is recommended that probability be set to 1.
+        :param width: 
+        :param height: 
+        :param resample_filter: 
+        :return: 
+        """
+
+        if probability != 1:
+            warnings.warn("For resizing, it is recommended that the probability is set to 1.", stacklevel=1)
+
+        if resample_filter in self._legal_filters:
             self.add_operation(Resize(probability=probability,
                                       width=width,
                                       height=height,
                                       resample_filter=resample_filter))
         else:
-            print("The save_filter parameter must be one of ", legal_filters)
+            print("The save_filter parameter must be one of ", self._legal_filters)
             print("E.g. save_filter(800, 600, \'BICUBIC\')")
 
     def skew_left_right(self, probability, magnitude=None):
+        """
+        Skew an image by tilting it left or right by a random amount. The 
+        magnitude of this skew can be set to a maximum using the 
+        magnitude parameter. This can be either a scalar representing the
+        maximum tilt, or vector representing a range.
+        
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :param magnitude: The maximum tilt, which must be value between 0.1 
+        and 1.0, where 1 represents a tilt of 45 degrees.
+        :return: None 
+        """
         self.add_operation(Skew(probability=probability,
                                 skew_type="TILT_LEFT_RIGHT",
                                 magnitude=magnitude))
 
     def skew_top_bottom(self, probability, magnitude=None):
+        """
+        Skew an image by tilting it forwards or backwards by a random amount. 
+        The magnitude of this skew can be set to a maximum using the 
+        magnitude parameter. This can be either a scalar representing the
+        maximum tilt, or vector representing a range.
+
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :param magnitude: The maximum tilt, which must be value between 0.1 
+        and 1.0, where 1 represents a tilt of 45 degrees.
+        :return: None 
+        """
         self.add_operation(Skew(probability=probability,
                                 skew_type="TILT_TOP_BOTTOM",
                                 magnitude=magnitude))
 
     def skew_tilt(self, probability, magnitude=None):
+        """
+        Skew an image by tilting in a random direction, either forwards,
+        backwards, left, or right, by a random amount. The magnitude of 
+        this skew can be set to a maximum using the magnitude parameter.
+        This can be either a scalar representing the maximum tilt, or 
+        vector representing a range.
+        
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed. 
+        :param magnitude: The maximum tilt, which must be value between 0.1 
+        and 1.0, where 1 represents a tilt of 45 degrees.
+        :return: 
+        """
         self.add_operation(Skew(probability=probability,
                                 skew_type="TILT",
                                 magnitude=magnitude))
