@@ -83,11 +83,23 @@ Elastic distortions allow you to make distortions to an image while maintaining 
 
 - ``random_distortion()``
 
+Here, we have taken a sample image and generated 50 samples, with a grid size of 16 and a distortion magnitude of 8:
+
++-------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------+
+| Original Image                                                                                  | Rotated 10 degrees                                                                                 |
++-------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------+
+| .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/distort.gif |
++-------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------+
+
+To highlight how this might be useful in a real-world scenario, here is the distort function being applied to a single image of a figure 8. 
+
 +------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
 | Original Image                                                                                                   | Random distortions applied                                                                                       |
 +------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
 | .. image:: https://cloud.githubusercontent.com/assets/16042756/23697279/79850d52-03e7-11e7-9445-475316b702a3.png | .. image:: https://cloud.githubusercontent.com/assets/16042756/23697283/802698a6-03e7-11e7-94b7-f0b61977ef33.gif |
 +------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
+
+Realistic new samples can be created using this method.
 
 See the auto-generated documentation for more details regarding this function's parameters.
 
