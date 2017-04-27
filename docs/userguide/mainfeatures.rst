@@ -200,18 +200,25 @@ The following functions are available for mirroring images (translating them thr
 - ``flip_top_bottom()``
 - ``flip_random()``
 
-Mirroring will not be demonstrated for reasons that are, one sincerely hopes, obvious.
+Of these, ``flip_random()`` can be used in situations where mirroring through both axes may make sense. We may, for example, combine random mirroring, with random distortions, to create new data:
+
++--------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
+| Original image                                                                                         | Random crops + resize operation                                                                         |
++--------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
+| .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/eight_200px.png | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/flip_distort.gif |
++--------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
+
 
 Notes
 -----
 
 Skin lesion image obtained from the ISIC Archive:
 
-Image id: 5436e3adbae478396759f0f1
-Image name: ISIC_0000017.jpg
-Download: https://isic-archive.com:443/api/v1/image/5436e3adbae478396759f0f1/download
+- Image id: 5436e3adbae478396759f0f1
+- Image name: ISIC_0000017.jpg
+- Download: https://isic-archive.com:443/api/v1/image/5436e3adbae478396759f0f1/download
 
-See https://isic-archive.com/#images for details.
+See https://isic-archive.com/#images for further details.
 
 Map data © OpenStreetMap contributors licensed under the Creative Commons Attribution-ShareAlike 2.0 licence (CC BY-SA), see https://www.openstreetmap.org/copyright
 
