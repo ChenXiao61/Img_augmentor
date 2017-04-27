@@ -101,11 +101,11 @@ The ``rotate_random_90()`` function will rotate the image by either 90, 180, or 
 
 As can be seen above, an arbitrary, non-modulo 90, rotation will unfortunately result in the image being padded in each corner. To allieviate this, Augmentor's default behaviour is to crop the image and retain the largest drop possible while maintaining the image's aspect ratio:
 
-+-----------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------+
-| Original Image                                                                                            | Rotated 10 degrees, cropped                                                                                              |
-+-----------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------+
-| .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/ISIC_0000017_s.jpg | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/ISIC_0000017_r_aug_s.jpg          |
-+-----------------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------+
++-----------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| Original Image                                                                                            | Rotated 10 degrees, cropped                                                                                     |
++-----------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/ISIC_0000017_s.jpg | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/ISIC_0000017_r_aug_s.jpg |
++-----------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 
 This will, of course, result in the image being zoomed in. For smaller rotations of between -5 and 5 degrees, this zoom effect is not particularly drastic.
 
