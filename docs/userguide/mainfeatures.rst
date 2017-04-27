@@ -76,6 +76,21 @@ If you only wish to skew either left or right, use ``skew_left_right()``. To ske
 
 The function ``skew()`` will skew your image in a random direction of the 12 directions shown above.
 
+Elastic Distortions
+-------------------
+
+Elastic distortions allow you to make distortions to an image while maintaining the image's aspect ratio. 
+
+- ``random_distortion()``
+
++------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
+| Original Image                                                                                                   | Random distortions applied                                                                                       |
++------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
+| .. image:: https://cloud.githubusercontent.com/assets/16042756/23697279/79850d52-03e7-11e7-9445-475316b702a3.png | .. image:: https://cloud.githubusercontent.com/assets/16042756/23697283/802698a6-03e7-11e7-94b7-f0b61977ef33.gif |
++------------------------------------------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------+
+
+See the auto-generated documentation for more details regarding this function's parameters.
+
 Rotating
 --------
 
@@ -89,9 +104,9 @@ Rotate functions that are available are:
 - ``rotate270()``
 - ``rotate_random_90()``
 
-The ``rotate()`` warrants more discussion and will be desribed here. When an image is rotated,
+Most of these methods are self-explanatory. The ``rotate_random_90()`` function will rotate the image by either 90, 180, or 270 degrees. 
 
-The ``rotate_random_90()`` function will rotate the image by either 90, 180, or 270 degrees. 
+However, the ``rotate()`` warrants more discussion and will be desribed here. When an image is rotated,
 
 +-----------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------+
 | Original Image                                                                                            | Rotated 10 degrees                                                                                          |
@@ -102,23 +117,51 @@ The ``rotate_random_90()`` function will rotate the image by either 90, 180, or 
 As can be seen above, an arbitrary, non-modulo 90, rotation will unfortunately result in the image being padded in each corner. To allieviate this, Augmentor's default behaviour is to crop the image and retain the largest drop possible while maintaining the image's aspect ratio:
 
 +-----------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
-| Original Image                                                                                            | Rotated 10 degrees, cropped                                                                                     |
+| Original Image                                                                                            | Rotated 10 degrees, automatically cropped                                                                       |
 +-----------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/ISIC_0000017_s.jpg | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/ISIC_0000017_r_aug_s.jpg |
 +-----------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 
 This will, of course, result in the image being zoomed in. For smaller rotations of between -5 and 5 degrees, this zoom effect is not particularly drastic.
 
+Shearing
+--------
+
+Shearing tilts an image along one of its sides. For example:
+
+Functions available for shearing are:
+
+- ``shear()``
+
+You can shear by random amounts, a fixed amount, in random directions, or in a fixed direction. See the auto-generated documentation for more details.
+
 Cropping
 --------
 
 Cropping functions which are available are:
 
-- 
+- ``crop_centre()``
+- ``crop_by_size()``
+- ``crop_random()``
 
+Mirroring
+---------
 
+The following functions are available for mirroring images (translating them throw the x any y axes):
 
+- ``flip_left_right()``
+- ``flip_top_bottom()``
+- ``flip_random()``
 
+Notes
+-----
 
+Skin lesion image obtained from the ISIC Archive:
+
+Image id: 5436e3adbae478396759f0f1
+Image name: ISIC_0000017.jpg
+Download: https://isic-archive.com:443/api/v1/image/5436e3adbae478396759f0f1/download
+
+See https://isic-archive.com/#images for details.
 
 
