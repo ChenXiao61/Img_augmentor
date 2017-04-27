@@ -127,11 +127,29 @@ This will, of course, result in the image being zoomed in. For smaller rotations
 Shearing
 --------
 
-Shearing tilts an image along one of its sides. For example:
+Shearing tilts an image along one of its sides. The can be in the x-axis or y-axis direction. 
 
 Functions available for shearing are:
 
 - ``shear()``
+
+If you shear in the x or y axis, you will normally get images that look as follows:
+
++-------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+
+| Original image                                                                                  | Shear (x-axis) 20 degrees                                                                         | Shear (y-axis) 20 degrees                                                                         |
++-------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+
+| .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/graz.png | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/graz_x.png | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/graz_y.png |
++-------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+
+
+However, as with rotations, you are left with image that are either larger in size, or are cropped to the original size but contain padding in at the sides of the images.
+
+Augmentor automatically crops the largest area possible before returning the image, as follows:
+
++-------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------+
+| Original image                                                                                  | Shear (x-axis) 20 degrees                                                                             | Shear (y-axis) 20 degrees                                                                             |
++-------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------+
+| .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/graz.png | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/graz_x_aug.png | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/graz_y_aug.png |
++-------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------+
 
 You can shear by random amounts, a fixed amount, in random directions, or in a fixed direction. See the auto-generated documentation for more details.
 
@@ -163,5 +181,7 @@ Image name: ISIC_0000017.jpg
 Download: https://isic-archive.com:443/api/v1/image/5436e3adbae478396759f0f1/download
 
 See https://isic-archive.com/#images for details.
+
+Map data © OpenStreetMap contributors licensed under the Creative Commons Attribution-ShareAlike 2.0 licence (CC BY-SA), see https://www.openstreetmap.org/copyright
 
 
