@@ -86,7 +86,7 @@ Elastic distortions allow you to make distortions to an image while maintaining 
 Here, we have taken a sample image and generated 50 samples, with a grid size of 16 and a distortion magnitude of 8:
 
 +-------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------+
-| Original Image                                                                                  | Rotated 10 degrees                                                                                 |
+| Original Image                                                                                  | Random distortions applied                                                                         |
 +-------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------+
 | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/distort.gif |
 +-------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------+
@@ -174,6 +174,23 @@ Cropping functions which are available are:
 - ``crop_by_size()``
 - ``crop_random()``
 
+The ``crop_random()`` function warrants further explanation. Here a region of a size specified by the user is cropped at random from the original image: 
+
++-------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------+
+| Original image                                                                                  | Random crops                                                                                    |
++-------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------+
+| .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/crop.gif |
++-------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------+
+
+You could combine this with a resize operation, so that the images returned are the same size as the images of the original, pre-augmented dataset:
+
++-------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------+
+| Original image                                                                                  | Random crops + resize operation                                                                        |
++-------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------+
+| .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/crop_resize.gif |
++-------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------+
+
+
 Mirroring
 ---------
 
@@ -182,6 +199,8 @@ The following functions are available for mirroring images (translating them thr
 - ``flip_left_right()``
 - ``flip_top_bottom()``
 - ``flip_random()``
+
+Mirroring will not be demonstrated for reasons that are, one sincerely hopes, obvious.
 
 Notes
 -----
