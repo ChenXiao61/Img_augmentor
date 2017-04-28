@@ -657,7 +657,7 @@ class Pipeline(object):
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
         :param magnitude: The maximum tilt, which must be value between 0.1 
-        and 1.0, where 1 represents a tilt of 45 degrees.
+         and 1.0, where 1 represents a tilt of 45 degrees.
         :return: None 
         """
         self.add_operation(Skew(probability=probability,
@@ -674,7 +674,7 @@ class Pipeline(object):
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
         :param magnitude: The maximum tilt, which must be value between 0.1 
-        and 1.0, where 1 represents a tilt of 45 degrees.
+         and 1.0, where 1 represents a tilt of 45 degrees.
         :return: None 
         """
         self.add_operation(Skew(probability=probability,
@@ -692,7 +692,7 @@ class Pipeline(object):
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed. 
         :param magnitude: The maximum tilt, which must be value between 0.1 
-        and 1.0, where 1 represents a tilt of 45 degrees.
+         and 1.0, where 1 represents a tilt of 45 degrees.
         :return: 
         """
         self.add_operation(Skew(probability=probability,
