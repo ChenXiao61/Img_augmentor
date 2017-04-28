@@ -330,10 +330,16 @@ class Pipeline(object):
 
     def status(self):
         """
-        Prints the status of the pipeline to the console.
+        Prints the status of the pipeline to the console. If you want to
+        remove an operation, use the index shown and the 
+        :func:`remove_operation` method.
+
+         .. seealso:: The :func:`remove_operation` function.
+
+         .. seealso:: The :func:`add_operation` function.
 
         The status includes the number of operations currently attached to
-        pipeline, each operation's parameters, the number of images in the
+        the pipeline, each operation's parameters, the number of images in the
         pipeline, and a summary of the images' properties, such as their
         dimensions and formats.
 
