@@ -544,6 +544,11 @@ class Pipeline(object):
          used as a range if :attr:`True`, or as a constant value, if 
          :attr:`False`. If :attr:`True` the magnitude is selected randomly 
          from between 0 and :attr:`magnitude`.
+        :type probability: Float
+        :type grid_width: Integer
+        :type grid_height: Integer
+        :type magnitude: Integer
+        :type randomise_magnitude: Boolean
         :return: None
         """
         self.add_operation(Distort(probability=probability, grid_width=grid_width,
@@ -555,6 +560,8 @@ class Pipeline(object):
         which the image is zoomed is a randomly chosen value between 
         :attr:`min_factor` and :attr:`max_factor`.
         
+        Typical values may be ``min_factor=1.1`` and ``max_factor=1.5``.
+        
         To zoom by a constant amount, set :attr:`min_factor` and
         :attr:`max_factor` to the same value.
         
@@ -562,7 +569,10 @@ class Pipeline(object):
          probability that the operation should be performed. 
         :param min_factor: The minimum factor by which to zoom the image.
         :param max_factor: The maximum factor by which to zoom the image.
-        :return: 
+        :type probability: Float
+        :type min_factor: Float
+        :type max_factor: Float
+        :return: None
         """
         self.add_operation(Zoom(probability=probability, min_factor=min_factor, max_factor=max_factor))
 

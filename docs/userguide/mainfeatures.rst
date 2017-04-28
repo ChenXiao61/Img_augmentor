@@ -138,7 +138,7 @@ Rotate functions that are available are:
 
 Most of these methods are self-explanatory. The ``rotate_random_90()`` function will rotate the image by either 90, 180, or 270 degrees. 
 
-However, the ``rotate()`` warrants more discussion and will be desribed here. When an image is rotated,
+However, the ``rotate()`` warrants more discussion and will be desribed here. When an image is rotated, and it is not a multiple of 90 degrees, the image must either be stretched to accomodate a now larger image, or some of the image must be cut, as demonstrated below:
 
 +-------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+
 | Original Image                                                                                  | Rotated 10 degrees                                                                                |
