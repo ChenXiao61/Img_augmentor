@@ -460,8 +460,8 @@ class Pipeline(object):
         :attr:`max_left_rotation` and :attr:`max_right_rotation` to the same
         value.
         
-        .. note:: The function will rotate in place, and crop the largest 
-         possible rectangle from the rotated image. 
+        .. note:: This function will rotate **in place**, and crop the largest 
+         possible rectangle from the rotated image.
 
         :param max_left_rotation: The maximum number of degrees the image can
          be rotated to the left.
@@ -484,12 +484,7 @@ class Pipeline(object):
         Flip (mirror) the image along its vertical axis, i.e. from top to
         bottom.
 
-        This function mirrors the image along an axis, and is not a rotation
-        transform. Mirroring can also be applied along the horizontal axis.
-
         .. seealso:: The :func:`flip_left_right` function.
-
-        .. seealso:: The :func:`rotate` function.
 
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
@@ -503,12 +498,7 @@ class Pipeline(object):
         Flip (mirror) the image along its horizontal axis, i.e. from left to
         right.
 
-        This function mirrors the image along an axis, and is not a rotation
-        transform. Mirroring can also be applied along the vertical axis.
-
         .. seealso:: The :func:`flip_top_bottom` function.
-
-        .. seealso:: The :func:`rotate` function.
 
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
@@ -543,15 +533,17 @@ class Pipeline(object):
         in finer, more granular distortions. The magnitude of the distortions
         can be controlled using magnitude. This can be random or fixed.
 
-        :param probability: The probability that the function will execute
-         when the image is passed through the pipeline.
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
         :param grid_width: The number of rectangles in the grid's horizontal
          axis.
         :param grid_height: The number of rectangles in the grid's vertical
          axis.
         :param magnitude: The magnitude of the distortions.
         :param randomise_magnitude: Specifies whether the magnitude should be 
-         used as a range if True, or as a constant value, if False.
+         used as a range if :attr:`True`, or as a constant value, if 
+         :attr:`False`. If :attr:`True` the magnitude is selected randomly 
+         from between 0 and :attr:`magnitude`.
         :return: None
         """
         self.add_operation(Distort(probability=probability, grid_width=grid_width,
@@ -559,11 +551,17 @@ class Pipeline(object):
 
     def zoom(self, probability, min_factor, max_factor):
         """
-        Zoom in to an image, while maintaining its aspect ratio.
+        Zoom in to an image, while maintaining its aspect ratio. The amount by
+        which the image is zoomed is a randomly chosen value between 
+        :attr:`min_factor` and :attr:`max_factor`.
         
-        :param probability: 
-        :param min_factor: 
-        :param max_factor: 
+        To zoom by a constant amount, set :attr:`min_factor` and
+        :attr:`max_factor` to the same value.
+        
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed. 
+        :param min_factor: The minimum factor by which to zoom the image.
+        :param max_factor: The maximum factor by which to zoom the image.
         :return: 
         """
         self.add_operation(Zoom(probability=probability, min_factor=min_factor, max_factor=max_factor))
