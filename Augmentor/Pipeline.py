@@ -292,7 +292,7 @@ class Pipeline(object):
 
     def add_ground_truth_directory(self, ground_truth_directory, halt_on_non_match=False):
         """
-        .. note:: This function is currently not being used.
+        .. warning:: This function is currently not being used.
          Although this function is not currently being used by Augmentor, 
          it is being kept here for a future implementation.
 
@@ -309,6 +309,8 @@ class Pipeline(object):
          :attr:`True`.
         :exception: IOError if no ground truth images found or if
          :attr:`halt_on_non_match` is :attr:`True`.
+        :type ground_truth_directory: String
+        :type halt_on_non_match: Boolean
         :return: None
         """
 
@@ -385,23 +387,30 @@ class Pipeline(object):
         Rotate an image by 90 degrees.
 
         The operation will rotate an image by 90 degrees, and will be
-        performed with a specified probability.
+        performed with a probability of that specified by the
+        :attr:`probability` parameter.
 
-        :param probability: The probability that an image will have this
-         operation applied when being passed through the pipeline.
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :type probability: Float
         :return: None
         """
-        self.add_operation(Rotate(probability=probability, rotation=90))
+        if probability < 0 or probability > 1:
+            raise ValueError("The value of probability must be between 0 and 1.")
+        else:
+            self.add_operation(Rotate(probability=probability, rotation=90))
 
     def rotate180(self, probability):
         """
         Rotate an image by 180 degrees.
 
         The operation will rotate an image by 180 degrees, and will be
-        performed with a specified probability.
+        performed with a probability of that specified by the
+        :attr:`probability` parameter.
 
-        :param probability: The probability that an image will have this
-         operation applied when being passed through the pipeline.
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :type probability: Float
         :return: None
         """
         self.add_operation(Rotate(probability=probability, rotation=180))
@@ -411,11 +420,12 @@ class Pipeline(object):
         Rotate an image by 270 degrees.
 
         The operation will rotate an image by 270 degrees, and will be
-        performed with a specified probability, defined by the
+        performed with a probability of that specified by the
         :attr:`probability` parameter.
 
-        :param probability: The probability that an image will have this
-         operation applied when being passed through the pipeline.
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :type probability: Float
         :return: None
         """
         self.add_operation(Rotate(probability=probability, rotation=270))
@@ -426,10 +436,11 @@ class Pipeline(object):
 
         This function will rotate by either 90, 180, or 270 degrees. This is
         useful to avoid scenarios where images may be rotated back to their
-        original positions (such as a rotate90() + rotate270() performed
-        directly afterwards. The random rotation is chosen uniformly from
-        90, 180, or 270. The probability controls the chance of the operation
-        being performed at all, and does not affect the rotation degree.
+        original positions (such as a :func:`rotate90` and a :func:`rotate270` 
+        being performed directly afterwards. The random rotation is chosen 
+        uniformly from 90, 180, or 270 degrees. The probability controls the 
+        chance of the operation being performed at all, and does not affect 
+        the rotation degree.
 
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
@@ -445,16 +456,22 @@ class Pipeline(object):
         The operation will rotate an image by an random amount, within a range
         specified. The parameters :attr:`max_left_rotation` and
         :attr:`max_right_rotation` allow you to control this range. If you
-        wish to rotate the images by an exact number of  degrees, set both
+        wish to rotate the images by an exact number of degrees, set both
         :attr:`max_left_rotation` and :attr:`max_right_rotation` to the same
         value.
+        
+        .. note:: The function will rotate in place, and crop the largest 
+         possible rectangle from the rotated image. 
 
         :param max_left_rotation: The maximum number of degrees the image can
          be rotated to the left.
         :param max_right_rotation: The maximum number of degrees the image can
          be rotated to the left.
-        :param probability: The probability that an image will have this
-         operation applied when being passed through the pipeline.
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :type max_left_rotation: Integer
+        :type max_right_rotation: Integer
+        :type probability: Float
         :return: None
         """
         if max_left_rotation < 180 & max_right_rotation < 180:
