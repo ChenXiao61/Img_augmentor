@@ -3,7 +3,25 @@ Main Features
 
 In this section we will describe the main features of Augmentor with example code and output.
 
-All functions described here are made available by the Pipeline object. Create a new Pipeline object by instantiating it with a path to a set of images or image that you wish to augment:
+Augmentor is software package for image augmentation with an emphasis on providing operations that are typically used in the generation of image data for machine learning problems.
+
+In principle, Augmentor consists of a number of classes for standard image manipulation functions, such as the ``Rotate`` class or the ``Crop`` class. You interact and use these classes using a large number of convenience functions, which cover most of the functions you might require when augmenting image datasets for machine learning problems.
+
+Because image augmentation is often a multi-stage procedure, Augmentor uses a **pipeline**-based appraoch, where **operations** are added sequentially to a pipeline. Images are then passed through this pipeline, where each operation is applied to the image as it passed through the pipeline.
+
+Also, Augmentor applies operations to images **stochastically** as they pass through the pipeline, according to a user-defined probability value for each operation. 
+
+Therefore every operation has at minimum a probability parameter, which controls how likely the operation will be applied to each image that is seen as the image passes through the pipeline. Take for example a rotate operation, which is defined as follows:
+
+.. code-block:: python
+    
+    rotate(probability=0.5, max_left_rotation=5, max_right_rotation=10)
+
+The probability parameter controls how often the operation is applied. The ``max_left_rotation`` and ``max_right_rotation`` controls the degree by which the image is rotated, **if** the operation is applied. The value, in this case between -5 and 10 degrees, is chosen at random.
+
+Therefore, Augmentor allows you to create an augmentation pipeline, which chains together operations that are applied stochastically, where the parameters of each of these operations are also chosen at random, within a range specified by the user. This means that each time an image is passed through the pipeline, a different image is returned. Depending on the number of operations in the pipeline, and the range of values that each operation has available, a very large amount of new image data can be created in this way.
+
+All functions described in this section are made available by the Pipeline object. To begin using Augmentor, you always create a new Pipeline object by instantiating it with a path to a set of images or image that you wish to augment:
 
 .. code-block:: python
 
@@ -38,6 +56,8 @@ To see the status of the current pipeline:
 	    PNG
 
 You can remove operations using the ``remove_operation(index)`` function and the appropriate ``index`` indicator from above.
+
+Full documentation of all functions and operations can be found in the auto-generated documentation. This guide suffice as a rough guide to the major features of the package, however.
 
 Perspective Skewing
 -------------------
@@ -126,7 +146,7 @@ However, the ``rotate()`` warrants more discussion and will be desribed here. Wh
 | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/rotate.png |
 +-------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+
 
-As can be seen above, an arbitrary, non-modulo 90, rotation will unfortunately result in the image being padded in each corner. To allieviate this, Augmentor's default behaviour is to crop the image and retain the largest drop possible while maintaining the image's aspect ratio:
+As can be seen above, an arbitrary, non-modulo 90, rotation will unfortunately result in the image being padded in each corner. To allieviate this, Augmentor's default behaviour is to crop the image and retain the largest crop possible while maintaining the image's aspect ratio:
 
 +-------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------+
 | Original Image                                                                                  | Rotated 10 degrees, automatically cropped                                                             |
@@ -194,7 +214,7 @@ You could combine this with a resize operation, so that the images returned are 
 Mirroring
 ---------
 
-The following functions are available for mirroring images (translating them throw the x any y axes):
+The following functions are available for mirroring images (translating them through the x any y axes):
 
 - ``flip_left_right()``
 - ``flip_top_bottom()``
@@ -203,7 +223,7 @@ The following functions are available for mirroring images (translating them thr
 Of these, ``flip_random()`` can be used in situations where mirroring through both axes may make sense. We may, for example, combine random mirroring, with random distortions, to create new data:
 
 +--------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
-| Original image                                                                                         | Random crops + resize operation                                                                         |
+| Original image                                                                                         | Random mirroring + random distortions                                                                   |
 +--------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
 | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/eight_200px.png | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/flip_distort.gif |
 +--------------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
