@@ -126,8 +126,11 @@ class Pipeline(object):
             except IOError:
                 print("Insufficient rights to read or write output directory (%s)" % abs_output_directory)
 
+        # Use the ImageUtilities class's scan_directory function to find images in the
+        # source_directory folder.
         self.image_list = scan_directory(source_directory)
 
+        # Create AugmentorImage objects for each of the images in the source directory.
         for image_path in scan_directory(source_directory):
             single_augmentor_image = AugmentorImage(image_path=image_path,
                                                     output_directory=abs_output_directory)
@@ -136,7 +139,8 @@ class Pipeline(object):
                                                                    os.path.basename(image_path))
             self.augmentor_images.append(single_augmentor_image)
 
-        # TODO: Check if all ground truth images are readable.
+        # Check the images, read their dimensions, and remove them if they cannot be read
+        # TODO: Do not throw an error here, just remove the image and continue.
         for augmentor_image in self.augmentor_images:
             try:
                 with Image.open(augmentor_image.image_path) as opened_image:
@@ -201,7 +205,7 @@ class Pipeline(object):
         path defined during the pipeline's instantiation.
 
         :param n: The number of new samples to produce.
-        :type n: Int
+        :type n: Integer
         :return: None
         """
         if len(self.augmentor_images) == 0:
@@ -217,7 +221,7 @@ class Pipeline(object):
                 if sample_count <= n:
                     self._execute(augmentor_image)
                     file_name_to_print = os.path.basename(augmentor_image.image_path)
-                    # This is just to avoid printing very long file names
+                    # This is just to shoten very long file names which obscure the progress bar.
                     if len(file_name_to_print) >= 30:
                         file_name_to_print = file_name_to_print[0:10] + "..." + \
                                              file_name_to_print[-10: len(file_name_to_print)]
@@ -230,7 +234,7 @@ class Pipeline(object):
         """
         Apply the current pipeline to a single image, returning the
         transformed image. By default, the transformed image is not saved 
-        to disk.
+        to disk, and is returned to the user.
 
         This method can be used to pass a single image through the
         pipeline, but will not save the transformed to disk by
@@ -241,7 +245,7 @@ class Pipeline(object):
          pipeline.
         :param save_to_disk: Whether to save the image to disk. Defaults to
          False.
-        :type image: String
+        :type image_path: String
         :type save_to_disk: Boolean
         :return: The transformed image.
         """
@@ -253,9 +257,9 @@ class Pipeline(object):
         Add an operation directly to the pipeline. Can be used to add custom
         operations to a pipeline.
 
-        To add custom operations to a pipeline, subclass from
-        Operation, overload its methods, and insert it into the pipeline
-        using this method.
+        To add custom operations to a pipeline, subclass from the
+        Operation abstract base class, overload its methods, and insert the 
+        new object into the pipeline using this method.
 
          .. seealso:: The :class:`.Operation` class.
 
@@ -279,6 +283,7 @@ class Pipeline(object):
           index.
 
         :param operation_index: The index of the operation to remove.
+        :type operation_index: Integer
         :return: The removed operation. You can reinsert this at end of the
          pipeline using :func:`add_operation` if required.
         """
@@ -287,8 +292,9 @@ class Pipeline(object):
 
     def add_ground_truth_directory(self, ground_truth_directory, halt_on_non_match=False):
         """
-        Add a directory containing the ground truth for your current set of
-        images.
+        .. note:: This function is currently not being used.
+         Although this function is not currently being used by Augmentor, 
+         it is being kept here for a future implementation.
 
         This function allows you to add ground truth images that relate to
         the images currently in pipeline. It will scan a folder and collate
@@ -306,10 +312,6 @@ class Pipeline(object):
         :return: None
         """
 
-        # Right now, it seems unlikely that we will need this function at all.
-        # Keeping it here for the meantime however.
-        raise NotImplementedError("This method is currently not implemented.")
-
         # if not halt_on_non_match:
         #     ground_truth_file_paths = scan_directory(ground_truth_directory)
 
@@ -323,6 +325,8 @@ class Pipeline(object):
         # missing_files = set(ground_truth_file_names).difference(original_file_names)
 
         # return common_files, missing_files
+
+        raise NotImplementedError("This method is currently not implemented.")
 
     def status(self):
         """
@@ -716,9 +720,9 @@ class Pipeline(object):
 
         This function allows you to use the current pipeline to generate
         samples on a different image source, defined by the
-        :attr:`image_source` parameter. The ``image_source`` can either be a
-        path to a single image, or a path to a folder containing any number
-        of images.
+        :attr:`image_source` parameter. The :attr:`image_source` can either 
+        be a path to a single image, or a path to a folder containing any 
+        number of images.
 
         .. seealso:: The :func:`sample` function.
 
