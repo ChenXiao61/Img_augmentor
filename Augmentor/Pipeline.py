@@ -51,7 +51,6 @@ class Pipeline(object):
         random.seed()
 
         # TODO: Allow a single image to be added when initialising.
-
         self.image_counter = 0
         self.augmentor_images = []
         self.distinct_dimensions = set()
@@ -75,11 +74,36 @@ class Pipeline(object):
         # print("Output directory set to %s." % self.output_directory)
 
     def _populate(self, source_directory, output_directory, ground_truth_directory, ground_truth_output_directory):
+        """
+        Private method for populating member variables with AugmentImage
+        objects for each of the images found in the source directory 
+        specified by the user. It also populates a number of fields such as
+        the :attr:`output_directory` member variable, used later when saving
+        images to disk.
+        
+        This method is used by :func:`__init__`. 
+        
+        :param source_directory: The directory to scan for images.
+        :param output_directory: The directory to set for saving files.
+         Defaults to a directory named output relative to 
+         :attr:`source_directory`.
+        :param ground_truth_directory: A directory containing ground truth 
+         files for the associated images in the :attr:`source_directory` 
+         directory.
+        :param ground_truth_output_directory: A path to a directory to store
+         the output of the operations on the ground truth data set.
+        :type source_directory: String
+        :type output_directory: String
+        :type ground_truth_directory: String
+        :type ground_truth_output_directory: String
+        :return: None
+        """
 
         ####
+        # NOTE.
         # A lot of this functionality, such as checking for paths that exist
-        # and that they are writable, etc., will be moved to the AugmentorImage class
-        # in the ImageUtilities module.
+        # and that they are writable, etc., will eventually be moved to the
+        # AugmentorImage class in the ImageUtilities module.
         ####
 
         # Check if the source directory for the original images to augment exists at all
@@ -132,6 +156,10 @@ class Pipeline(object):
         """
         Private method. Used to pass an image through the current pipeline,
         and return the augmented image.
+        
+        The returned image can then either be saved to disk or simply passed
+        back to the user. Currently this is fixed to True, as Augmentor
+        has only been implemented to save to disk at present.
 
         :param augmentor_image: The image to pass through the pipeline.
         :param save_to_disk: Whether to save the image to disk. Currently
@@ -556,6 +584,10 @@ class Pipeline(object):
         """
         self.add_operation(CropPercentage(probability=probability, percentage_area=percentage_area, centre=False))
 
+    def crop_random_not_to_scale(self, probability, percentage_area):
+        # TODO: Crop an area where the ratio is not kept the same, then resize to uniform dimensions
+        raise NotImplementedError
+
     def crop_random_absolute(self, probability, width, height):
         raise NotImplementedError
 
@@ -768,7 +800,7 @@ class Pipeline(object):
 
         :param image_path: The path to the image.
         :type image_path: String
-        :return: A tuple containing the image's file name, extension, and
+        :return: A 3-tuple containing the image's file name, extension, and
          root path.
         """
         file_name, extension = os.path.splitext(image_path)

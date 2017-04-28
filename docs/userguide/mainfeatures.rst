@@ -7,7 +7,7 @@ Augmentor is software package for image augmentation with an emphasis on providi
 
 In principle, Augmentor consists of a number of classes for standard image manipulation functions, such as the ``Rotate`` class or the ``Crop`` class. You interact and use these classes using a large number of convenience functions, which cover most of the functions you might require when augmenting image datasets for machine learning problems.
 
-Because image augmentation is often a multi-stage procedure, Augmentor uses a **pipeline**-based appraoch, where **operations** are added sequentially to a pipeline. Images are then passed through this pipeline, where each operation is applied to the image as it passed through the pipeline.
+Because image augmentation is often a multi-stage procedure, Augmentor uses a **pipeline**-based appraoch, where **operations** are added sequentially in order to generate a pipeline. Images are then passed through this pipeline, where each operation is applied to the image as it passes through.
 
 Also, Augmentor applies operations to images **stochastically** as they pass through the pipeline, according to a user-defined probability value for each operation. 
 
@@ -17,7 +17,7 @@ Therefore every operation has at minimum a probability parameter, which controls
     
     rotate(probability=0.5, max_left_rotation=5, max_right_rotation=10)
 
-The probability parameter controls how often the operation is applied. The ``max_left_rotation`` and ``max_right_rotation`` controls the degree by which the image is rotated, **if** the operation is applied. The value, in this case between -5 and 10 degrees, is chosen at random.
+The ``probability`` parameter controls how often the operation is applied. The ``max_left_rotation`` and ``max_right_rotation`` controls the degree by which the image is rotated, **if** the operation is applied. The value, in this case between -5 and 10 degrees, is chosen at random.
 
 Therefore, Augmentor allows you to create an augmentation pipeline, which chains together operations that are applied stochastically, where the parameters of each of these operations are also chosen at random, within a range specified by the user. This means that each time an image is passed through the pipeline, a different image is returned. Depending on the number of operations in the pipeline, and the range of values that each operation has available, a very large amount of new image data can be created in this way.
 
