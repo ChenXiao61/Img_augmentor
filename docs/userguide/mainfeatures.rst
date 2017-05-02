@@ -7,7 +7,7 @@ Augmentor is software package for image augmentation with an emphasis on providi
 
 In principle, Augmentor consists of a number of classes for standard image manipulation functions, such as the ``Rotate`` class or the ``Crop`` class. You interact and use these classes using a large number of convenience functions, which cover most of the functions you might require when augmenting image datasets for machine learning problems.
 
-Because image augmentation is often a multi-stage procedure, Augmentor uses a **pipeline**-based appraoch, where **operations** are added sequentially in order to generate a pipeline. Images are then passed through this pipeline, where each operation is applied to the image as it passes through.
+Because image augmentation is often a multi-stage procedure, Augmentor uses a **pipeline**-based approach, where **operations** are added sequentially in order to generate a pipeline. Images are then passed through this pipeline, where each operation is applied to the image as it passes through.
 
 Also, Augmentor applies operations to images **stochastically** as they pass through the pipeline, according to a user-defined probability value for each operation. 
 
@@ -45,15 +45,15 @@ To see the status of the current pipeline:
     There are 1 operation(s) in the current pipeline.
     Index 0:
         Operation RotateRange (probability: 1):
-	        Attribute: max_right_rotation (10)
-	        Attribute: max_left_rotation (-5)
-	        Attribute: probability (1)
+            Attribute: max_right_rotation (10)
+            Attribute: max_left_rotation (-5)
+            Attribute: probability (1)
 
     There are 1 image(s) in the source directory.
     Dimensions:
-	    Width: 400 Height: 400
+        Width: 400 Height: 400
     Formats:
-	    PNG
+        PNG
 
 You can remove operations using the ``remove_operation(index)`` function and the appropriate ``index`` indicator from above.
 
@@ -138,7 +138,7 @@ Rotate functions that are available are:
 
 Most of these methods are self-explanatory. The ``rotate_random_90()`` function will rotate the image by either 90, 180, or 270 degrees. 
 
-However, the ``rotate()`` warrants more discussion and will be desribed here. When an image is rotated, and it is not a multiple of 90 degrees, the image must either be stretched to accomodate a now larger image, or some of the image must be cut, as demonstrated below:
+However, the ``rotate()`` warrants more discussion and will be described here. When an image is rotated, and it is not a multiple of 90 degrees, the image must either be stretched to accommodate a now larger image, or some of the image must be cut, as demonstrated below:
 
 +-------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+
 | Original Image                                                                                  | Rotated 10 degrees                                                                                |
@@ -146,7 +146,7 @@ However, the ``rotate()`` warrants more discussion and will be desribed here. Wh
 | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/rotate.png |
 +-------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------+
 
-As can be seen above, an arbitrary, non-modulo 90, rotation will unfortunately result in the image being padded in each corner. To allieviate this, Augmentor's default behaviour is to crop the image and retain the largest crop possible while maintaining the image's aspect ratio:
+As can be seen above, an arbitrary, non-modulo 90, rotation will unfortunately result in the image being padded in each corner. To alleviate this, Augmentor's default behaviour is to crop the image and retain the largest crop possible while maintaining the image's aspect ratio:
 
 +-------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------+
 | Original Image                                                                                  | Rotated 10 degrees, automatically cropped                                                             |

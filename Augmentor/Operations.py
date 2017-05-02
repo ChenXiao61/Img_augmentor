@@ -46,14 +46,21 @@ class Operation(object):
 
 
 class HistogramEqualisation(Operation):
+    """
+    The class :class:`HistogramEqualisation` is used to perform histogram
+    equalisation on images passed to it.
+    """
     def __init__(self, probability):
         Operation.__init__(self, probability)
 
     def perform_operation(self, image):
         # TODO: We may need to apply this to each channel:
-        # This might be a color image.
-        # The histogram will be computed on the flattened image.
-        # You can instead apply this function to each color channel.
+        # If an image is a colour image, the histogram will
+        # will be computed on the flattened image, which fires
+        # a warning.
+        # We may want to apply this instead to each colour channel.
+        # but I see no reason why right now. It would remove
+        # the need to perform to catch these warnings, however.
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             return ImageOps.equalize(image)
@@ -76,14 +83,18 @@ class Invert(Operation):
 
 
 class BlackAndWhite(Operation):
-    def __init__(self, probability):
+    def __init__(self, probability, threshold):
         Operation.__init__(self, probability)
+        self.threshold = threshold
 
     def perform_operation(self, image):
         # TODO: Currently this has been taken from URL below, needs to be changed anyway.
         # http://stackoverflow.com/questions/18777873/convert-rgb-to-black-or-white
         image = ImageOps.grayscale(image)
-        image = image.point(lambda x: 0 if x < 128 else 255, '1')
+        # Use the threshold, (which defaults to 128 at user-facing API)
+        # to control what is changed to black and what is changed to white.
+        # Note: 0 represents black and 255 represents white.
+        image = image.point(lambda x: 0 if x < self.threshold else 255, '1')
         return image
 
 
@@ -735,7 +746,6 @@ class Custom(Operation):
         Operation.__init__(self, probability)
         self.custom_function = custom_function
         self.function_arguments = function_arguments
-        # TODO: find the names of the argument types above, is that a function pointer???
 
     def __str__(self):
         return "Custom (" + self.custom_function.__name__ + ")"

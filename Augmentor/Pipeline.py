@@ -634,8 +634,17 @@ class Pipeline(object):
         raise NotImplementedError
 
     def histogram_equalisation(self, probability=1.0):
+        """
+        Apply histogram equalisation to the image.
+        
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed. For histogram,
+         equalisation it is recommended that the probability be set to 1.
+        :type probability: Float
+        :return: None
+        """
         if probability != 1:
-            warnings.warn("For resizing, it is recommended that the probability is set to 1.", stacklevel=1)
+            warnings.warn("For this function, it is recommended that the probability is set to 1.", stacklevel=1)
         self.add_operation(HistogramEqualisation(probability=probability))
 
     def resize_by_percentage(self, percentage_resize):
@@ -647,8 +656,11 @@ class Pipeline(object):
 
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
-        :param scale_factor: The a value larger than 1.0 as a factor to scale by.
-        :return:
+        :param scale_factor: The factor to scale by, which must be greater
+         than 1.0.
+        :type probability: Float
+        :type scale_factor: Float
+        :return: None
         """
 
         if scale_factor < 1.0:
@@ -659,15 +671,21 @@ class Pipeline(object):
 
     def resize(self, probability, width, height, resample_filter="BICUBIC"):
         """
-        Resize an image according to a set of dimensions. 
+        Resize an image according to a set of dimensions specified by the
+        user.
         
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed. For resizing,
-         it is recommended that probability be set to 1.
-        :param width: 
-        :param height: 
-        :param resample_filter: 
-        :return: 
+         it is recommended that the probability be set to 1.
+        :param width: The new width that the image should be resized to.
+        :param height: The new height that the image should be resized to.
+        :param resample_filter: The resampling filter to use. Must be one of
+         BICUBIC, BILINEAR, ANTIALIAS, or NEAREST.
+        :type probability: Float
+        :type width: Integer
+        :type height: Integer
+        :type resample_filter: String
+        :return: None
         """
 
         if probability != 1:
@@ -693,8 +711,11 @@ class Pipeline(object):
          probability that the operation should be performed.
         :param magnitude: The maximum tilt, which must be value between 0.1 
          and 1.0, where 1 represents a tilt of 45 degrees.
+        :type probability: Float
+        :type magnitude: Float
         :return: None 
         """
+
         self.add_operation(Skew(probability=probability,
                                 skew_type="TILT_LEFT_RIGHT",
                                 magnitude=magnitude))
@@ -770,6 +791,53 @@ class Pipeline(object):
         :return: None
         """
         raise NotImplementedError
+
+    def greyscale(self, probability):
+        """
+        Convert images to greyscale. For this operation, setting the 
+        :attr:`probability` to 1.0 is recommended.
+        
+        .. seealso:: The :func:`black_and_white` function.
+        
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed. For resizing,
+         it is recommended that the probability be set to 1.
+        :type probability: Float
+        :return: None
+        """
+        self.add_operation(Greyscale(probability=probability))
+
+    def black_and_white(self, probability, threshold=128):
+        """
+        Convert images to black and white. In other words convert the image
+        to use a 1-bit, binary palette. The threshold defaults to 128, 
+        but can be controlled using the :attr:`threshold` parameter.
+        
+        .. seealso:: The :func:`greyscale` function.
+        
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed. For resizing,
+         it is recommended that the probability be set to 1.
+        :param threshold: Controls the threshold point at which each pixel
+         is converted to either black or white. Any values above this 
+         threshold are converted to black, and any values below this
+         threshold are converted to white.
+        :return: None
+        """
+        # TODO: Check if the threshold text above is correct regarding conversion.
+        self.add_operation(BlackAndWhite(probability=probability, threshold=threshold))
+
+    def invert(self, probability):
+        """
+        Invert an image. For this operation, setting the 
+        :attr:`probability` to 1.0 is recommended.
+        
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed. For resizing,
+         it is recommended that the probability be set to 1.
+        :return: None
+        """
+        self.add_operation(Invert(probability=probability))
 
 ########################################################################################################################
 # To be implemented                                                                                                    #
