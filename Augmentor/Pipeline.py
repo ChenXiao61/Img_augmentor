@@ -25,6 +25,13 @@ class Pipeline(object):
     and the generation of augmented data by applying operations to
     this pipeline.
     """
+
+    # Some class variables we use often
+    probability_error_text = "The value of probability must be between 0 and 1."
+    threshold_error_text = "The value of threshold must be between 0 and 255."
+    valid_formats = ["PNG", "BMP", "GIF", "JPEG"]
+    legal_filters = ["NEAREST", "BICUBIC", "ANTIALIAS", "BILINEAR"]
+
     def __init__(self, source_directory, ground_truth_directory=None, output_directory="output", save_format="JPEG"):
         """
         Create a new Pipeline object pointing to a directory containing your
@@ -185,6 +192,7 @@ class Pipeline(object):
             file_name = str(uuid.uuid4()) + "." + self.save_format
             try:
                 # A strange error is forcing me to do this at the moment, but will fix later properly
+                # TODO: Fix this!
                 if image.mode != "RGB":
                     image = image.convert("RGB")
                 # For testing this cab be commented out to create only one output image.
@@ -377,7 +385,7 @@ class Pipeline(object):
         Set the seed of Python's internal random number generator.
 
         :param seed: The seed to use. Strings or other objects will be hashed.
-        :type seed: Object
+        :type seed: Integer
         :return: None
         """
         random.seed(seed)
@@ -395,8 +403,9 @@ class Pipeline(object):
         :type probability: Float
         :return: None
         """
-        if probability < 0 or probability > 1:
-            raise ValueError("The value of probability must be between 0 and 1.")
+
+        if 0 <= probability <= 1:
+            raise ValueError(Pipeline.probability_error_text)
         else:
             self.add_operation(Rotate(probability=probability, rotation=90))
 
@@ -552,7 +561,8 @@ class Pipeline(object):
         :return: None
         """
         self.add_operation(Distort(probability=probability, grid_width=grid_width,
-                                   grid_height=grid_height, magnitude=magnitude, randomise_magnitude=randomise_magnitude))
+                                   grid_height=grid_height, magnitude=magnitude,
+                                   randomise_magnitude=randomise_magnitude))
 
     def zoom(self, probability, min_factor, max_factor):
         """
@@ -691,7 +701,7 @@ class Pipeline(object):
         if probability != 1:
             warnings.warn("For resizing, it is recommended that the probability is set to 1.", stacklevel=1)
 
-        if resample_filter in self._legal_filters:
+        if resample_filter in Pipeline.legal_filters:
             self.add_operation(Resize(probability=probability,
                                       width=width,
                                       height=height,
@@ -805,6 +815,9 @@ class Pipeline(object):
         :type probability: Float
         :return: None
         """
+
+        if 0 <= probability <= 1:
+            raise ValueError(Pipeline.probability_error_text)
         self.add_operation(Greyscale(probability=probability))
 
     def black_and_white(self, probability, threshold=128):
@@ -818,14 +831,21 @@ class Pipeline(object):
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed. For resizing,
          it is recommended that the probability be set to 1.
-        :param threshold: Controls the threshold point at which each pixel
-         is converted to either black or white. Any values above this 
-         threshold are converted to black, and any values below this
-         threshold are converted to white.
+        :param threshold: A value between 0 and 255 which controls the
+         threshold point at which each pixel is converted to either black
+         or white. Any values above this threshold are converted to white, and
+         any values below this threshold are converted to black.
+        :type probability: Float
+        :type threshold: Integer
         :return: None
         """
-        # TODO: Check if the threshold text above is correct regarding conversion.
-        self.add_operation(BlackAndWhite(probability=probability, threshold=threshold))
+
+        if not 0 <= probability <= 1:
+            raise ValueError(Pipeline.probability_error_text)
+        elif not 0 <= threshold <= 255:
+            raise ValueError("The threshold must be between 0 and 255.")
+        else:
+            self.add_operation(BlackAndWhite(probability=probability, threshold=threshold))
 
     def invert(self, probability):
         """
@@ -837,7 +857,11 @@ class Pipeline(object):
          it is recommended that the probability be set to 1.
         :return: None
         """
-        self.add_operation(Invert(probability=probability))
+
+        if not 0 <= probability <= 1:
+            raise ValueError(Pipeline.probability_error_text)
+        else:
+            self.add_operation(Invert(probability=probability))
 
 ########################################################################################################################
 # To be implemented                                                                                                    #
@@ -910,3 +934,10 @@ class Pipeline(object):
         root_path = os.path.dirname(image_path)
 
         return file_name, extension, root_path
+
+    @staticmethod
+    def check_probability(probability):
+        if 0 <= probability <= 1:
+            return True
+        else:
+            return False

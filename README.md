@@ -51,7 +51,7 @@ which will generate 10,000 augmented images based on your specifications. By def
 
 Let's perform an augmentation task on a single image, demonstrating the pipeline and several features of Augmentor.
 
-First import the package and intialise a Pipeline object by pointing it to a directory containing your images:
+First import the package and initialise a Pipeline object by pointing it to a directory containing your images:
 
 ```python
 import Augmentor
@@ -92,7 +92,7 @@ Using elastic distortions, one image can be used to generate many images that ar
 |-----------------------------------------------------------------------------------------------------------------------------------|---|-------------------------------------------------------------------------------------------------------------------------|
 | ![eight_hand_drawn_border](https://cloud.githubusercontent.com/assets/16042756/23697279/79850d52-03e7-11e7-9445-475316b702a3.png) | → | ![eights_border](https://cloud.githubusercontent.com/assets/16042756/23697283/802698a6-03e7-11e7-94b7-f0b61977ef33.gif) |
 
-The input image has a 1 pixel black border to emphasise that only the interior of the image is being distorted.
+The input image has a 1 pixel black border to emphasise that you are getting rotation-like distortions without changing the size or aspect ratio of the original image.
 
 ## Licence and Acknowledgements
 
@@ -106,11 +106,13 @@ Augmentor is made available under the terms of the MIT Licence. See [`Licence.md
 You can use `urllib` to obtain the image in order to reproduce the augmented images above:
 
 ```python
-In [1]: import urllib
-In [2]: im_url = "https://isic-archive.com:443/api/v1/image/5436e3abbae478396759f0cf/download"
-In [3]: urllib.urlretrieve(im_url, "ISIC_0000000.jpg")
-Out[3]: ('ISIC_0000000.jpg', <httplib.HTTPMessage instance at 0x7f7bd949a950>)
+>>> from urllib import urlretrieve
+>>> im_url = "https://isic-archive.com:443/api/v1/image/5436e3abbae478396759f0cf/download"
+>>> urlretrieve(im_url, "ISIC_0000000.jpg")
+('ISIC_0000000.jpg', <httplib.HTTPMessage instance at 0x7f7bd949a950>)
 ```
+
+Note: For Python 3, use `from urllib.request import urlretrieve`.
 
 ## Asciicast
 
