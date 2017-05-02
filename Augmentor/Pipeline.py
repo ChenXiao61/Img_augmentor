@@ -698,17 +698,16 @@ class Pipeline(object):
         :return: None
         """
 
-        if probability != 1:
-            warnings.warn("For resizing, it is recommended that the probability is set to 1.", stacklevel=1)
-
-        if resample_filter in Pipeline.legal_filters:
-            self.add_operation(Resize(probability=probability,
-                                      width=width,
-                                      height=height,
-                                      resample_filter=resample_filter))
+        if not 0 <= probability <= 1:
+            raise ValueError(Pipeline.probability_error_text)
+        elif not width > 1:
+            raise ValueError("Width must be greater than 1.")
+        elif not height > 1:
+            raise ValueError("Height must be greater than 1.")
+        elif resample_filter not in Pipeline.legal_filters:
+            raise ValueError("The save_filter argument must be one of %s." % Pipeline.legal_filters)
         else:
-            print("The save_filter parameter must be one of ", self._legal_filters)
-            print("E.g. save_filter(800, 600, \'BICUBIC\')")
+            self.add_operation(Resize(probability=probability, width=width, height=height, resample_filter=resample_filter))
 
     def skew_left_right(self, probability, magnitude=None):
         """
@@ -816,7 +815,7 @@ class Pipeline(object):
         :return: None
         """
 
-        if 0 <= probability <= 1:
+        if not 0 <= probability <= 1:
             raise ValueError(Pipeline.probability_error_text)
         self.add_operation(Greyscale(probability=probability))
 
@@ -937,7 +936,7 @@ class Pipeline(object):
 
     @staticmethod
     def check_probability(probability):
-        if 0 <= probability <= 1:
+        if not 0 <= probability <= 1:
             return True
         else:
             return False
