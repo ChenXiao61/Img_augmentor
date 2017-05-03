@@ -255,6 +255,13 @@ class Skew(Operation):
         
         To see examples of the various skews, see :ref:`perspectiveskewing`.
         
+        Images are skewed **in place** and an image of the same size is
+        returned by this function. That is to say, that after a skew
+        has been performed, the largest possible area of the same aspect ratio
+        of the original image is cropped from the skewed image, and this is 
+        then resized to match the original image size. The 
+        :ref:`perspectiveskewing` section describes this in detail.
+        
         :param probability: Controls the probability that the operation is 
          performed when it is invoked in the pipeline. 
         :param skew_type: Must be one of ``TILT``, ``TILT_TOP_BOTTOM``, 
@@ -274,6 +281,7 @@ class Skew(Operation):
          To see examples of the various skews, see :ref:`perspectiveskewing`.  
                   
         :param magnitude: The degree to which the image is skewed.
+        :type probability: Float
         :type skew_type: String
         :type magnitude: Integer
         """
@@ -283,9 +291,14 @@ class Skew(Operation):
 
     def perform_operation(self, image):
         """
-        Skew an image across 4 points.
-        :param image: The image to transform.
-        :return: The transformed image.
+        Perform the skew on the passed image and returns the transformed 
+        image. Uses the :attr:`skew_type` and :attr:`magnitude` parameters to 
+        control the type of skew to perform as well as the degree to which it
+        is performed.
+        
+        :param image: The image to skew.
+        :type image: PIL.Image
+        :return: The skewed image as type PIL.Image
         """
 
         w, h = image.size
@@ -405,7 +418,28 @@ class Skew(Operation):
 
 
 class Rotate(Operation):
+    """
+    This class is used to perform rotations on images by arbitrary numbers of
+    degrees.
+      
+    Images are rotated **in place** and an image of the same size is
+    returned by this function. That is to say, that after a rotation
+    has been performed, the largest possible area of the same aspect ratio
+    of the original image is cropped from the skewed image, and this is 
+    then resized to match the original image size. The 
+    :ref:`rotating` section describes this in detail and has example 
+    images to demonstrate this.
+    """
     def __init__(self, probability, rotation):
+        """
+        As well as the required :attr:`probability` parameter, the 
+        :attr:`rotation` parameter controls the maximum number of degrees
+        by which to rotate. 
+        
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline. 
+        :param rotation: The maximum number of degrees to rotate by. 
+        """
         Operation.__init__(self, probability)
         self.rotation = rotation
 
@@ -414,10 +448,14 @@ class Rotate(Operation):
 
     def perform_operation(self, image):
         """
-        Rotate an image by an arbitrary amount.
+        Rotate an image by an arbitrary number of degrees. The 
+        `attr`:rotation` parameter controls the number of degrees by which the
+        passed image is rotated.
         
-        The source can be understood more easily by looking at the following
-        equation:
+        For developers who are looking at the function's source code, 
+        the source can be better understood by taking into account the 
+        following equations that were used to calculate the maximum area
+        to crop from the rotated image:
         
         :math:`E = \\frac{\\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}}\\Big(X-\\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}} Y\\Big)}{1-\\frac{(\\sin{\\theta_{a}})^2}{(\\sin{\\theta_{b}})^2}}`
 
@@ -467,7 +505,33 @@ class Rotate(Operation):
 
 
 class RotateRange(Operation):
+    """
+    This class is used to perform rotations on images by arbitrary numbers of
+    degrees.
+
+    Images are rotated **in place** and an image of the same size is
+    returned by this function. That is to say, that after a rotation
+    has been performed, the largest possible area of the same aspect ratio
+    of the original image is cropped from the skewed image, and this is 
+    then resized to match the original image size. The 
+    :ref:`rotating` section describes this in detail and has example 
+    images to demonstrate this.
+    """
     def __init__(self, probability, max_left_rotation, max_right_rotation):
+        """
+        As well as the required :attr:`probability` parameter, the 
+        :attr:`max_left_rotation` parameter controls the maximum number of 
+        degrees by which to rotate to the left, while the 
+        :attr:`max_right_rotation` controls the maximum number of degrees to
+        rotate to the right. 
+
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline. 
+        :param max_left_rotation: The maximum number of degrees to rotate 
+         the image anti-clockwise.
+        :param max_right_rotation: The maximum number of degrees to rotate
+         the image clockwise.
+        """
         Operation.__init__(self, probability)
         self.max_left_rotation = -abs(max_left_rotation)   # Ensure always negative
         self.max_right_rotation = abs(max_right_rotation)  # Ensure always positive

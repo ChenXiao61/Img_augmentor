@@ -125,6 +125,8 @@ Realistic new samples can be created using this method.
 
 See the auto-generated documentation for more details regarding this function's parameters.
 
+.. _rotating:
+
 Rotating
 --------
 
