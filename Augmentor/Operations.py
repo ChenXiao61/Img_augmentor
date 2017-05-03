@@ -103,9 +103,17 @@ class Operation(object):
 class HistogramEqualisation(Operation):
     """
     The class :class:`HistogramEqualisation` is used to perform histogram
-    equalisation on images passed to it.
+    equalisation on images passed to its :func:`perform_operation` function.
     """
     def __init__(self, probability):
+        """
+        As there are no user tunable parameters, the class is instantiated
+        using only the probability.
+        
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline.
+        :type probability: Float
+        """
         Operation.__init__(self, probability)
 
     def perform_operation(self, image):
