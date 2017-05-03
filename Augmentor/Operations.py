@@ -6,7 +6,7 @@ by the user, instead the user interacts with the :class:`Pipeline` class and
 uses the utility functions contained there. 
  
 In this module, each operation is a subclass of type :class:`Operation`.
-:class:`Pipeline` objects expect :class:`Operation` types, and therefore all
+:class:`.Pipeline` objects expect :class:`Operation` types, and therefore all
 operations are of type :class:`Operation`, and extend this superclass 
 where necessary.
  
