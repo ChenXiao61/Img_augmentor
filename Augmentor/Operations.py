@@ -198,7 +198,27 @@ class Invert(Operation):
 
 
 class BlackAndWhite(Operation):
+    """
+    This class is used to convert images into black and white. In other words,
+    into using a 1-bit, monochrome binary colour palette. This is not to be 
+    confused with greyscale, where an 8-bit greyscale pixel intensity range
+    is used. 
+    """
     def __init__(self, probability, threshold):
+        """
+        As well as the required :attr:`probability` parameter, a 
+        :attr:`threshold` can also be defined to define the cutoff point where
+        a pixel is converted to black or white. The :attr:`threshold` defaults
+        to 128 at the user-facing 
+        :func:`~Augmentor.Pipeline.Pipeline.black_and_white` function. 
+        
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline.
+        :param threshold: A value between 0 and 255 that defines the cut off
+         point where an individual pixel is converted into black or white. 
+        :type probability: Float
+        :type threshold: Integer
+        """
         Operation.__init__(self, probability)
         self.threshold = threshold
 
