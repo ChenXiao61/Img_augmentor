@@ -27,10 +27,10 @@ class Pipeline(object):
     """
 
     # Some class variables we use often
-    probability_error_text = "The value of probability must be between 0 and 1."
-    threshold_error_text = "The value of threshold must be between 0 and 255."
-    valid_formats = ["PNG", "BMP", "GIF", "JPEG"]
-    legal_filters = ["NEAREST", "BICUBIC", "ANTIALIAS", "BILINEAR"]
+    _probability_error_text = "The value of probability must be between 0 and 1."
+    _threshold_error_text = "The value of threshold must be between 0 and 255."
+    _valid_formats = ["PNG", "BMP", "GIF", "JPEG"]
+    _legal_filters = ["NEAREST", "BICUBIC", "ANTIALIAS", "BILINEAR"]
 
     def __init__(self, source_directory, ground_truth_directory=None, output_directory="output", save_format="JPEG"):
         """
@@ -72,8 +72,6 @@ class Pipeline(object):
                        ground_truth_directory=ground_truth_directory,
                        ground_truth_output_directory=output_directory)
 
-        self._valid_formats = ["PNG", "BMP", "GIF", "JPEG"]
-        self._legal_filters = ["NEAREST", "BICUBIC", "ANTIALIAS", "BILINEAR"]
         self.save_format = save_format
         self.operations = []
 
@@ -405,7 +403,7 @@ class Pipeline(object):
         """
 
         if 0 <= probability <= 1:
-            raise ValueError(Pipeline.probability_error_text)
+            raise ValueError(Pipeline._probability_error_text)
         else:
             self.add_operation(Rotate(probability=probability, rotation=90))
 
@@ -699,13 +697,13 @@ class Pipeline(object):
         """
 
         if not 0 <= probability <= 1:
-            raise ValueError(Pipeline.probability_error_text)
+            raise ValueError(Pipeline._probability_error_text)
         elif not width > 1:
             raise ValueError("Width must be greater than 1.")
         elif not height > 1:
             raise ValueError("Height must be greater than 1.")
-        elif resample_filter not in Pipeline.legal_filters:
-            raise ValueError("The save_filter argument must be one of %s." % Pipeline.legal_filters)
+        elif resample_filter not in Pipeline._legal_filters:
+            raise ValueError("The save_filter argument must be one of %s." % Pipeline._legal_filters)
         else:
             self.add_operation(Resize(probability=probability, width=width, height=height, resample_filter=resample_filter))
 
@@ -816,7 +814,7 @@ class Pipeline(object):
         """
 
         if not 0 <= probability <= 1:
-            raise ValueError(Pipeline.probability_error_text)
+            raise ValueError(Pipeline._probability_error_text)
         self.add_operation(Greyscale(probability=probability))
 
     def black_and_white(self, probability, threshold=128):
@@ -840,7 +838,7 @@ class Pipeline(object):
         """
 
         if not 0 <= probability <= 1:
-            raise ValueError(Pipeline.probability_error_text)
+            raise ValueError(Pipeline._probability_error_text)
         elif not 0 <= threshold <= 255:
             raise ValueError("The threshold must be between 0 and 255.")
         else:
@@ -858,7 +856,7 @@ class Pipeline(object):
         """
 
         if not 0 <= probability <= 1:
-            raise ValueError(Pipeline.probability_error_text)
+            raise ValueError(Pipeline._probability_error_text)
         else:
             self.add_operation(Invert(probability=probability))
 

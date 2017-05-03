@@ -24,17 +24,45 @@ import warnings
 
 class Operation(object):
     """
-    The class :class:`Operation` represents the Base class for all operations
+    The class :class:`Operation` represents the base class for all operations
     that can be performed. Inherit from :class:`Operation`, overload its
-    methods, and instantiate super to create a new operation.
+    methods, and instantiate super to create a new operation. See 
+    the section on extending Augmentor with custom operations on Read The
+    Docs for more detailed information at
+    http://augmentor.readthedocs.io/en/master/userguide/extend.html
     """
     def __init__(self, probability):
+        """
+        All operations must at least have a :attr:`probability` which is 
+        initialised when creating the operation's object.
+        
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline. 
+        :type probability: Float
+        """
         self.probability = probability
 
     def __str__(self):
+        """
+        Used to display a string representation of the operation, which is 
+        used by the :func:`Pipeline.status` to display the current pipeline's
+        operations in a human readable way.
+        
+        :return: A string representation of the operation. Can be overridden 
+         if required, for example as is done in the :class:`Rotate` class. 
+        """
         return self.__class__.__name__
 
     def perform_operation(self, image):
+        """
+        Perform the operation on the image. Each operation must at least 
+        have this function, which accepts an image of type PIL.Image, performs
+        its operation, and returns an image of type PIL.Image.
+        
+        :param image: The image to transform.
+        :type image: PIL.Image
+        :return: The transformed image of type PIL.Image.
+        """
         raise RuntimeError("Illegal call to base class.")
 
     @staticmethod
@@ -688,7 +716,7 @@ class Distort(Operation):
         for i in range(len(dimensions)):
             generated_mesh.append([dimensions[i], polygons[i]])
 
-        return image.transform(image.size, Image.MESH, generated_mesh, resample=Image.LINEAR)
+        return image.transform(image.size, Image.MESH, generated_mesh, resample=Image.BICUBIC)
 
 
 class Zoom(Operation):
