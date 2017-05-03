@@ -425,6 +425,7 @@ class Rotate(Operation):
     """
 
     # TODO: Incorporate these into the code in Pipeline.py
+    # Also, move them to the Module
     ROTATE90 = 90
     ROTATE180 = 180
     ROTATE270 = 270
@@ -569,23 +570,80 @@ class RotateRange(Operation):
 
 
 class Resize(Operation):
+    """
+    This class is used to resize images by absolute values passed as parameters.
+    """
     def __init__(self, probability, width, height, resample_filter):
+        """
+        Accepts the required probability parameter as well as parameters
+        to control the size of the transformed image.
+         
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline. 
+        :param width: The width in pixels to resize the image to.
+        :param height: The height in pixels to resize the image to.
+        :param resample_filter: The resample filter to use. Must be one of 
+         the standard PIL types, i.e. ``NEAREST``, ``BICUBIC``, ``ANTIALIAS``, 
+         or ``BILINEAR``.
+        :type probability: Float
+        :type width: Integer
+        :type height: Integer
+        :type resample_filter: String
+        """
         Operation.__init__(self, probability)
         self.width = width
         self.height = height
         self.resample_filter = resample_filter
 
     def perform_operation(self, image):
+        """
+        Resize the passed image and returns the resized image. Uses the
+        parameters passed to the constructor to resize the passed image.
+        
+        :param image: The image to resize.
+        :type image: PIL.Image
+        :return: The resized image as type PIL.Image
+        """
         # TODO: Automatically change this to ANTIALIAS or BICUBIC depending on the size of the file
         return image.resize((self.width, self.height), eval("Image.%s" % self.resample_filter))
 
 
 class Flip(Operation):
+    """
+    This class is used to mirror image through the x or y axes.
+    
+    The class allows an image to be mirrored along either 
+    its x axis or its y axis, or randomly.
+    """
     def __init__(self, probability, top_bottom_left_right):
+        """
+        The direction of the flip, or whether it should be randomised, is 
+        controlled using the `attr`:top_bottom_left_right` parameter.
+        
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline.
+        :param top_bottom_left_right: Controls the direction the image should
+         be mirrored. Must be one of ``LEFT_RIGHT``, ``TOP_BOTTOM``, or 
+         ``RANDOM``.
+         
+         - ``LEFT_RIGHT`` defines that the image is mirrored along its x axis.
+         - ``TOP_BOTTOM`` defines that the image is mirrored along its y axis.
+         - ``RANDOM`` defines that the image is mirrored randomly along 
+           either the x or y axis.
+        """
         Operation.__init__(self, probability)
         self.top_bottom_left_right = top_bottom_left_right
 
     def perform_operation(self, image):
+        """
+        Mirror the image according to the `attr`:top_bottom_left_right` 
+        argument passed to the constructor and return the mirrored image.
+        
+        :param image: The image to mirror.
+        :type image: PIL.Image
+        :return: The mirrored image as type PIL.Image
+        """
+        # TODO: Does it make sense to flip both ways?
         if self.top_bottom_left_right == "LEFT_RIGHT":
             return image.transpose(Image.FLIP_LEFT_RIGHT)
         elif self.top_bottom_left_right == "TOP_BOTTOM":
