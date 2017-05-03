@@ -610,7 +610,7 @@ class Resize(Operation):
 
 class Flip(Operation):
     """
-    This class is used to mirror image through the x or y axes.
+    This class is used to mirror images through the x or y axes.
     
     The class allows an image to be mirrored along either 
     its x axis or its y axis, or randomly.
@@ -657,14 +657,44 @@ class Flip(Operation):
 
 
 class Crop(Operation):
+    """
+    This class is used to crop images by absolute values passed as parameters.
+    """
     def __init__(self, probability, width, height, centre):
+        """
+        As well as the always required :attr:`probability` parameter, the 
+        constructor requires a :attr:`width` to control the width of
+        of the area to crop as well as a :attr:`height` parameter 
+        to control the height of the area to crop. Also, whether the 
+        area to crop should be taken from the centre of the image or from a 
+        random location within the image is toggled using :attr:`centre`.
+        
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline. 
+        :param width: The width in pixels of the area to crop from the image.
+        :param height: The height in pixels of the area to crop from the image.
+        :param centre: Whether to crop from the centre of the image or a random
+         location within the image, while maintaining the size of the crop 
+         without cropping out of the original image's area.
+        :type probability: Float
+        :type width: Integer
+        :type height: Integer
+        :type centre: Boolean
+        """
         Operation.__init__(self, probability)
         self.width = width
         self.height = height
         self.centre = centre
 
     def perform_operation(self, image):
-
+        """
+        Crop an area from an image, either from a random location or centred,
+        using the dimensions supplied during instantiation.
+        
+        :param image: The image to crop the area from.
+        :type image: PIL.Image
+        :return: The cropped area as an image of type PIL.Image
+        """
         w, h = image.size
 
         if self.centre:
@@ -748,6 +778,9 @@ class CropPercentage(Operation):
 
 
 class CropRandom(Operation):
+    """
+    This class is currently not in use.
+    """
     def __init__(self, probability, percentage_area):
         Operation.__init__(self, probability)
         self.percentage_area = percentage_area
@@ -882,16 +915,37 @@ class Shear(Operation):
 
 class Scale(Operation):
     """
-    Class to increase or decrease images by a certain factor. The ``Resize`` class handles images \
-    that need to be re-sized with different **dimensions**, which may not maintain aspect ratio.
+    This class is used to increase or decrease images in size by a certain 
+    factor, while maintaining the aspect ratio of the original image. 
+    
+    .. seealso:: The :class:`Resize` class for resizing images by 
+     **dimensions**, and hence will not necessarily maintain the aspect ratio.
+
     """
     def __init__(self, probability, scale_factor):
+        """
+        As the aspect ratio is always kept constant, only a 
+        :attr:`scale_factor` is required for scaling the image.
+        
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline. 
+        :param scale_factor: The factor by which to scale, where 1.5 would 
+         result in an image scaled up by 150%.
+        :type probability: Float
+        :type scale_factor: Float
+        """
         Operation.__init__(self, probability)
         self.scale_factor = scale_factor
 
-    # Resize by a certain factor (*not* dimensions - which would uniformly resize all
-    # images to X*Y while scale depends on the size of the input)
     def perform_operation(self, image):
+        """
+        Scale the passed :attr:`image` by the factor specified during 
+        instantiation, returning the scaled image.
+        
+        :param image: The image to scale.
+        :type image: PIL.Image
+        :return: The scaled image as type PIL.Image
+        """
         h, w = image.size
         new_h = h * int(floor(self.scale_factor))
         new_w = w * int(floor(self.scale_factor))
@@ -899,7 +953,34 @@ class Scale(Operation):
 
 
 class Distort(Operation):
+    """
+    This class performs randomised, elastic distortions on images.
+    """
     def __init__(self, probability, grid_width, grid_height, magnitude, randomise_magnitude):
+        """
+        As well as the probability, the granularity of the distortions 
+        produced by this class can be controlled using the width and
+        height of the overlaying distortion grid. The larger the height
+        and width of the grid, the smaller the distortions. This means
+        that larger grid sizes can result in finer, less sever distortions.
+        As well as this, the magnitude of the distortions vectors can 
+        also be adjusted.
+        
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline. 
+        :param grid_width: The width of the gird overlay, which is used
+         by the class to apply the transformations to the image.
+        :param grid_height: The height of the gird overlay, which is used
+         by the class to apply the transformations to the image.
+        :param magnitude: Controls the degree to which each distortion is 
+         applied to the overlaying distortion grid.
+        :param randomise_magnitude: Controls whether the distortion magnitude
+         is randomised or fixed.
+        :type probability: Float
+        :type grid_width: Integer
+        :type grid_height: Integer
+        :type magnitude: Integer
+        """
         Operation.__init__(self, probability)
         self.grid_width = grid_width
         self.grid_height = grid_height
@@ -908,7 +989,14 @@ class Distort(Operation):
         self.randomise_magnitude = randomise_magnitude
 
     def perform_operation(self, image):
-
+        """
+        Distorts the passed image according to the parameters supplied during
+        instantiation, returning the newly distorted image.
+        
+        :param image: The image to be distorted. 
+        :type image: PIL.Image
+        :return: The distorted image as type PIL.Image
+        """
         w, h = image.size
 
         horizontal_tiles = self.grid_width
