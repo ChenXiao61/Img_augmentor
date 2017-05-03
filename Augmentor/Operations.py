@@ -107,8 +107,8 @@ class HistogramEqualisation(Operation):
     """
     def __init__(self, probability):
         """
-        As there are no user tunable parameters, the class is instantiated
-        using only the probability.
+        As there are no further user definable parameters, the class is 
+        instantiated using only the :attr:`probability` argument.
         
         :param probability: Controls the probability that the operation is 
          performed when it is invoked in the pipeline.
@@ -117,31 +117,83 @@ class HistogramEqualisation(Operation):
         Operation.__init__(self, probability)
 
     def perform_operation(self, image):
+        """
+        Performs histogram equalisation on the image passed as an argument 
+        and returns the equalised image. There are no user definable parameters
+        for this method.
+        
+        :param image: The image on which to perform the histogram equalisation.
+        :type image: PIL.Image
+        :return: The transformed image of type PIL.Image
+        """
         # TODO: We may need to apply this to each channel:
         # If an image is a colour image, the histogram will
         # will be computed on the flattened image, which fires
         # a warning.
-        # We may want to apply this instead to each colour channel.
+        # We may want to apply this instead to each colour channel,
         # but I see no reason why right now. It would remove
-        # the need to perform to catch these warnings, however.
+        # the need to catch these warnings, however.
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             return ImageOps.equalize(image)
 
 
 class Greyscale(Operation):
+    """
+    This class is used to convert images into greyscale. That is, it converts
+    images into having only shades of grey (pixel value intensities) 
+    varying from 0 to 255 which represent black and white respectively.
+    
+    .. seealso:: The :class:`BlackAndWhite` class.
+    """
     def __init__(self, probability):
+        """
+        As there are no further user definable parameters, the class is 
+        instantiated using only the :attr:`probability` argument.
+        
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline.
+        :type probability: Float
+        """
         Operation.__init__(self, probability)
 
     def perform_operation(self, image):
+        """
+        Converts the passed image to greyscale and returns the transformed 
+        image. There are no user definable parameters for this method.
+        
+        :param image: The image to convert to greyscale.
+        :type image: PIL.Image
+        :return: The transformed image as type PIL.Image
+        """
         return ImageOps.grayscale(image)
 
 
 class Invert(Operation):
+    """
+    This class is used to negate images. That is to reverse the pixel values
+    for any image processed by it.
+    """
     def __init__(self, probability):
+        """
+        As there are no further user definable parameters, the class is 
+        instantiated using only the :attr:`probability` argument.
+        
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline.
+        :type probability: Float
+        """
         Operation.__init__(self, probability)
 
     def perform_operation(self, image):
+        """
+        Negates the image passed as an argument. There are no user definable 
+        parameters for this method.
+        
+        :param image: The image to negate.
+        :type image: PIL.Image
+        :return: The transformed image as type PIL.Image
+        """
         return ImageOps.invert(image)
 
 
@@ -782,7 +834,8 @@ class Zoom(Operation):
 
 class Custom(Operation):
     """
-    Class that allows for a custom operation to be performed.
+    Class that allows for a custom operations to be performed using Augmentor's
+    standard :class:`~Augmentor.Pipeline.Pipeline` object.
     """
     def __init__(self, probability, custom_function, **function_arguments):
         """
