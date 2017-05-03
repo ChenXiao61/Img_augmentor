@@ -419,26 +419,35 @@ class Skew(Operation):
 
 class Rotate(Operation):
     """
-    This class is used to perform rotations on images by arbitrary numbers of
-    degrees.
-      
-    Images are rotated **in place** and an image of the same size is
-    returned by this function. That is to say, that after a rotation
-    has been performed, the largest possible area of the same aspect ratio
-    of the original image is cropped from the skewed image, and this is 
-    then resized to match the original image size. The 
-    :ref:`rotating` section describes this in detail and has example 
-    images to demonstrate this.
+    This class is used to perform rotations on images in multiples of 90 
+    degrees. Arbitrary rotations are handled by the :class:`RotateRange`
+    class.
     """
+
+    # TODO: Incorporate these into the code in Pipeline.py
+    ROTATE90 = 90
+    ROTATE180 = 180
+    ROTATE270 = 270
+    ROTATE_RANDOM = -1
+
     def __init__(self, probability, rotation):
         """
         As well as the required :attr:`probability` parameter, the 
-        :attr:`rotation` parameter controls the maximum number of degrees
-        by which to rotate. 
+        :attr:`rotation` parameter controls the rotation to perform, 
+        which must be one of ``90``, ``180``, ``270`` or ``-1`` (see below). 
         
         :param probability: Controls the probability that the operation is 
          performed when it is invoked in the pipeline. 
-        :param rotation: The maximum number of degrees to rotate by. 
+        :param rotation: Controls the rotation to perform. Must be one of 
+         ``90``, ``180``, ``270`` or ``-1``.
+         
+         - ``90`` rotate the image by 90 degrees.
+         - ``180`` rotate the image by 180 degrees.
+         - ``270`` rotate the image by 270 degrees. 
+         - ``-1`` rotate the image randomly by either 90, 180, or 270 degrees.
+        
+        .. seealso:: For arbitrary rotations, see the :class:`RotateRange` class.
+         
         """
         Operation.__init__(self, probability)
         self.rotation = rotation
@@ -448,60 +457,18 @@ class Rotate(Operation):
 
     def perform_operation(self, image):
         """
-        Rotate an image by an arbitrary number of degrees. The 
-        `attr`:rotation` parameter controls the number of degrees by which the
-        passed image is rotated.
-        
-        For developers who are looking at the function's source code, 
-        the source can be better understood by taking into account the 
-        following equations that were used to calculate the maximum area
-        to crop from the rotated image:
-        
-        :math:`E = \\frac{\\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}}\\Big(X-\\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}} Y\\Big)}{1-\\frac{(\\sin{\\theta_{a}})^2}{(\\sin{\\theta_{b}})^2}}`
-
-        which describes how :math:`E` is derived, and then follows 
-        :math:`B = Y - E` and 
-        :math:`A = \\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}} B`.
+        Rotate an image by either 90, 180, or 270 degrees, or randomly from
+        any of these.
         
         :param image: The image to rotate.
-        :return: The rotated image.
+        :type image: PIL.Image
+        :return: The rotated image as type PIL.Image
         """
         if self.rotation == -1:
             random_factor = random.randint(1, 3)
-            # TODO: Check if for a modulo 90 a resample is needed
-            return image.rotate(90 * random_factor, expand=True, resample=Image.BICUBIC)
+            return image.rotate(90 * random_factor, expand=True)
         else:
-            # Get size before we rotate
-            x = image.size[0]
-            y = image.size[1]
-
-            # Rotate, while expanding the canvas size
-            image = image.rotate(self.rotation, expand=True, resample=Image.BICUBIC)
-
-            # Get size after rotation, which includes the empty space
-            X = image.size[0]
-            Y = image.size[1]
-
-            # Get our two angles needed for the calculation of the largest area
-            angle_a = abs(self.rotation)
-            angle_b = 90 - angle_a
-
-            # We need the sin of angle a and b a few times
-            sin_angle_a = math.sin(math.radians(angle_a))
-            sin_angle_b = math.sin(math.radians(angle_b))
-
-            # Now we find the maximum area of the rectangle that could be cropped
-            E = (sin_angle_a / sin_angle_b) * \
-                (Y - X * (sin_angle_a / sin_angle_b))
-            E = E / 1 - (sin_angle_a ** 2 / sin_angle_b ** 2)
-            B = X - E
-            A = (sin_angle_a / sin_angle_b) * B
-
-            # Crop this area from the rotated image
-            image = image.crop((int(round(E)), int(round(A)), int(round(X - E)), int(round(Y - A))))
-
-            # Return the image, re-sized to the size of the image passed originally
-            return image.resize((x, y), resample=Image.BICUBIC)
+            return image.rotate(self.rotation, expand=True)
 
 
 class RotateRange(Operation):
@@ -531,12 +498,26 @@ class RotateRange(Operation):
          the image anti-clockwise.
         :param max_right_rotation: The maximum number of degrees to rotate
          the image clockwise.
+        :type probability: Float
+        :type max_left_rotation: Integer
+        :type max_right_rotation: Integer
         """
         Operation.__init__(self, probability)
         self.max_left_rotation = -abs(max_left_rotation)   # Ensure always negative
         self.max_right_rotation = abs(max_right_rotation)  # Ensure always positive
 
     def perform_operation(self, image):
+        """
+        Perform the rotation on the passed :attr:`image` and return
+        the transformed image. Uses the :attr:`max_left_rotation` and 
+        :attr:`max_right_rotation` passed into the constructor to control
+        the amount of degrees to rotate by. Whether the image is rotated 
+        clockwise or anti-clockwise is chosen at random.
+        
+        :param image: The image to rotate.
+        :type image: PIL.Image
+        :return: The rotated image as type PIL.Image
+        """
         random_left = random.randint(self.max_left_rotation, -5)
         random_right = random.randint(5, self.max_right_rotation)
 
@@ -657,16 +638,47 @@ class Crop(Operation):
 
 
 class CropPercentage(Operation):
+    """
+    This class is used to crop images by a percentage of their area.
+    """
     def __init__(self, probability, percentage_area, centre):
+        """
+        As well as the always required :attr:`probability` parameter, the 
+        constructor requires a :attr:`percentage_area` to control the area
+        of the image to crop in terms of its percentage of the original image, 
+        and a :attr:`centre` parameter toggle whether a random area or the
+        centre of the images should be cropped.
+        
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline. 
+        :param percentage_area: The percentage area of the original image 
+         to crop. A value of 0.5 would crop an area that is 50% of the area
+         of the original image's size. 
+        :param centre: Whether to crop from the centre of the image or
+         crop a random location within the image.
+        :type probability: Float
+        :type percentage_area: Float
+        :type centre: Boolean
+        """
         Operation.__init__(self, probability)
         self.percentage_area = percentage_area
         self.centre = centre
 
     def perform_operation(self, image):
+        """
+        Crop the passed :attr:`image` by percentage area, returning the crop as an 
+        image.
+        
+        :param image: The image to crop an area from.
+        :type image: PIL.Image
+        :return: The cropped area as an image of type PIL.Image
+        """
+
         w, h = image.size
         w_new = int(floor(w * self.percentage_area))  # TODO: Floor might return 0, so we need to check this.
         h_new = int(floor(h * self.percentage_area))
 
+        # TODO: randomise the percentage area, to get different crops each time.
         if self.centre:
             left_shift = floor(w_new / 2.)
             down_shift = floor(h_new / 2.)
