@@ -1,3 +1,18 @@
+"""
+The Operations module contains classes for all operations used by Augmentor. 
+
+The classes contained in this module are not called or instantiated directly
+ by the user, instead the user interacts with the :class:`Pipeline` class and 
+ uses the utility functions contained there. 
+ 
+In this module, each operation is a subclass of type :class:`Operation`.
+ :class:`Pipeline` objects expect :class:`Operation` types, and therefore all
+ operations are of type :class:`Operation`, and extend this superclass 
+ where necessary.
+ 
+Hence, the documentation for this module is intended for developers who 
+ wish to extend Augmentor or wish to see how operations function internally.
+"""
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 from builtins import *
@@ -67,6 +82,13 @@ class Operation(object):
 
     @staticmethod
     def extract_paths_and_extensions(image_path):
+        """
+        Utility function to extract the file name, extension and root path 
+        of an image's full path. 
+        
+        :param image_path: The path of the image.
+        :return: A 3-tuple containing the file name, extension, and root path.
+        """
         file_name, extension = os.path.splitext(image_path)
         root_path = os.path.dirname(image_path)
 
