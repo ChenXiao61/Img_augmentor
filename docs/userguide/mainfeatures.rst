@@ -59,6 +59,8 @@ You can remove operations using the ``remove_operation(index)`` function and the
 
 Full documentation of all functions and operations can be found in the auto-generated documentation. This guide suffice as a rough guide to the major features of the package, however.
 
+.. _perspectiveskewing:
+
 Perspective Skewing
 -------------------
 

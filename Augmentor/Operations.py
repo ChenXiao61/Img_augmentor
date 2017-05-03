@@ -15,8 +15,7 @@ function.
 Hence, the documentation for this module is intended for developers who 
 wish to extend Augmentor or wish to see how operations function internally.
 
-For detailed information on extending Augmentor, see
-http://augmentor.readthedocs.io/en/master/userguide/extend.html
+For detailed information on extending Augmentor, see :ref:`extendingaugmentor`.
 """
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
@@ -45,11 +44,10 @@ import warnings
 class Operation(object):
     """
     The class :class:`Operation` represents the base class for all operations
-    that can be performed. Inherit from :class:`Operation`, overload its
-    methods, and instantiate super to create a new operation. See 
-    the section on extending Augmentor with custom operations on Read The
-    Docs for more detailed information at
-    http://augmentor.readthedocs.io/en/master/userguide/extend.html
+    that can be performed. Inherit from :class:`Operation`, overload 
+    its methods, and instantiate super to create a new operation. See 
+    the section on extending Augmentor with custom operations at 
+    :ref:`extendingaugmentor`.
     """
     def __init__(self, probability):
         """
@@ -202,7 +200,9 @@ class BlackAndWhite(Operation):
     This class is used to convert images into black and white. In other words,
     into using a 1-bit, monochrome binary colour palette. This is not to be 
     confused with greyscale, where an 8-bit greyscale pixel intensity range
-    is used. 
+    is used.
+    
+    .. seealso:: The :class:`Greyscale` class.
     """
     def __init__(self, probability, threshold):
         """
@@ -223,21 +223,60 @@ class BlackAndWhite(Operation):
         self.threshold = threshold
 
     def perform_operation(self, image):
-        # TODO: Currently this has been taken from URL below, needs to be changed anyway.
-        # http://stackoverflow.com/questions/18777873/convert-rgb-to-black-or-white
+        """
+        Convert the image passed as an argument to black and white, 1-bit 
+        monochrome. Uses the :attr:`threshold` passed to the constructor
+        to control the cut-off point where a pixel is converted to black or 
+        white.
+        
+        :param image: The image to convert into monochrome.
+        :type image: PIL.Image
+        :return: The converted image as type PIL.Image
+        """
         image = ImageOps.grayscale(image)
-        # Use the threshold, (which defaults to 128 at user-facing API)
-        # to control what is changed to black and what is changed to white.
-        # Note: 0 represents black and 255 represents white.
-        image = image.point(lambda x: 0 if x < self.threshold else 255, '1')
-        return image
+        # See the Stack Overflow question:
+        # http://stackoverflow.com/questions/18777873/convert-rgb-to-black-or-white
+        # An alternative would be to use PIL.ImageOps.posterize(image=image, bits=1)
+        return image.point(lambda x: 0 if x < self.threshold else 255, '1')
 
 
 class Skew(Operation):
     """
-    Perform perspective skewing on images.
+    This class is used to perform perspective skewing on images. It allows
+    for skewing from a total of 12 different perspectives.  
     """
-    def __init__(self, probability, skew_type="TILT", magnitude=None):
+    def __init__(self, probability, skew_type, magnitude):
+        """
+        As well as the required :attr:`probability` parameter, the type of
+        skew that is performed is controlled using a :attr:`skew_type` and a 
+        :attr:`magnitude` parameter. The :attr:`skew_type` controls the
+        direction of the skew, while :attr:`magnitude` controls the degree
+        to which the skew is performed.
+        
+        To see examples of the various skews, see :ref:`perspectiveskewing`.
+        
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline. 
+        :param skew_type: Must be one of ``TILT``, ``TILT_TOP_BOTTOM``, 
+         ``TILT_LEFT_RIGHT``, or ``CORNER``.
+         
+         - ``TILT`` will randomly skew either left, right, up, or down.
+           Left or right means it skews on the x-axis while up and down
+           means that it skews on the y-axis.
+         - ``TILT_TOP_BOTTOM`` will randomly skew up or down, or in other
+           words skew along the y-axis.
+         - ``TILT_LEFT_RIGHT`` will randomly skew left or right, or in other
+           words skew along the x-axis.
+         - ``CORNER`` will randomly skew one **corner** of the image either 
+           along the x-axis or y-axis. This means in one of 8 different
+           directions, randomly.
+         
+         To see examples of the various skews, see :ref:`perspectiveskewing`.  
+                  
+        :param magnitude: The degree to which the image is skewed.
+        :type skew_type: String
+        :type magnitude: Integer
+        """
         Operation.__init__(self, probability)
         self.skew_type = skew_type
         self.magnitude = magnitude
@@ -875,9 +914,9 @@ class Custom(Operation):
          as its first parameter.
         :param function_arguments: The arguments for your custom operation's
          code.
-         :type probability: Float
-         :type custom_function: *Function
-         :type function_arguments: dict
+        :type probability: Float
+        :type custom_function: *Function
+        :type function_arguments: dict
         """
         Operation.__init__(self, probability)
         self.custom_function = custom_function

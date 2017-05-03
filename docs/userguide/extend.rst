@@ -1,3 +1,5 @@
+.. _extendingaugmentor:
+
 Extending Augmentor
 ===================
 
