@@ -20,3 +20,9 @@ Documentation of the Operations module
     :members:
     :undoc-members:
 
+Documentation of the ImageUtilities module
+------------------------------------------
+
+.. automodule:: Augmentor.ImageUtilities
+    :members:
+    :undoc-members:
