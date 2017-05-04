@@ -1230,4 +1230,12 @@ class Custom(Operation):
         return "Custom (" + self.custom_function.__name__ + ")"
 
     def perform_operation(self, image):
+        """
+        Perform the custom operation on the passed image, returning the 
+        transformed image.
+        
+        :param image: The image to perform the custom operation on.
+        :return: The transformed image (other functions in the pipeline
+         will expect an image of type PIL.Image)
+        """
         return self.function_name(image, **self.function_arguments)
