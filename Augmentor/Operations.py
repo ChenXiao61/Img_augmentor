@@ -1156,11 +1156,11 @@ class Zoom(Operation):
         :param probability: Controls the probability that the operation is 
          performed when it is invoked in the pipeline. 
         :param min_factor: The minimum amount of zoom to apply. Set both the 
-        :attr:`min_factor` and :attr:`min_factor` to the same values to zoom 
-        by a constant factor.
+         :attr:`min_factor` and :attr:`min_factor` to the same values to zoom 
+         by a constant factor.
         :param max_factor: The maximum amount of zoom to apply. Set both the 
-        :attr:`min_factor` and :attr:`min_factor` to the same values to zoom 
-        by a constant factor.
+         :attr:`min_factor` and :attr:`min_factor` to the same values to zoom 
+         by a constant factor.
         :type probability: Float
         :type min_factor: Float
         :type max_factor: Float
