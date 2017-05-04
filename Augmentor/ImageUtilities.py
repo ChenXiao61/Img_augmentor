@@ -84,10 +84,10 @@ class AugmentorImage(object):
     def image_file_name(self):
         """
         The :attr:`image_file_name` property contains the **file name** of the
-        image contained in this instance.
+        image contained in this instance. **There is no setter for this 
+        property.**
         
         :getter: Returns this image's file name.
-        :setter: **There is no setter for this property.**
         :type: String
         """
         return os.path.basename(self.image_path)
@@ -96,10 +96,10 @@ class AugmentorImage(object):
     def ground_truth(self):
         """
         The :attr:`ground_truth` property contains an absolute path to the
-        ground truth file for an image. **There is no setter for this 
-        property.**
+        ground truth file for an image.
         
-        :getter: Returns this image's file name.
+        :getter: Returns this image's ground truth file path.
+        :setter: Sets this image's ground truth file path.
         :type: String
         """
         return self._ground_truth
