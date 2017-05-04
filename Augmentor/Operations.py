@@ -782,13 +782,28 @@ class CropPercentage(Operation):
 
 class CropRandom(Operation):
     """
-    This class is currently not in use.
+    .. warning:: This :class:`CropRandom` class is currently not in use and
+     and is WIP.
     """
     def __init__(self, probability, percentage_area):
+        """
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline.
+        :param percentage_area: The percentage area of the original image 
+         to crop. A value of 0.5 would crop an area that is 50% of the area
+         of the original image's size. 
+        """
         Operation.__init__(self, probability)
         self.percentage_area = percentage_area
 
     def perform_operation(self, image):
+        """
+        Randomly crop the passed image, returning the crop as a new image.
+        
+        :param image: The image to crop.
+        :type image: PIL.Image
+        :return: The cropped region as an image of type PIL.Image
+        """
         w, h = image.size
 
         # TODO: Fix this, as it is currently 1/4 of the area for 0.5 rather than 1/2.
@@ -802,15 +817,50 @@ class CropRandom(Operation):
 
 
 class Shear(Operation):
+    """
+    This class is used to shear images, that is to tilt them in a certain
+    direction. Tilting can occur along either the x- or y-axis and in both 
+    directions (i.e. left or right along the x-axis, up or down along the 
+    y-axis).
+    
+    Images are sheared **in place** and an image of the same size as the input 
+    image is returned by this class. That is to say, that after a shear
+    has been performed, the largest possible area of the same aspect ratio
+    of the original image is cropped from the sheared image, and this is 
+    then resized to match the original image size. The 
+    :ref:`shearing` section describes this in detail.
+    
+    For sample code with image examples see :ref:`shearing`.
+    """
     def __init__(self, probability, max_shear_left, max_shear_right):
+        """
+        The shearing is randomised in magnitude, from 0 to the 
+        :attr:`max_shear_left` or 0 to :attr:`max_shear_right` where the 
+        direction is randomised. The shear axis is also randomised
+        i.e. if it shears up/down along the y-axis or 
+        left/right along the x-axis. 
+
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline. 
+        :param max_shear_left: The maximum shear to the left.
+        :param max_shear_right: The maximum shear to the right.
+        :type probability: Float
+        :type max_shear_left: Integer
+        :type max_shear_right: Integer
+        """
         Operation.__init__(self, probability)
-        # This is in radians, see
-        # http://scikit-image.org/docs/dev/api/skimage.transform.html
         self.max_shear_left = max_shear_left
         self.max_shear_right = max_shear_right
 
     def perform_operation(self, image):
-
+        """
+        Shears the passed image according to the parameters defined during 
+        instantiation, and returns the sheared image.
+        
+        :param image: The image to shear.
+        :type image: PIL.Image
+        :return: The sheared image of type PIL.Image
+        """
         ######################################################################
         # Old version which uses SciKit Image
         ######################################################################
@@ -924,6 +974,8 @@ class Scale(Operation):
     .. seealso:: The :class:`Resize` class for resizing images by 
      **dimensions**, and hence will not necessarily maintain the aspect ratio.
 
+    This function will return images that are **larger** than the input
+    images.
     """
     def __init__(self, probability, scale_factor):
         """
@@ -1091,13 +1143,40 @@ class Distort(Operation):
 
 
 class Zoom(Operation):
-    # TODO: Zoom dimensions and do not crop, so that the crop can be applied manually later
+    """
+    This class is used to enlarge images (to zoom) but to return a cropped
+    region of the zoomed image of the same size as the original image.
+    """
     def __init__(self, probability, min_factor, max_factor):
+        """
+        The amount of zoom applied is randomised, from between 
+        :attr:`min_factor` and :attr:`max_factor`. Set these both to the same
+        value to always zoom by a constant factor.
+        
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline. 
+        :param min_factor: The minimum amount of zoom to apply. Set both the 
+        :attr:`min_factor` and :attr:`min_factor` to the same values to zoom 
+        by a constant factor.
+        :param max_factor: The maximum amount of zoom to apply. Set both the 
+        :attr:`min_factor` and :attr:`min_factor` to the same values to zoom 
+        by a constant factor.
+        :type probability: Float
+        :type min_factor: Float
+        :type max_factor: Float
+        """
         Operation.__init__(self, probability)
         self.min_factor = min_factor
         self.max_factor = max_factor
 
     def perform_operation(self, image):
+        """
+        Zooms/scales the passed image and returns the new image.
+        
+        :param image: The image to be zoomed.
+        :type image: PIL.Image
+        :return: The zoomed in image as type PIL.Image
+        """
         factor = round(random.uniform(self.min_factor, self.max_factor), 2)
         original_width, original_height = image.size
         # TODO: Join these two functions together so that we don't have this image_zoom variable lying around.

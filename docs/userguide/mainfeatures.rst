@@ -162,6 +162,8 @@ As can be seen above, an arbitrary, non-modulo 90, rotation will unfortunately r
 
 This will, of course, result in the image being zoomed in. For smaller rotations of between -5 and 5 degrees, this zoom effect is not particularly drastic.
 
+.. _shearing:
+
 Shearing
 --------
 
