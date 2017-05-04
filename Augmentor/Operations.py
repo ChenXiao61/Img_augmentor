@@ -1206,7 +1206,7 @@ class Custom(Operation):
 
         To add a custom operation you can instantiate this class, passing
         a function pointer, :attr:`custom_function`, followed by an
-        arbitrarily long list keyword arguments, :attr:`**function_arguments`.
+        arbitrarily long list keyword arguments, :attr:`\*\*function_arguments`.
 
         .. seealso:: The :func:`~Augmentor.Pipeline.Pipeline.add_operation`
          function.
@@ -1219,7 +1219,7 @@ class Custom(Operation):
         :param function_arguments: The arguments for your custom operation's
          code.
         :type probability: Float
-        :type custom_function: *Function
+        :type custom_function: \*Function
         :type function_arguments: dict
         """
         Operation.__init__(self, probability)
