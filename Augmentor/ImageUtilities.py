@@ -45,8 +45,15 @@ class AugmentorImage(object):
         self.image_path = image_path
         self.output_directory = output_directory
 
+
     @property
     def output_directory(self):
+        """
+        Getter for :attr:`output_directory`. This is the directory to which
+        augmented images will be saved for this instance.
+        
+        :return: The output directory for this image 
+        """
         return self._output_directory
 
     @output_directory.setter
