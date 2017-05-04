@@ -1,7 +1,15 @@
 # Pipeline.py
 # Author: Marcus D. Bloice <https://github.com/mdbloice>
 # Licensed under the terms of the MIT Licence.
+"""
+The Pipeline module is the user facing API for the Augmentor package. It
+contains the :class:`~Augmentor.Pipeline.Pipeline` class which is used to 
+create pipeline objects, which can be used to build an augmentation pipeline
+by adding operations to the pipeline object. 
 
+For a good overview of how to use Augmentor, along with code samples and 
+example images, can be seen in the :ref:`mainfeatures` section.  
+"""
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 

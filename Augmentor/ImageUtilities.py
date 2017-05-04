@@ -1,3 +1,11 @@
+# ImageUtilities.py
+# Author: Marcus D. Bloice <https://github.com/mdbloice>
+# Licensed under the terms of the MIT Licence.
+"""
+The ImageUtilities module provides a number of helper functions, as well as
+the main :class:`~Augmentor.ImageUtilities.AugmentorImage` class, that is used
+throughout the package as a container class for images to be augmented.
+"""
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 from builtins import *
@@ -8,13 +16,26 @@ import glob
 
 class AugmentorImage(object):
     """
-    Wrapper class containing paths to images that are used by the pipeline
-    to perform augmentation. 
+    Wrapper class containing paths to images, as well as a number of other 
+    parameters, that are used by the Pipeline and Operation modules to perform 
+    augmentation.
+     
+    Each image that is found by Augmentor during the initialisation of a 
+    Pipeline object is contained with a new AugmentorImage object.
     """
     def __init__(self, image_path, output_directory):
+        """
+        To initialise an AugmentorImage object for any image, the image's
+        file path is required, as well as that image's output directory,
+        which defines where any augmented images are stored. 
+        
+        :param image_path: The full path to an image. 
+        :param output_directory: The directory where augmented images for this
+         image should be saved.
+        """
         # Just to stop Pylint complaining about initialising these outside
         # of __init__ which is not actually happening, as the are being
-        # initialised in the setters from init, but anyway.
+        # initialised in the setters from within init, but anyway I shall obey.
         self._ground_truth = None
         self._image_path = None
         self._output_directory = None
@@ -59,6 +80,15 @@ class AugmentorImage(object):
 
 
 def extract_paths_and_extensions(image_path):
+    """
+    Extract an image's file name, its extension, and its root path (the
+    image's absolute path without the file name).
+
+    :param image_path: The path to the image.
+    :type image_path: String
+    :return: A 3-tuple containing the image's file name, extension, and
+     root path.
+    """
     file_name, extension = os.path.splitext(image_path)
     root_path = os.path.dirname(image_path)
 
@@ -66,9 +96,17 @@ def extract_paths_and_extensions(image_path):
 
 
 def scan_directory(source_directory):
+    """
+    Scan a directory for images, returning any images found with the
+    extensions ``.jpg``, ``.JPG``, ``.jpeg``, ``.JPEG``, ``.gif``, ``.GIF``,
+    ``.img``, ``.IMG``, ``.png`` or ``.PNG``.
+    
+    :param source_directory: The directory to scan for images.
+    :type source_directory: String
+    :return: A list of images found in the :attr:`source_directory`
+    """
     file_types = ['*.jpg', '*.bmp', '*.jpeg', '*.gif', '*.img', '*.png']
 
-    # Also include the uppercase versions of the file extensions.
     # TODO: We might need to catch .Jpeg and .Png perhaps?
     file_types.extend([str.upper(str(x)) for x in file_types])
 

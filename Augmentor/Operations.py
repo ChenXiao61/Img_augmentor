@@ -1,3 +1,6 @@
+# Operations.py
+# Author: Marcus D. Bloice <https://github.com/mdbloice>
+# Licensed under the terms of the MIT Licence.
 """
 The Operations module contains classes for all operations used by Augmentor. 
 
@@ -618,7 +621,7 @@ class Flip(Operation):
     def __init__(self, probability, top_bottom_left_right):
         """
         The direction of the flip, or whether it should be randomised, is 
-        controlled using the `attr`:top_bottom_left_right` parameter.
+        controlled using the :attr:`top_bottom_left_right` parameter.
         
         :param probability: Controls the probability that the operation is 
          performed when it is invoked in the pipeline.
@@ -962,7 +965,7 @@ class Distort(Operation):
         produced by this class can be controlled using the width and
         height of the overlaying distortion grid. The larger the height
         and width of the grid, the smaller the distortions. This means
-        that larger grid sizes can result in finer, less sever distortions.
+        that larger grid sizes can result in finer, less severe distortions.
         As well as this, the magnitude of the distortions vectors can 
         also be adjusted.
         
