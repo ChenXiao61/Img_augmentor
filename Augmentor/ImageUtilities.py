@@ -50,6 +50,10 @@ class AugmentorImage(object):
         """
         The :attr:`output_directory` property contains a path to the directory 
         to which augmented images will be saved for this instance.
+        
+        :getter: Returns this image's output directory.
+        :setter: Sets this image's output directory.
+        :type: String
         """
         return self._output_directory
 
@@ -62,6 +66,10 @@ class AugmentorImage(object):
         """
         The :attr:`image_path` property contains the absolute file path to the
         image.
+        
+        :getter: Returns this image's image path.
+        :setter: Sets this image's image path
+        :type: String
         """
         return self._image_path
 
@@ -77,6 +85,10 @@ class AugmentorImage(object):
         """
         The :attr:`image_file_name` property contains the **file name** of the
         image contained in this instance.
+        
+        :getter: Returns this image's file name.
+        :setter: **There is no setter for this property.**
+        :type: String
         """
         return os.path.basename(self.image_path)
 
@@ -84,7 +96,11 @@ class AugmentorImage(object):
     def ground_truth(self):
         """
         The :attr:`ground_truth` property contains an absolute path to the
-        ground truth file for an image. 
+        ground truth file for an image. **There is no setter for this 
+        property.**
+        
+        :getter: Returns this image's file name.
+        :type: String
         """
         return self._ground_truth
 
