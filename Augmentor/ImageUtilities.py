@@ -59,6 +59,10 @@ class AugmentorImage(object):
 
     @property
     def image_path(self):
+        """
+        The :attr:`image_path` property contains the absolute file path to the
+        image.
+        """
         return self._image_path
 
     @image_path.setter
@@ -70,10 +74,18 @@ class AugmentorImage(object):
 
     @property
     def image_file_name(self):
+        """
+        The :attr:`image_file_name` property contains the **file name** of the
+        image contained in this instance.
+        """
         return os.path.basename(self.image_path)
 
     @property
     def ground_truth(self):
+        """
+        The :attr:`ground_truth` property contains an absolute path to the
+        ground truth file for an image. 
+        """
         return self._ground_truth
 
     @ground_truth.setter
