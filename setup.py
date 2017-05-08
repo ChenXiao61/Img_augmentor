@@ -3,13 +3,13 @@ from setuptools import setup
 setup(
     name='Augmentor',
     packages=['Augmentor'],
-    version='0.1.1',  # PEP440 says I need 0.1.0 or similar. Change this.
+    version='0.1.1',
     description='Image augmentation library for Machine Learning',
     long_description='Image augmentation library for Machine Learning',
     license='MIT',
     author='Marcus D. Bloice',
     author_email='marcus.bloice@medunigraz.at',
-    url='https://github.com/mdbloice/Augmentor',                        # URL to GitHub repo
+    url='https://github.com/mdbloice/Augmentor',                            # URL to GitHub repo
     # download_url='https://github.com/mdbloice/Augmentor/tarball/0.1.1',   # Get this using git tag
     keywords=['image', 'augmentation', 'artificial', 'generation', 'machine', 'learning'],
     include_package_data=True,  # This will include all files in MANIFEST.in in the package when installing.

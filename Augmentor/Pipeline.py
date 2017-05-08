@@ -35,7 +35,7 @@ class Pipeline(object):
     """
 
     # Some class variables we use often
-    _probability_error_text = "The value of probability must be between 0 and 1."
+    _probability_error_text = "The probability argument must be between 0 and 1."
     _threshold_error_text = "The value of threshold must be between 0 and 255."
     _valid_formats = ["PNG", "BMP", "GIF", "JPEG"]
     _legal_filters = ["NEAREST", "BICUBIC", "ANTIALIAS", "BILINEAR"]
@@ -88,7 +88,7 @@ class Pipeline(object):
 
     def _populate(self, source_directory, output_directory, ground_truth_directory, ground_truth_output_directory):
         """
-        Private method for populating member variables with AugmentImage
+        Private method for populating member variables with AugmentorImage
         objects for each of the images found in the source directory 
         specified by the user. It also populates a number of fields such as
         the :attr:`output_directory` member variable, used later when saving
@@ -235,7 +235,7 @@ class Pipeline(object):
                 if sample_count <= n:
                     self._execute(augmentor_image)
                     file_name_to_print = os.path.basename(augmentor_image.image_path)
-                    # This is just to shoten very long file names which obscure the progress bar.
+                    # This is just to shorten very long file names which obscure the progress bar.
                     if len(file_name_to_print) >= 30:
                         file_name_to_print = file_name_to_print[0:10] + "..." + \
                                              file_name_to_print[-10: len(file_name_to_print)]
@@ -302,13 +302,14 @@ class Pipeline(object):
          pipeline using :func:`add_operation` if required.
         """
 
+        # Python's own List exceptions can handle erroneous user input.
         self.operations.pop(operation_index)
 
     def add_ground_truth_directory(self, ground_truth_directory, halt_on_non_match=False):
         """
-        .. warning:: This function is currently not being used.
+        .. warning:: This function is currently not in use.
          Although this function is not currently being used by Augmentor, 
-         it is being kept here for a future implementation.
+         it is being kept here for future implementation.
 
         This function allows you to add ground truth images that relate to
         the images currently in pipeline. It will scan a folder and collate
@@ -410,7 +411,7 @@ class Pipeline(object):
         :return: None
         """
 
-        if 0 <= probability <= 1:
+        if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         else:
             self.add_operation(Rotate(probability=probability, rotation=90))
@@ -428,7 +429,10 @@ class Pipeline(object):
         :type probability: Float
         :return: None
         """
-        self.add_operation(Rotate(probability=probability, rotation=180))
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        else:
+            self.add_operation(Rotate(probability=probability, rotation=180))
 
     def rotate270(self, probability):
         """
@@ -443,7 +447,10 @@ class Pipeline(object):
         :type probability: Float
         :return: None
         """
-        self.add_operation(Rotate(probability=probability, rotation=270))
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        else:
+            self.add_operation(Rotate(probability=probability, rotation=270))
 
     def rotate_random_90(self, probability):
         """
@@ -462,7 +469,10 @@ class Pipeline(object):
         :type probability: Float
         :return:
         """
-        self.add_operation(Rotate(probability=probability, rotation=-1))
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        else:
+            self.add_operation(Rotate(probability=probability, rotation=-1))
 
     def rotate(self, probability, max_left_rotation, max_right_rotation):
         """
@@ -489,10 +499,16 @@ class Pipeline(object):
         :type probability: Float
         :return: None
         """
-        if max_left_rotation < 180 & max_right_rotation < 180:
-            raise ValueError("The max_left_rotation and max_right_rotation values cannot exceed 180.")
-        self.add_operation(RotateRange(probability=probability, max_left_rotation=max_left_rotation,
-                                       max_right_rotation=max_right_rotation))
+
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        if not 0 <= max_left_rotation <= 180:
+            raise ValueError("The max_left_rotation argument must be between 0 and 180.")
+        if not 0 <= max_right_rotation <= 180:
+            raise ValueError("The max_right_rotation argument must be between 0 and 180.")
+        else:
+            self.add_operation(RotateRange(probability=probability, max_left_rotation=max_left_rotation,
+                                           max_right_rotation=max_right_rotation))
 
     def flip_top_bottom(self, probability):
         """
@@ -506,7 +522,11 @@ class Pipeline(object):
         :type probability: Float
         :return: None
         """
-        self.add_operation(Flip(probability=probability, top_bottom_left_right="TOP_BOTTOM"))
+
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        else:
+            self.add_operation(Flip(probability=probability, top_bottom_left_right="TOP_BOTTOM"))
 
     def flip_left_right(self, probability):
         """
@@ -520,7 +540,11 @@ class Pipeline(object):
         :type probability: Float
         :return: None
         """
-        self.add_operation(Flip(probability=probability, top_bottom_left_right="LEFT_RIGHT"))
+
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        else:
+            self.add_operation(Flip(probability=probability, top_bottom_left_right="LEFT_RIGHT"))
 
     def flip_random(self, probability):
         """
@@ -535,7 +559,11 @@ class Pipeline(object):
         :type probability: Float
         :return: None
         """
-        self.add_operation(Flip(probability=probability, top_bottom_left_right="RANDOM"))
+
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        else:
+            self.add_operation(Flip(probability=probability, top_bottom_left_right="RANDOM"))
 
     def random_distortion(self, probability, grid_width, grid_height, magnitude, randomise_magnitude=True):
         """
@@ -566,9 +594,12 @@ class Pipeline(object):
         :type randomise_magnitude: Boolean
         :return: None
         """
-        self.add_operation(Distort(probability=probability, grid_width=grid_width,
-                                   grid_height=grid_height, magnitude=magnitude,
-                                   randomise_magnitude=randomise_magnitude))
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        else:
+            self.add_operation(Distort(probability=probability, grid_width=grid_width,
+                                       grid_height=grid_height, magnitude=magnitude,
+                                       randomise_magnitude=randomise_magnitude))
 
     def zoom(self, probability, min_factor, max_factor):
         """
@@ -590,7 +621,13 @@ class Pipeline(object):
         :type max_factor: Float
         :return: None
         """
-        self.add_operation(Zoom(probability=probability, min_factor=min_factor, max_factor=max_factor))
+
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        elif min_factor < 1:
+            raise ValueError("The min_factor argument must be greater than 1.")
+        else:
+            self.add_operation(Zoom(probability=probability, min_factor=min_factor, max_factor=max_factor))
 
     def crop_by_size(self, probability, width, height, centre=True):
         """
@@ -612,9 +649,32 @@ class Pipeline(object):
          the dimensions specified.
         :return: None
         """
-        self.add_operation(Crop(probability=probability, width=width, height=height, centre=centre))
+
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        elif width <= 1:
+            raise ValueError("The width argument must be greater than 1.")
+        elif height <= 1:
+            raise ValueError("The height argument must be greater than 1.")
+        elif not isinstance(centre, bool):
+            raise ValueError("The centre argument must be True or False.")
+        else:
+            self.add_operation(Crop(probability=probability, width=width, height=height, centre=centre))
 
     def crop_centre(self, probability, percentage_area):
+        """
+        Crops the centre of an image as a percentage of the image's area.
+        
+        :param probability: The probability that the function will execute
+         when the image is passed through the pipeline.
+        :param percentage_area: The area, as a percentage of the current
+         image's area, to crop.
+        :return: None
+        """
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        elif not 0 < percentage_area < 1:
+            raise ValueError("The percentage_area argument must be greater than 0 and less than 1.")
         self.add_operation(CropPercentage(probability=probability, percentage_area=percentage_area, centre=True))
 
     def crop_random(self, probability, percentage_area):
@@ -633,7 +693,10 @@ class Pipeline(object):
         :type percentage_area: Float
         :return: None
         """
-        self.add_operation(CropPercentage(probability=probability, percentage_area=percentage_area, centre=False))
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        else:
+            self.add_operation(CropPercentage(probability=probability, percentage_area=percentage_area, centre=False))
 
     def crop_random_not_to_scale(self, probability, percentage_area):
         # TODO: Crop an area where the ratio is not kept the same, then resize to uniform dimensions
@@ -659,9 +722,11 @@ class Pipeline(object):
         :type probability: Float
         :return: None
         """
-        if probability != 1:
-            warnings.warn("For this function, it is recommended that the probability is set to 1.", stacklevel=1)
-        self.add_operation(HistogramEqualisation(probability=probability))
+
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        else:
+            self.add_operation(HistogramEqualisation(probability=probability))
 
     def resize_by_percentage(self, percentage_resize):
         raise NotImplementedError
@@ -679,8 +744,10 @@ class Pipeline(object):
         :return: None
         """
 
-        if scale_factor < 1.0:
-            print("The scale cannot be lower than 1.0. Operation not added to pipeline.")
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        elif scale_factor <= 1.0:
+            raise ValueError("The scale_factor argument must be greater than 1.0.")
         else:
             self.add_operation(Scale(probability=probability,
                                      scale_factor=scale_factor))
@@ -704,7 +771,7 @@ class Pipeline(object):
         :return: None
         """
 
-        if not 0 <= probability <= 1:
+        if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         elif not width > 1:
             raise ValueError("Width must be greater than 1.")
@@ -722,6 +789,8 @@ class Pipeline(object):
         magnitude parameter. This can be either a scalar representing the
         maximum tilt, or vector representing a range.
         
+        To see examples of the various skews, see :ref:`perspectiveskewing`.
+        
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
         :param magnitude: The maximum tilt, which must be value between 0.1 
@@ -731,9 +800,14 @@ class Pipeline(object):
         :return: None 
         """
 
-        self.add_operation(Skew(probability=probability,
-                                skew_type="TILT_LEFT_RIGHT",
-                                magnitude=magnitude))
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        elif not 0 < magnitude <= 1:
+            raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
+        else:
+            self.add_operation(Skew(probability=probability,
+                                    skew_type="TILT_LEFT_RIGHT",
+                                    magnitude=magnitude))
 
     def skew_top_bottom(self, probability, magnitude=None):
         """
@@ -741,16 +815,26 @@ class Pipeline(object):
         The magnitude of this skew can be set to a maximum using the 
         magnitude parameter. This can be either a scalar representing the
         maximum tilt, or vector representing a range.
+        
+        To see examples of the various skews, see :ref:`perspectiveskewing`.
 
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
         :param magnitude: The maximum tilt, which must be value between 0.1 
          and 1.0, where 1 represents a tilt of 45 degrees.
+        :type probability: Float
+        :type magnitude: Float
         :return: None 
         """
-        self.add_operation(Skew(probability=probability,
-                                skew_type="TILT_TOP_BOTTOM",
-                                magnitude=magnitude))
+
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        elif not 0 < magnitude <= 1:
+            raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
+        else:
+            self.add_operation(Skew(probability=probability,
+                                    skew_type="TILT_TOP_BOTTOM",
+                                    magnitude=magnitude))
 
     def skew_tilt(self, probability, magnitude=None):
         """
@@ -759,6 +843,8 @@ class Pipeline(object):
         this skew can be set to a maximum using the magnitude parameter.
         This can be either a scalar representing the maximum tilt, or 
         vector representing a range.
+        
+        To see examples of the various skews, see :ref:`perspectiveskewing`.
         
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed. 
@@ -771,6 +857,16 @@ class Pipeline(object):
                                 magnitude=magnitude))
 
     def skew_corner(self, probability, magnitude=None):
+        """
+        Skew an image towards one corner, randomly by a random magnitude.
+        
+        To see examples of the various skews, see :ref:`perspectiveskewing`.
+        
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed. 
+        :param magnitude: 
+        :return: 
+        """
         self.add_operation(Skew(probability=probability,
                                 skew_type="CORNER",
                                 magnitude=magnitude))
