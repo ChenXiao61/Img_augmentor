@@ -305,45 +305,26 @@ class Pipeline(object):
         # Python's own List exceptions can handle erroneous user input.
         self.operations.pop(operation_index)
 
-    def add_ground_truth_directory(self, ground_truth_directory, halt_on_non_match=False):
+    def add_further_directory(self, new_source_directory, new_output_directory="output",
+                              new_ground_truth_source_directory=None):
         """
-        .. warning:: This function is currently not in use.
-         Although this function is not currently being used by Augmentor, 
-         it is being kept here for future implementation.
-
-        This function allows you to add ground truth images that relate to
-        the images currently in pipeline. It will scan a folder and collate
-        images in the pipeline with the ground truth images in the new
-        ground truth directory by *file name*, ignoring file extension.
-        This means you can use the same directory if the file names are
-        differentiable only be extension.
-
-        :param ground_truth_directory: The new directory to scan.
-        :param halt_on_non_match: Do not halt on non-match and throw away
-         any images if :attr:`False`. Otherwise halt on non-match, if
-         :attr:`True`.
-        :exception: IOError if no ground truth images found or if
-         :attr:`halt_on_non_match` is :attr:`True`.
-        :type ground_truth_directory: String
-        :type halt_on_non_match: Boolean
+        Add a further directory containing images you wish to scan for augmentation.
+        
+        :param new_source_directory: The directory to scan for images.
+        :param new_output_directory: The directory to use for outputted, 
+         augmented images.
+        :param new_ground_truth_source_directory: A directory containing
+        :type new_source_directory: String
+        :type new_output_directory: String
+        :type new_ground_truth_source_directory: String
         :return: None
         """
+        if not os.path.exists(new_source_directory):
+            raise IOError("The path does not appear to exist.")
 
-        # if not halt_on_non_match:
-        #     ground_truth_file_paths = scan_directory(ground_truth_directory)
-
-        # The variable ground_truth_files contains paths, so we need to strip these away
-        # ground_truth_file_names = \
-        #    [os.path.basename(x) for x in ground_truth_file_paths]
-        # original_file_names = \
-        #     [os.path.basename(x) for x in self.image_list]
-
-        # common_files = set(ground_truth_file_names).intersection(original_file_names)
-        # missing_files = set(ground_truth_file_names).difference(original_file_names)
-
-        # return common_files, missing_files
-
-        raise NotImplementedError("This method is currently not implemented.")
+        self.augmentor_images += self._populate(source_directory=new_source_directory,
+                                                output_directory=new_output_directory,
+                                                ground_truth_directory=new_ground_truth_source_directory)
 
     def status(self):
         """
@@ -370,7 +351,7 @@ class Pipeline(object):
             for operation in self.operations:
                 print("Index %s:\n\tOperation %s (probability: %s):" % (operation_index, operation, operation.probability))
                 for operation_attribute, operation_value in operation.__dict__.items():
-                    print ("\t\tAttribute: %s (%s)" % (operation_attribute, operation_value))
+                    print("\t\tAttribute: %s (%s)" % (operation_attribute, operation_value))
                 operation_index += 1
             print()
 
@@ -410,7 +391,6 @@ class Pipeline(object):
         :type probability: Float
         :return: None
         """
-
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         else:
@@ -499,7 +479,6 @@ class Pipeline(object):
         :type probability: Float
         :return: None
         """
-
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         if not 0 <= max_left_rotation <= 180:
@@ -522,7 +501,6 @@ class Pipeline(object):
         :type probability: Float
         :return: None
         """
-
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         else:
@@ -540,7 +518,6 @@ class Pipeline(object):
         :type probability: Float
         :return: None
         """
-
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         else:
@@ -559,7 +536,6 @@ class Pipeline(object):
         :type probability: Float
         :return: None
         """
-
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         else:
@@ -596,6 +572,8 @@ class Pipeline(object):
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
+        elif not isinstance(randomise_magnitude, bool):
+            raise ValueError("The randomise_magnitude argument must be either True or False.")
         else:
             self.add_operation(Distort(probability=probability, grid_width=grid_width,
                                        grid_height=grid_height, magnitude=magnitude,
@@ -621,7 +599,6 @@ class Pipeline(object):
         :type max_factor: Float
         :return: None
         """
-
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         elif min_factor < 1:
@@ -647,9 +624,12 @@ class Pipeline(object):
         :param centre: If **True**, crops from the centre of the image,
          otherwise crops at a random location within the image, maintaining
          the dimensions specified.
+        :type probability: Float
+        :type width: Integer
+        :type height: Integer
+        :type centre: Boolean
         :return: None
         """
-
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         elif width <= 1:
@@ -669,6 +649,8 @@ class Pipeline(object):
          when the image is passed through the pipeline.
         :param percentage_area: The area, as a percentage of the current
          image's area, to crop.
+        :type probability: Float
+        :type percentage_area: Float
         :return: None
         """
         if not 0 < probability <= 1:
@@ -698,20 +680,6 @@ class Pipeline(object):
         else:
             self.add_operation(CropPercentage(probability=probability, percentage_area=percentage_area, centre=False))
 
-    def crop_random_not_to_scale(self, probability, percentage_area):
-        # TODO: Crop an area where the ratio is not kept the same, then resize to uniform dimensions
-        raise NotImplementedError
-
-    def crop_random_absolute(self, probability, width, height):
-        raise NotImplementedError
-
-    def crop_by_number_of_tiles(self, number_of_crops_per_image):
-        # In this function we want to crop images, based on the a number of crops per image
-        raise NotImplementedError
-
-    def crop_by_percentage(self, percent_size_of_crop, from_center=True):
-        raise NotImplementedError
-
     def histogram_equalisation(self, probability=1.0):
         """
         Apply histogram equalisation to the image.
@@ -722,14 +690,10 @@ class Pipeline(object):
         :type probability: Float
         :return: None
         """
-
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         else:
             self.add_operation(HistogramEqualisation(probability=probability))
-
-    def resize_by_percentage(self, percentage_resize):
-        raise NotImplementedError
 
     def scale(self, probability, scale_factor):
         """
@@ -743,7 +707,6 @@ class Pipeline(object):
         :type scale_factor: Float
         :return: None
         """
-
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         elif scale_factor <= 1.0:
@@ -770,7 +733,6 @@ class Pipeline(object):
         :type resample_filter: String
         :return: None
         """
-
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         elif not width > 1:
@@ -799,7 +761,6 @@ class Pipeline(object):
         :type magnitude: Float
         :return: None 
         """
-
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         elif not 0 < magnitude <= 1:
@@ -826,7 +787,6 @@ class Pipeline(object):
         :type magnitude: Float
         :return: None 
         """
-
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         elif not 0 < magnitude <= 1:
@@ -850,11 +810,16 @@ class Pipeline(object):
          probability that the operation should be performed. 
         :param magnitude: The maximum tilt, which must be value between 0.1 
          and 1.0, where 1 represents a tilt of 45 degrees.
-        :return: 
+        :type probability: Float
+        :type magnitude: Float
+        :return: None
         """
-        self.add_operation(Skew(probability=probability,
-                                skew_type="TILT",
-                                magnitude=magnitude))
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        else:
+            self.add_operation(Skew(probability=probability,
+                                    skew_type="TILT",
+                                    magnitude=magnitude))
 
     def skew_corner(self, probability, magnitude=None):
         """
@@ -864,20 +829,205 @@ class Pipeline(object):
         
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed. 
-        :param magnitude: 
+        :param magnitude: The maximum skew, which must be value between 0.1 
+         and 1.0.
         :return: 
         """
-        self.add_operation(Skew(probability=probability,
-                                skew_type="CORNER",
-                                magnitude=magnitude))
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        else:
+            self.add_operation(Skew(probability=probability,
+                                    skew_type="CORNER",
+                                    magnitude=magnitude))
 
     def skew(self, probability, magnitude=None):
-        self.add_operation(Skew(probability=probability,
-                                skew_type=random.choice(["TILT", "CORNER"]),
-                                magnitude=magnitude))
+        """
+        Skew an image in a random direction, either left to right,
+        top to bottom, or one of 8 corner directions. 
+        
+        To see examples of all the skew types, see :ref:`perspectiveskewing`.
+        
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed. 
+        :param magnitude: The maximum skew, which must be value between 0.1 
+         and 1.0, or None for a random magnitude (default).
+        :type probability: Float
+        :type magnitude: Float
+        :return: None
+        """
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        else:
+            self.add_operation(Skew(probability=probability,
+                                    skew_type=random.choice(["TILT", "CORNER"]),
+                                    magnitude=magnitude))
+
+    def shear(self, probability, max_shear_left, max_shear_right):
+        """
+        Shear the image by a specified number of degrees.
+
+        :param probability: The probability that the operation is performed. 
+        :param max_shear_left: The max number of degrees to shear to the left.
+         Cannot be larger than 90 degrees.
+        :param max_shear_right: The max number of degrees to shear to the 
+         right. Cannot be larger than 90 degrees.
+        :return: None
+        """
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        elif not 0 < max_shear_left <= 90:
+            raise ValueError("The max_shear_left argument must be between 0 and 90.")
+        elif not 0 < max_shear_right <= 90:
+            raise ValueError("The max_shear_right argument must be between 0 and 90.")
+        else:
+            self.add_operation(Shear(probability=probability,
+                                     max_shear_left=max_shear_left,
+                                     max_shear_right=max_shear_right))
+
+    def greyscale(self, probability):
+        """
+        Convert images to greyscale. For this operation, setting the 
+        :attr:`probability` to 1.0 is recommended.
+        
+        .. seealso:: The :func:`black_and_white` function.
+        
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed. For resizing,
+         it is recommended that the probability be set to 1.
+        :type probability: Float
+        :return: None
+        """
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        self.add_operation(Greyscale(probability=probability))
+
+    def black_and_white(self, probability, threshold=128):
+        """
+        Convert images to black and white. In other words convert the image
+        to use a 1-bit, binary palette. The threshold defaults to 128, 
+        but can be controlled using the :attr:`threshold` parameter.
+        
+        .. seealso:: The :func:`greyscale` function.
+        
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed. For resizing,
+         it is recommended that the probability be set to 1.
+        :param threshold: A value between 0 and 255 which controls the
+         threshold point at which each pixel is converted to either black
+         or white. Any values above this threshold are converted to white, and
+         any values below this threshold are converted to black.
+        :type probability: Float
+        :type threshold: Integer
+        :return: None
+        """
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        elif not 0 <= threshold <= 255:
+            raise ValueError("The threshold must be between 0 and 255.")
+        else:
+            self.add_operation(BlackAndWhite(probability=probability, threshold=threshold))
+
+    def invert(self, probability):
+        """
+        Invert an image. For this operation, setting the 
+        :attr:`probability` to 1.0 is recommended.
+        
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed. For resizing,
+         it is recommended that the probability be set to 1.
+        :return: None
+        """
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        else:
+            self.add_operation(Invert(probability=probability))
+
+########################################################################################################################
+# To be implemented                                                                                                    #
+########################################################################################################################
+    def new_operation(self, operation, parameters):
+        """
+        .. warning:: Not yet implemented.
+        
+        Add an operation to the pipeline.
+        """
+        # Add ability to add a new operation at runtime.
+        # We will not need to do any of this, users will be required to add operations
+        # to the pipeline manually.
+        # function_name = string.lower(operation.__name__)
+        # class_name = string.capwords(operation.__name__)
+        # dyn_class = type(class_name, (object,), parameters)
+        # globals()[]
+        raise NotImplementedError("This method is currently not implemented.")
+
+    def pad(self, probability, image, new_width, new_height):
+        """
+        .. warning:: Not yet implemented.
+        
+        Pad an image so that it can be enlarged without stretching it. This is 
+        done by using the last pixel value and extrapolating it to the new size.
+        """
+        # Functionality to pad a non-square image with borders to make it a certain aspect ratio.
+        # Not yet implemented.
+        raise NotImplementedError("This method is currently not implemented.")
+
+    def add_ground_truth_directory(self, ground_truth_directory, halt_on_non_match=False):
+        """
+        .. warning:: Not yet implemented.
+
+        This function allows you to add ground truth images that relate to
+        the images currently in pipeline. It will scan a folder and collate
+        images in the pipeline with the ground truth images in the new
+        ground truth directory by *file name*, ignoring file extension.
+        This means you can use the same directory if the file names are
+        differentiable only be extension.
+
+        :param ground_truth_directory: The new directory to scan.
+        :param halt_on_non_match: Do not halt on non-match and throw away
+         any images if :attr:`False`. Otherwise halt on non-match, if
+         :attr:`True`.
+        :exception: IOError if no ground truth images found or if
+         :attr:`halt_on_non_match` is :attr:`True`.
+        :type ground_truth_directory: String
+        :type halt_on_non_match: Boolean
+        :return: None
+        """
+
+        # if not halt_on_non_match:
+        #     ground_truth_file_paths = scan_directory(ground_truth_directory)
+
+        # The variable ground_truth_files contains paths, so we need to strip these away
+        # ground_truth_file_names = \
+        #    [os.path.basename(x) for x in ground_truth_file_paths]
+        # original_file_names = \
+        #     [os.path.basename(x) for x in self.image_list]
+
+        # common_files = set(ground_truth_file_names).intersection(original_file_names)
+        # missing_files = set(ground_truth_file_names).difference(original_file_names)
+
+        # return common_files, missing_files
+
+        raise NotImplementedError("This method is currently not implemented.")
+
+    def crop_random_not_to_scale(self, probability, percentage_area):
+        """
+        .. warning:: Not yet implemented.
+        
+        Crops a random area, and rescales it to the same size as the original
+        input image.
+        
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :param percentage_area: The percentage area to crop.
+        :return: None
+        """
+        # TODO: Crop an area where the ratio is not kept the same, then resize to uniform dimensions
+        raise NotImplementedError("This method is currently not implemented.")
 
     def sample_from_new_image_source(self, image_source, n, output_directory="output"):
         """
+        .. warning:: Not yet implemented.
+        
         Uses the current pipeline to generate images from a different image
         source.
 
@@ -901,121 +1051,15 @@ class Pipeline(object):
         :type output_directory: String
         :return: None
         """
-        raise NotImplementedError
+        raise NotImplementedError("This method is currently not implemented.")
 
-    def greyscale(self, probability):
+    def resize_by_percentage(self, percentage_resize):
         """
-        Convert images to greyscale. For this operation, setting the 
-        :attr:`probability` to 1.0 is recommended.
+        .. warning:: Not yet implemented.
         
-        .. seealso:: The :func:`black_and_white` function.
-        
-        :param probability: A value between 0 and 1 representing the
-         probability that the operation should be performed. For resizing,
-         it is recommended that the probability be set to 1.
-        :type probability: Float
-        :return: None
+        Resize an image based on the percentage of its original size.
         """
-
-        if not 0 <= probability <= 1:
-            raise ValueError(Pipeline._probability_error_text)
-        self.add_operation(Greyscale(probability=probability))
-
-    def black_and_white(self, probability, threshold=128):
-        """
-        Convert images to black and white. In other words convert the image
-        to use a 1-bit, binary palette. The threshold defaults to 128, 
-        but can be controlled using the :attr:`threshold` parameter.
-        
-        .. seealso:: The :func:`greyscale` function.
-        
-        :param probability: A value between 0 and 1 representing the
-         probability that the operation should be performed. For resizing,
-         it is recommended that the probability be set to 1.
-        :param threshold: A value between 0 and 255 which controls the
-         threshold point at which each pixel is converted to either black
-         or white. Any values above this threshold are converted to white, and
-         any values below this threshold are converted to black.
-        :type probability: Float
-        :type threshold: Integer
-        :return: None
-        """
-
-        if not 0 <= probability <= 1:
-            raise ValueError(Pipeline._probability_error_text)
-        elif not 0 <= threshold <= 255:
-            raise ValueError("The threshold must be between 0 and 255.")
-        else:
-            self.add_operation(BlackAndWhite(probability=probability, threshold=threshold))
-
-    def invert(self, probability):
-        """
-        Invert an image. For this operation, setting the 
-        :attr:`probability` to 1.0 is recommended.
-        
-        :param probability: A value between 0 and 1 representing the
-         probability that the operation should be performed. For resizing,
-         it is recommended that the probability be set to 1.
-        :return: None
-        """
-
-        if not 0 <= probability <= 1:
-            raise ValueError(Pipeline._probability_error_text)
-        else:
-            self.add_operation(Invert(probability=probability))
-
-########################################################################################################################
-# To be implemented                                                                                                    #
-########################################################################################################################
-    def new_operation(self, operation, parameters):
-        # Add ability to add a new operation at runtime.
-        raise NotImplementedError
-
-        # We will not need to do any of this, users will be required to add operations
-        # to the pipeline manually.
-        # function_name = string.lower(operation.__name__)
-        # class_name = string.capwords(operation.__name__)
-        # dyn_class = type(class_name, (object,), parameters)
-        # globals()[]
-
-    def add_further_directory(self, new_source_directory, new_output_directory="output",
-                              new_ground_truth_source_directory=None):
-
-        if not os.path.exists(new_source_directory):
-            raise IOError("The path does not appear to exist.")
-
-        self.augmentor_images += self._populate(source_directory=new_source_directory,
-                                                output_directory=new_output_directory,
-                                                ground_truth_directory=new_ground_truth_source_directory)
-
-    def apply_pipeline(self, image):
-        # Apply the current pipeline to a single image, returning the newly created image.
-        # Not yet implemented.
-
-        raise NotImplementedError
-
-    def shear(self, probability, max_shear_left, max_shear_right):
-        """
-        Shear the image by a specified number of degrees.
-        
-        :param probability: The probability that the operation is performed. 
-        :param max_shear_left: The max number of degrees to shear to the left.
-         Cannot be larger than 90 degrees.
-        :param max_shear_right: The max number of degrees to shear to the 
-         right. Cannot be larger than 90 degrees.
-        :return: None
-        """
-        if max_shear_left >= 90 or max_shear_right >= 90:
-            print("Cannot have a value larger than 90 degrees for angle.")
-        else:
-            self.add_operation(Shear(probability=probability,
-                                     max_shear_left=max_shear_left,
-                                     max_shear_right=max_shear_right))
-
-    def pad(self):
-        # Functionality to pad a non-square image with borders to make it a certain aspect ratio.
-        # Not yet implemented.
-        raise NotImplementedError
+        raise NotImplementedError("This method is currently not implemented.")
 
 ########################################################################################################################
 # Utility Functions                                                                                                    #
@@ -1038,7 +1082,7 @@ class Pipeline(object):
 
     @staticmethod
     def check_probability(probability):
-        if not 0 <= probability <= 1:
+        if not 0 < probability <= 1:
             return True
         else:
             return False
