@@ -25,7 +25,6 @@ from __future__ import (absolute_import, division,
 from builtins import *
 
 from PIL import Image, ImageOps
-from .ImageUtilities import extract_paths_and_extensions
 import math
 from math import floor, ceil
 
@@ -85,20 +84,6 @@ class Operation(object):
         :return: The transformed image of type PIL.Image.
         """
         raise RuntimeError("Illegal call to base class.")
-
-    @staticmethod
-    def extract_paths_and_extensions(image_path):
-        """
-        Utility function to extract the file name, extension and root path 
-        of an image's full path. 
-        
-        :param image_path: The path of the image.
-        :return: A 3-tuple containing the file name, extension, and root path.
-        """
-        file_name, extension = os.path.splitext(image_path)
-        root_path = os.path.dirname(image_path)
-
-        return file_name, extension, root_path
 
 
 class HistogramEqualisation(Operation):

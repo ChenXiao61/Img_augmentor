@@ -941,29 +941,3 @@ class Pipeline(object):
             raise ValueError(Pipeline._probability_error_text)
         else:
             self.add_operation(Invert(probability=probability))
-
-########################################################################################################################
-# Utility Functions                                                                                                    #
-########################################################################################################################
-    @staticmethod
-    def extract_paths_and_extensions(image_path):
-        """
-        Extract an image's file name, its extension, and its root path (the
-        image's absolute path without the file name).
-
-        :param image_path: The path to the image.
-        :type image_path: String
-        :return: A 3-tuple containing the image's file name, extension, and
-         root path.
-        """
-        file_name, extension = os.path.splitext(image_path)
-        root_path = os.path.dirname(image_path)
-
-        return file_name, extension, root_path
-
-    @staticmethod
-    def check_probability(probability):
-        if not 0 < probability <= 1:
-            return True
-        else:
-            return False
