@@ -263,7 +263,6 @@ class Pipeline(object):
         :type save_to_disk: Boolean
         :return: The transformed image.
         """
-
         return self._execute(AugmentorImage(os.path.abspath(image_path), None), save_to_disk)
 
     def add_operation(self, operation):
@@ -581,7 +580,7 @@ class Pipeline(object):
 
     def zoom(self, probability, min_factor, max_factor):
         """
-        Zoom in to an image, while maintaining its aspect ratio. The amount by
+        Zoom in to an image, while **maintaining its size**. The amount by
         which the image is zoomed is a randomly chosen value between 
         :attr:`min_factor` and :attr:`max_factor`.
         
@@ -677,6 +676,8 @@ class Pipeline(object):
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
+        elif not 0 < percentage_area < 1:
+            raise ValueError("The percentage_area argument must be greater than 0 and less than 1.")
         else:
             self.add_operation(CropPercentage(probability=probability, percentage_area=percentage_area, centre=False))
 
@@ -697,7 +698,8 @@ class Pipeline(object):
 
     def scale(self, probability, scale_factor):
         """
-        Scale an image, while maintaining its aspect ratio.
+        Scale (enlarge) an image, while maintaining its aspect ratio. This 
+        returns an image with larger dimensions than the original image.
 
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
@@ -710,15 +712,14 @@ class Pipeline(object):
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         elif scale_factor <= 1.0:
-            raise ValueError("The scale_factor argument must be greater than 1.0.")
+            raise ValueError("The scale_factor argument must be greater than 1.")
         else:
-            self.add_operation(Scale(probability=probability,
-                                     scale_factor=scale_factor))
+            self.add_operation(Scale(probability=probability, scale_factor=scale_factor))
 
     def resize(self, probability, width, height, resample_filter="BICUBIC"):
         """
         Resize an image according to a set of dimensions specified by the
-        user.
+        user in pixels.
         
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed. For resizing,
@@ -755,7 +756,7 @@ class Pipeline(object):
         
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
-        :param magnitude: The maximum tilt, which must be value between 0.1 
+        :param magnitude: The maximum tilt, which must be value between 0.1  
          and 1.0, where 1 represents a tilt of 45 degrees.
         :type probability: Float
         :type magnitude: Float
@@ -763,12 +764,11 @@ class Pipeline(object):
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
-        elif not 0 < magnitude <= 1:
-            raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
+        elif magnitude:
+            if not 0 < magnitude <= 1:
+                raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
         else:
-            self.add_operation(Skew(probability=probability,
-                                    skew_type="TILT_LEFT_RIGHT",
-                                    magnitude=magnitude))
+            self.add_operation(Skew(probability=probability, skew_type="TILT_LEFT_RIGHT", magnitude=magnitude))
 
     def skew_top_bottom(self, probability, magnitude=None):
         """
@@ -789,8 +789,9 @@ class Pipeline(object):
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
-        elif not 0 < magnitude <= 1:
-            raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
+        elif magnitude:
+            if not 0 < magnitude <= 1:
+                raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
         else:
             self.add_operation(Skew(probability=probability,
                                     skew_type="TILT_TOP_BOTTOM",
@@ -816,6 +817,9 @@ class Pipeline(object):
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
+        elif magnitude:
+            if not 0 < magnitude <= 1:
+                raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
         else:
             self.add_operation(Skew(probability=probability,
                                     skew_type="TILT",
@@ -835,6 +839,9 @@ class Pipeline(object):
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
+        elif magnitude:
+            if not 0 < magnitude <= 1:
+                raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
         else:
             self.add_operation(Skew(probability=probability,
                                     skew_type="CORNER",
@@ -857,6 +864,9 @@ class Pipeline(object):
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
+        elif magnitude:
+            if not 0 < magnitude <= 1:
+                raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
         else:
             self.add_operation(Skew(probability=probability,
                                     skew_type=random.choice(["TILT", "CORNER"]),
@@ -931,6 +941,9 @@ class Pipeline(object):
         """
         Invert an image. For this operation, setting the 
         :attr:`probability` to 1.0 is recommended.
+        
+        .. warning:: This function will cause errors if used on binary, 1-bit
+         palette images (e.g. black and white).
         
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed. For resizing,

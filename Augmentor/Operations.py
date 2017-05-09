@@ -412,13 +412,6 @@ class Rotate(Operation):
     class.
     """
 
-    # TODO: Incorporate these into the code in Pipeline.py
-    # Also, move them to the Module
-    ROTATE90 = 90
-    ROTATE180 = 180
-    ROTATE270 = 270
-    ROTATE_RANDOM = -1
-
     def __init__(self, probability, rotation):
         """
         As well as the required :attr:`probability` parameter, the 
@@ -767,8 +760,9 @@ class CropPercentage(Operation):
 
 class CropRandom(Operation):
     """
-    .. warning:: This :class:`CropRandom` class is currently not in use and
-     and is WIP.
+    .. warning:: This :class:`CropRandom` class is currently not used by any
+     of the user-facing functions in the :class:`~Augmentor.Pipeline.Pipeline`
+     class.
     """
     def __init__(self, probability, percentage_area):
         """
@@ -1167,7 +1161,7 @@ class Zoom(Operation):
         # TODO: Join these two functions together so that we don't have this image_zoom variable lying around.
         image_zoomed = image.resize((int(round(image.size[0] * factor)), int(round(image.size[1] * factor))))
 
-        # Return the centre of the zoomed image, so that it is the same dimensions as the original image
+        # Return the centre of the zoomed image, so that it is the same size as the original image
         half_the_width = image_zoomed.size[0] / 2
         half_the_height = image_zoomed.size[1] / 2
         return image_zoomed.crop(
