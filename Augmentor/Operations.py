@@ -299,23 +299,32 @@ class Skew(Operation):
         original_plane = [(y1, x1), (y2, x1), (y2, x2), (y1, x2)]
 
         max_skew_amount = max(w, h)
+        max_skew_amount = int(ceil(max_skew_amount * self.magnitude))
+        skew_amount = random.randint(1, max_skew_amount)
 
-        if not self.magnitude:
-            skew_amount = random.randint(1, max_skew_amount)
-        elif self.magnitude:
-            max_skew_amount /= self.magnitude
-            skew_amount = max_skew_amount
+        # Old implementation, remove.
+        # if not self.magnitude:
+        #    skew_amount = random.randint(1, max_skew_amount)
+        # elif self.magnitude:
+        #    max_skew_amount /= self.magnitude
+        #    skew_amount = max_skew_amount
+
+        # TODO: Fix this abomination
+        if self.skew_type == "RANDOM":
+            skew = random.choice(["TILT", "TILT_LEFT_RIGHT", "TILT_TOP_BOTTOM", "CORNER"])
+        else:
+            skew = self.skew_type
 
         # We have two choices now: we tilt in one of four directions
         # or we skew a corner.
 
-        if self.skew_type == "TILT" or self.skew_type == "TILT_LEFT_RIGHT" or self.skew_type == "TILT_TOP_BOTTOM":
+        if skew == "TILT" or skew == "TILT_LEFT_RIGHT" or skew == "TILT_TOP_BOTTOM":
 
-            if self.skew_type == "TILT":
+            if skew == "TILT":
                 skew_direction = random.randint(0, 3)
-            elif self.skew_type == "TILT_LEFT_RIGHT":
+            elif skew == "TILT_LEFT_RIGHT":
                 skew_direction = random.randint(0, 1)
-            elif self.skew_type == "TILT_TOP_BOTTOM":
+            elif skew == "TILT_TOP_BOTTOM":
                 skew_direction = random.randint(2, 3)
 
             if skew_direction == 0:
@@ -343,7 +352,7 @@ class Skew(Operation):
                              (y2 + skew_amount, x2),  # Bottom Right
                              (y1 - skew_amount, x2)]  # Bottom Left
 
-        if self.skew_type == "CORNER":
+        if skew == "CORNER":
 
             skew_direction = random.randint(0, 7)
 

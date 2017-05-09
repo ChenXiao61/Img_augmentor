@@ -227,6 +227,9 @@ class Pipeline(object):
                              "Add a directory using add_directory(), "
                              "pointing it to a directory containing images.")
 
+        if len(self.operations) == 0:
+            raise IndexError("There are no operations associated with this pipeline.")
+
         sample_count = 1
 
         progress_bar = tqdm(total=n, desc="Executing Pipeline", unit=' Samples', leave=False)
@@ -745,7 +748,7 @@ class Pipeline(object):
         else:
             self.add_operation(Resize(probability=probability, width=width, height=height, resample_filter=resample_filter))
 
-    def skew_left_right(self, probability, magnitude=None):
+    def skew_left_right(self, probability, magnitude=1):
         """
         Skew an image by tilting it left or right by a random amount. The 
         magnitude of this skew can be set to a maximum using the 
@@ -764,13 +767,12 @@ class Pipeline(object):
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
-        elif magnitude:
-            if not 0 < magnitude <= 1:
-                raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
+        elif not 0 < magnitude <= 1:
+            raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
         else:
             self.add_operation(Skew(probability=probability, skew_type="TILT_LEFT_RIGHT", magnitude=magnitude))
 
-    def skew_top_bottom(self, probability, magnitude=None):
+    def skew_top_bottom(self, probability, magnitude=1):
         """
         Skew an image by tilting it forwards or backwards by a random amount. 
         The magnitude of this skew can be set to a maximum using the 
@@ -789,15 +791,14 @@ class Pipeline(object):
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
-        elif magnitude:
-            if not 0 < magnitude <= 1:
-                raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
+        elif not 0 < magnitude <= 1:
+            raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
         else:
             self.add_operation(Skew(probability=probability,
                                     skew_type="TILT_TOP_BOTTOM",
                                     magnitude=magnitude))
 
-    def skew_tilt(self, probability, magnitude=None):
+    def skew_tilt(self, probability, magnitude=1):
         """
         Skew an image by tilting in a random direction, either forwards,
         backwards, left, or right, by a random amount. The magnitude of 
@@ -817,15 +818,14 @@ class Pipeline(object):
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
-        elif magnitude:
-            if not 0 < magnitude <= 1:
-                raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
+        elif not 0 < magnitude <= 1:
+            raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
         else:
             self.add_operation(Skew(probability=probability,
                                     skew_type="TILT",
                                     magnitude=magnitude))
 
-    def skew_corner(self, probability, magnitude=None):
+    def skew_corner(self, probability, magnitude=1):
         """
         Skew an image towards one corner, randomly by a random magnitude.
         
@@ -839,15 +839,14 @@ class Pipeline(object):
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
-        elif magnitude:
-            if not 0 < magnitude <= 1:
-                raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
+        elif not 0 < magnitude <= 1:
+            raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
         else:
             self.add_operation(Skew(probability=probability,
                                     skew_type="CORNER",
                                     magnitude=magnitude))
 
-    def skew(self, probability, magnitude=None):
+    def skew(self, probability, magnitude=1):
         """
         Skew an image in a random direction, either left to right,
         top to bottom, or one of 8 corner directions. 
@@ -857,19 +856,18 @@ class Pipeline(object):
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed. 
         :param magnitude: The maximum skew, which must be value between 0.1 
-         and 1.0, or None for a random magnitude (default).
+         and 1.0.
         :type probability: Float
         :type magnitude: Float
         :return: None
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
-        elif magnitude:
-            if not 0 < magnitude <= 1:
-                raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
+        elif not 0 < magnitude <= 1:
+            raise ValueError("The magnitude argument must be greater than 0 and less than or equal to 1.")
         else:
             self.add_operation(Skew(probability=probability,
-                                    skew_type=random.choice(["TILT", "CORNER"]),
+                                    skew_type="RANDOM",
                                     magnitude=magnitude))
 
     def shear(self, probability, max_shear_left, max_shear_right):
@@ -909,7 +907,8 @@ class Pipeline(object):
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
-        self.add_operation(Greyscale(probability=probability))
+        else:
+            self.add_operation(Greyscale(probability=probability))
 
     def black_and_white(self, probability, threshold=128):
         """
