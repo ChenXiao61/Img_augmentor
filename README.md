@@ -78,8 +78,8 @@ p.sample(100)
 
 Some sample output:
 
-| Input Image<sup>[1]</sup>                                                                                          |   | Augmented Images                                                                                      |
-|-------------------------------------------------------------------------------------------------------|---|-------------------------------------------------------------------------------------------------------|
+| Input Image<sup>[1]</sup>                                                                                          |   | Augmented Images                                                                                                    |
+|--------------------------------------------------------------------------------------------------------------------|---|---------------------------------------------------------------------------------------------------------------------|
 | ![Original](https://cloud.githubusercontent.com/assets/16042756/23019262/b696e3a6-f441-11e6-958d-17f18f2cd35e.jpg) | → | ![Augmented](https://cloud.githubusercontent.com/assets/16042756/23018832/cda6967e-f43f-11e6-9082-765c291f1fd6.gif) |
 
 The augmented images may be useful for a boundary detection task, for example.
@@ -94,6 +94,82 @@ Using elastic distortions, one image can be used to generate many images that ar
 
 The input image has a 1 pixel black border to emphasise that you are getting rotation-like distortions without changing the size or aspect ratio of the original image.
 
+The functionality can be more clearly seen here:
+
+| Original Image                                                                                    | Random distortions applied                                                                            |
+|---------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png) | ![Distorted](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/distort.gif) |
+
+## Perspective Transforms
+
+There are a total of 12 different types of perspective transform available. Four of the most common are shown below.
+
+| Tilt Left                                                                                               | Tilt Right                                                                                               | Tilt Forward                                                                                               | Tilt Backward                                                                                               |
+|---------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
+| ![TiltLeft](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/TiltLeft_s.png) | ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/TiltRight_s.png) | ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/TiltForward_s.png) | ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/TiltBackward_s.png) |
+
+The remaining eight types of transform are as follows:
+
+| Skew Type 0                                                                                         | Skew Type 1                                                                                         | Skew Type 2                                                                                         | Skew Type 3                                                                                         |
+|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
+| ![Skew0](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/Corner0_s.png) | ![Skew1](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/Corner1_s.png) | ![Skew2](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/Corner2_s.png) | ![Skew3](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/Corner3_s.png) |
+
+| Skew Type 4                                                                                         | Skew Type 5                                                                                         | Skew Type 6                                                                                         | Skew Type 7                                                                                         |
+|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
+| ![Skew4](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/Corner4_s.png) | ![Skew5](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/Corner5_s.png) | ![Skew6](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/Corner6_s.png) | ![Skew7](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/Corner7_s.png) |
+
+## Size Preserving Rotations
+
+Rotations by default preserve the file size of the original images:
+
+| Original Image                                                                                    | Rotated 10 degrees, automatically cropped                                                             |
+|---------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png) | ![Rotate](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/rotate_aug.png) |
+
+Compared to rotations by other software:
+
+| Original Image                                                                                    | Rotated 10 degrees                                                                                |
+|---------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
+| ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png) | ![Rotate](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/rotate.png) |
+
+## Size Preserving Shearing
+
+Shearing will also automatically crop the correct area from the sheared image, so that you have an image with no black space or padding.
+
+| Original image                                                                                    | Shear (x-axis) 20 degrees                                                                              | Shear (y-axis) 20 degrees                                                                              |
+|---------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png) | ![ShearX](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/shear_x_aug.png) | ![ShearY](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/shear_y_aug.png) |
+
+Compare this to how this is normally done:
+
+| Original image                                                                                    | Shear (x-axis) 20 degrees                                                                          | Shear (y-axis) 20 degrees                                                                          |
+|---------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png) | ![ShearX](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/shear_x.png) | ![ShearY](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/shear_y.png) |
+
+## Cropping
+
+Cropping is can also be handled in a manner more suitable for machine learning:
+
+| Original image                                                                                    | Random crops + resize operation                                                                          |
+|---------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png) | ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/crop_resize.gif) |
+
+## Chaining Operations in a Pipeline
+
+With only a few operations, a single image can be augmented to produce large numbers of new, label-preserving samples:
+
+| Original image                                                                                           | Random mirroring + random distortions                                                                            |
+|----------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/eight_200px.png) | ![DistortFlipFlop](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/flip_distort.gif) |
+
+In the example above, we have applied three operations: first we randomly distort the image, then we flip it horizontally and then vertically.
+
+```python
+p.random_distortion(probability=1, grid_width=4, grid_height=4, magnitude=8)
+p.flip_left_right(probability=0.8)
+p.flip_top_bottom(probability=0.3)
+p.sample(100)
+```
 ## Licence and Acknowledgements
 
 Augmentor is made available under the terms of the MIT Licence. See [`Licence.md`](https://github.com/mdbloice/Augmentor/blob/master/LICENSE.md).
