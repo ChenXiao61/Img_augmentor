@@ -178,12 +178,13 @@ The augmented images may be useful for a boundary detection task, for example.
 Augmentor is made available under the terms of the MIT Licence. See [`Licence.md`](https://github.com/mdbloice/Augmentor/blob/master/LICENSE.md).
 
 [1] Checkerboard image obtained from Wikimedia Commons and is in the public domain: <https://commons.wikimedia.org/wiki/File:Checkerboard_pattern.svg>
+
 [2] Skin lesion image obtained from the ISIC Archive:
 
 - Image id = 5436e3abbae478396759f0cf
 - Download: <https://isic-archive.com:443/api/v1/image/5436e3abbae478396759f0cf/download>
 
-You can use `urllib` to obtain the image in order to reproduce the augmented images above:
+You can use `urllib` to obtain the skin lesion image in order to reproduce the augmented images above:
 
 ```python
 >>> from urllib import urlretrieve
