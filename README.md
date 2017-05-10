@@ -57,7 +57,7 @@ Using elastic distortions, one image can be used to generate many images that ar
 |-----------------------------------------------------------------------------------------------------------------------------------|---|-------------------------------------------------------------------------------------------------------------------------|
 | ![eight_hand_drawn_border](https://cloud.githubusercontent.com/assets/16042756/23697279/79850d52-03e7-11e7-9445-475316b702a3.png) | → | ![eights_border](https://cloud.githubusercontent.com/assets/16042756/23697283/802698a6-03e7-11e7-94b7-f0b61977ef33.gif) |
 
-The input image has a 1 pixel black border to emphasise that you are getting rotation-like distortions without changing the size or aspect ratio of the original image.
+The input image has a 1 pixel black border to emphasise that you are getting distortions without changing the size or aspect ratio of the original image, and without any black/transparent padding around the newly generated images.
 
 The functionality can be more clearly seen here:
 
@@ -113,7 +113,7 @@ Compare this to how this is normally done:
 
 ### Cropping
 
-Cropping is can also be handled in a manner more suitable for machine learning:
+Cropping can also be handled in a manner more suitable for machine learning image augmentation:
 
 | Original image                                                                                    | Random crops + resize operation                                                                          |
 |---------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
