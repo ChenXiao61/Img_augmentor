@@ -162,14 +162,15 @@ With only a few operations, a single image can be augmented to produce large num
 |----------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
 | ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/eight_200px.png) | ![DistortFlipFlop](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/flip_distort.gif) |
 
-In the example above, we have applied three operations: first we randomly distort the image, then we flip it horizontally and then vertically.
+In the example above, we have applied three operations: first we randomly distort the image, then we flip it horizontally with a probability of 0.5 and then vertically with a probability of 0.5. We then sample from this pipeline 100 times to create 100 new data.
 
 ```python
 p.random_distortion(probability=1, grid_width=4, grid_height=4, magnitude=8)
-p.flip_left_right(probability=0.8)
-p.flip_top_bottom(probability=0.3)
+p.flip_left_right(probability=0.5)
+p.flip_top_bottom(probability=0.5)
 p.sample(100)
 ```
+
 ## Licence and Acknowledgements
 
 Augmentor is made available under the terms of the MIT Licence. See [`Licence.md`](https://github.com/mdbloice/Augmentor/blob/master/LICENSE.md).
