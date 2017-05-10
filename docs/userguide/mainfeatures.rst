@@ -154,11 +154,11 @@ However, the ``rotate()`` warrants more discussion and will be described here. W
 
 As can be seen above, an arbitrary, non-modulo 90, rotation will unfortunately result in the image being padded in each corner. To alleviate this, Augmentor's default behaviour is to crop the image and retain the largest crop possible while maintaining the image's aspect ratio:
 
-+-------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------+
-| Original Image                                                                                  | Rotated 10 degrees, automatically cropped                                                             |
-+-------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------+
-| .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/rotate_aug.png |
-+-------------------------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------+
++-------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
+| Original Image                                                                                  | Rotated 10 degrees, automatically cropped                                                               |
++-------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
+| .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png | .. image:: https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/rotate_aug_b.png |
++-------------------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------------------------+
 
 This will, of course, result in the image being zoomed in. For smaller rotations of between -5 and 5 degrees, this zoom effect is not particularly drastic.
 
