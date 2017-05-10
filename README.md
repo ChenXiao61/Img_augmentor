@@ -61,7 +61,7 @@ The input image has a 1 pixel black border to emphasise that you are getting dis
 
 The functionality can be more clearly seen here:
 
-| Original Image                                                                                    | Random distortions applied                                                                            |
+| Original Image<sup>[1]</sup                                                                       | Random distortions applied                                                                            |
 |---------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
 | ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png) | ![Distorted](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/distort.gif) |
 
@@ -167,7 +167,7 @@ p.sample(100)
 
 Some sample output:
 
-| Input Image<sup>[1]</sup>                                                                                          |   | Augmented Images                                                                                                    |
+| Input Image<sup>[2]</sup>                                                                                          |   | Augmented Images                                                                                                    |
 |--------------------------------------------------------------------------------------------------------------------|---|---------------------------------------------------------------------------------------------------------------------|
 | ![Original](https://cloud.githubusercontent.com/assets/16042756/23019262/b696e3a6-f441-11e6-958d-17f18f2cd35e.jpg) | → | ![Augmented](https://cloud.githubusercontent.com/assets/16042756/23018832/cda6967e-f43f-11e6-9082-765c291f1fd6.gif) |
 
@@ -177,7 +177,8 @@ The augmented images may be useful for a boundary detection task, for example.
 
 Augmentor is made available under the terms of the MIT Licence. See [`Licence.md`](https://github.com/mdbloice/Augmentor/blob/master/LICENSE.md).
 
-[1] Skin lesion image obtained from the ISIC Archive:
+[1] Checkerboard image obtained from Wikimedia Commons and is in the public domain: <https://commons.wikimedia.org/wiki/File:Checkerboard_pattern.svg>
+[2] Skin lesion image obtained from the ISIC Archive:
 
 - Image id = 5436e3abbae478396759f0cf
 - Download: <https://isic-archive.com:443/api/v1/image/5436e3abbae478396759f0cf/download>
