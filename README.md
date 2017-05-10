@@ -61,7 +61,7 @@ The input image has a 1 pixel black border to emphasise that you are getting dis
 
 The functionality can be more clearly seen here:
 
-| Original Image<sup>[1]</sup                                                                       | Random distortions applied                                                                            |
+| Original Image<sup>[1]</sup>                                                                      | Random distortions applied                                                                            |
 |---------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
 | ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png) | ![Distorted](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/distort.gif) |
 
