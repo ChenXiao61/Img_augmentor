@@ -87,9 +87,9 @@ The remaining eight types of transform are as follows:
 
 Rotations by default preserve the file size of the original images:
 
-| Original Image                                                                                    | Rotated 10 degrees, automatically cropped                                                             |
-|---------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png) | ![Rotate](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/rotate_aug.png) |
+| Original Image                                                                                    | Rotated 10 degrees, automatically cropped                                                               |
+|---------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/orig.png) | ![Rotate](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/rotate_aug_b.png) |
 
 Compared to rotations by other software:
 
