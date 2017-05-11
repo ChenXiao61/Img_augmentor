@@ -12,7 +12,7 @@ Install using `pip` from the command line:
 pip install Augmentor
 ```
 
-See the documentation for building from source.
+See the documentation for building from source. To upgrade from a previous version, use `pip install Augmentor --upgrade`.
 
 ## Documentation
 

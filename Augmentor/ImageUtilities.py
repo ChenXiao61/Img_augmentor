@@ -139,12 +139,14 @@ def scan_directory(source_directory):
     """
     file_types = ['*.jpg', '*.bmp', '*.jpeg', '*.gif', '*.img', '*.png']
 
-    # TODO: We might need to catch .Jpeg and .Png perhaps?
-    file_types.extend([str.upper(str(x)) for x in file_types])
-
     list_of_files = []
 
-    for file_type in file_types:
-        list_of_files.extend(glob.glob(os.path.join(os.path.abspath(source_directory), file_type)))
+    if os.name == "nt":
+        for file_type in file_types:
+            list_of_files.extend(glob.glob(os.path.join(os.path.abspath(source_directory), file_type)))
+    else:
+        file_types.extend([str.upper(str(x)) for x in file_types])
+        for file_type in file_types:
+            list_of_files.extend(glob.glob(os.path.join(os.path.abspath(source_directory), file_type)))
 
     return list_of_files

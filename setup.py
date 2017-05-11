@@ -30,9 +30,9 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     install_requires=[
-        'Pillow>=3.0.0',
-        'tqdm>=4.0.0',
-        'future>=0.15.0',
+        'Pillow>=4.0.0',
+        'tqdm>=4.9.0',
+        'future>=0.16.0',
         'numpy>=1.11.0'
     ]
     # zip_safe=False # Check this later.

@@ -240,6 +240,8 @@ Of these, ``flip_random()`` can be used in situations where mirroring through bo
 Notes
 -----
 
+Checkerboard image obtained from WikiMedia Commons and is in the public domain. See https://commons.wikimedia.org/wiki/File:Checkerboard_pattern.svg
+
 Skin lesion image obtained from the ISIC Archive:
 
 - Image id: 5436e3adbae478396759f0f1
@@ -247,7 +249,3 @@ Skin lesion image obtained from the ISIC Archive:
 - Download: https://isic-archive.com:443/api/v1/image/5436e3adbae478396759f0f1/download
 
 See https://isic-archive.com/#images for further details.
-
-Map data © OpenStreetMap contributors licensed under the Creative Commons Attribution-ShareAlike 2.0 licence (CC BY-SA), see https://www.openstreetmap.org/copyright
-
-
