@@ -509,8 +509,9 @@ class RotateRange(Operation):
         :type image: PIL.Image
         :return: The rotated image as type PIL.Image
         """
-        random_left = random.randint(self.max_left_rotation, -5)
-        random_right = random.randint(5, self.max_right_rotation)
+        # TODO: Small rotations of 1 or 2 degrees sometimes results in black pixels in the corners. Fix.
+        random_left = random.randint(self.max_left_rotation, 0)
+        random_right = random.randint(0, self.max_right_rotation)
 
         left_or_right = random.randint(0, 1)
 
@@ -687,39 +688,52 @@ class Crop(Operation):
         """
         w, h = image.size
 
+        # Just return the original image if the crop is too large for the
+        # current image.
+        if self.width > w or self.height > h:
+            return image
+
         if self.centre:
-            new_width = self.width / 2.
-            new_height = self.height / 2.
-            half_the_width = w / 2
-            half_the_height = h / 2
-
-            return image.crop(
-                (
-                    half_the_width - ceil(new_width),
-                    half_the_height - ceil(new_height),
-                    half_the_width + floor(new_width),
-                    half_the_height + floor(new_height)
-                )
-            )
+            return image.crop(((w/2)-(self.width/2), (h/2)-(self.height/2), (w/2)+(self.width/2), (h/2)+(self.height/2)))
         else:
-            random_right_shift = random.randint(0, (w - self.width))
-            random_down_shift = random.randint(0, (h - self.height))
+            left_shift = random.randint(0, int((w - self.width)))
+            down_shift = random.randint(0, int((h - self.height)))
+            return image.crop((left_shift, down_shift, self.width + left_shift, self.height + down_shift))
 
-            return image.crop(
-                (
-                    random_right_shift,
-                    random_down_shift,
-                    self.width+random_right_shift,
-                    self.height+random_down_shift
-                )
-            )
+        ################################################################################################################
+        #if self.centre:
+        #    new_width = self.width / 2.
+        #    new_height = self.height / 2.
+        #    half_the_width = w / 2
+        #    half_the_height = h / 2
+        #
+        #    return image.crop(
+        #        (
+        #            half_the_width - ceil(new_width),
+        #            half_the_height - ceil(new_height),
+        #            half_the_width + floor(new_width),
+        #            half_the_height + floor(new_height)
+        #        )
+        #    )
+        #else:
+        #    random_right_shift = random.randint(0, (w - self.width))
+        #    random_down_shift = random.randint(0, (h - self.height))
+        #
+        #    return image.crop(
+        #        (
+        #            random_right_shift,
+        #            random_down_shift,
+        #            self.width+random_right_shift,
+        #            self.height+random_down_shift
+        #        )
+        #    )
 
 
 class CropPercentage(Operation):
     """
     This class is used to crop images by a percentage of their area.
     """
-    def __init__(self, probability, percentage_area, centre):
+    def __init__(self, probability, percentage_area, centre, randomise_percentage_area):
         """
         As well as the always required :attr:`probability` parameter, the 
         constructor requires a :attr:`percentage_area` to control the area
@@ -741,6 +755,7 @@ class CropPercentage(Operation):
         Operation.__init__(self, probability)
         self.percentage_area = percentage_area
         self.centre = centre
+        self.randomise_percentage_area = randomise_percentage_area
 
     def perform_operation(self, image):
         """
@@ -752,19 +767,21 @@ class CropPercentage(Operation):
         :return: The cropped area as an image of type PIL.Image
         """
 
-        w, h = image.size
-        w_new = int(floor(w * self.percentage_area))  # TODO: Floor might return 0, so we need to check this.
-        h_new = int(floor(h * self.percentage_area))
-
-        # TODO: randomise the percentage area, to get different crops each time.
-        if self.centre:
-            left_shift = floor(w_new / 2.)
-            down_shift = floor(h_new / 2.)
-            return image.crop((left_shift, down_shift, w_new + left_shift, h_new + down_shift))
+        if self.randomise_percentage_area:
+            r_percentage_area = round(random.uniform(0.1, self.percentage_area), 2)
         else:
-            random_left_shift = random.randint(0, (w - w_new))  # Note: randint() is from uniform distribution.
-            random_down_shift = random.randint(0, (h - h_new))
-            return image.crop((random_left_shift, random_down_shift, w_new + random_left_shift, h_new + random_down_shift))
+            r_percentage_area = self.percentage_area
+
+        w, h = image.size
+        w_new = int(floor(w * r_percentage_area))  # TODO: Floor might return 0, so we need to check this.
+        h_new = int(floor(h * r_percentage_area))
+
+        if self.centre:
+            return image.crop(((w/2)-(w_new/2), (h/2)-(h_new/2), (w/2)+(w_new/2), (h/2)+(h_new/2)))
+        else:
+            left_shift = random.randint(0, int((w - w_new)))
+            down_shift = random.randint(0, int((h - h_new)))
+            return image.crop((left_shift, down_shift, w_new + left_shift, h_new + down_shift))
 
 
 class CropRandom(Operation):
@@ -794,12 +811,11 @@ class CropRandom(Operation):
         """
         w, h = image.size
 
-        # TODO: Fix this, as it is currently 1/4 of the area for 0.5 rather than 1/2.
-        w_new = int(floor(w * self.percentage_area))  # TODO: Floor might return 0, so we need to check this.
+        w_new = int(floor(w * self.percentage_area))
         h_new = int(floor(h * self.percentage_area))
 
-        random_left_shift = random.randint(0, (w - w_new))  # Note: randint() is from uniform distribution.
-        random_down_shift = random.randint(0, (h - h_new))
+        random_left_shift = random.randint(0, int((w - w_new)))  # Note: randint() is from uniform distribution.
+        random_down_shift = random.randint(0, int((h - h_new)))
 
         return image.crop((random_left_shift, random_down_shift, w_new + random_left_shift, h_new + random_down_shift))
 
@@ -868,10 +884,11 @@ class Shear(Operation):
 
         width, height = image.size
 
-        max_shear_left = -20
-        max_shear_right = 20
+        # For testing.
+        # max_shear_left = 20
+        # max_shear_right = 20
 
-        angle_to_shear = int(random.uniform(max_shear_left - 1, max_shear_right + 1))
+        angle_to_shear = int(random.uniform((abs(self.max_shear_left)*-1) - 1, self.max_shear_right + 1))
         if angle_to_shear != -1: angle_to_shear += 1
 
         # We use the angle phi in radians later
@@ -989,17 +1006,19 @@ class Scale(Operation):
         :type image: PIL.Image
         :return: The scaled image as type PIL.Image
         """
-        h, w = image.size
-        new_h = h * int(floor(self.scale_factor))
-        new_w = w * int(floor(self.scale_factor))
-        return image.resize((new_w, new_h))
+        w, h = image.size
+
+        new_h = int(h*self.scale_factor)
+        new_w = int(w*self.scale_factor)
+
+        return image.resize((new_w, new_h), resample=Image.BICUBIC)
 
 
 class Distort(Operation):
     """
     This class performs randomised, elastic distortions on images.
     """
-    def __init__(self, probability, grid_width, grid_height, magnitude, randomise_magnitude):
+    def __init__(self, probability, grid_width, grid_height, magnitude):
         """
         As well as the probability, the granularity of the distortions 
         produced by this class can be controlled using the width and
@@ -1028,8 +1047,8 @@ class Distort(Operation):
         self.grid_width = grid_width
         self.grid_height = grid_height
         self.magnitude = abs(magnitude)
-        randomise_magnitude = True  # TODO: Fix code below to handle FALSE state.
-        self.randomise_magnitude = randomise_magnitude
+        # TODO: Implement non-random magnitude.
+        self.randomise_magnitude = True
 
     def perform_operation(self, image):
         """
@@ -1181,6 +1200,53 @@ class Zoom(Operation):
                 half_the_height + floor((original_height / 2.))
             )
         )
+
+
+class ZoomRandom(Operation):
+    """
+    This class is used to zoom into random areas of the image.
+    """
+
+    def __init__(self, probability, percentage_area, randomise):
+        """
+        
+        
+        :param probability: Controls the probability that the operation is 
+         performed when it is invoked in the pipeline. 
+        :param percentage_area: 
+        :param randomise: 
+        """
+        Operation.__init__(self, probability)
+        self.percentage_area = percentage_area
+        self.randomise = randomise
+
+    def perform_operation(self, image):
+        """
+        Randomly zoom into the passed :attr:`image` by first cropping the image 
+        based on the :attr:`percentage_area` argument, and then resizing the 
+        image to match the size of the input area. 
+        
+        Effectively, you are zooming in on random areas of the image. 
+
+        :param image: The image to crop an area from.
+        :type image: PIL.Image
+        :return: The cropped area as an image of type PIL.Image
+        """
+
+        if self.randomise:
+            r_percentage_area = round(random.uniform(0.1, self.percentage_area), 2)
+        else:
+            r_percentage_area = self.percentage_area
+
+        w, h = image.size
+        w_new = int(floor(w * r_percentage_area))  # TODO: Floor might return 0, so we need to check this.
+        h_new = int(floor(h * r_percentage_area))
+
+        random_left_shift = random.randint(0, (w - w_new))  # Note: randint() is from uniform distribution.
+        random_down_shift = random.randint(0, (h - h_new))
+        image = image.crop((random_left_shift, random_down_shift, w_new + random_left_shift, h_new + random_down_shift))
+
+        return image.resize((w, h), resample=Image.BICUBIC)
 
 
 class Custom(Operation):

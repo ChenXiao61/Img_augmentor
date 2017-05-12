@@ -21,7 +21,6 @@ from .ImageUtilities import scan_directory, AugmentorImage
 import os
 import random
 import uuid
-import warnings
 
 from tqdm import tqdm
 from PIL import Image
@@ -40,7 +39,7 @@ class Pipeline(object):
     _valid_formats = ["PNG", "BMP", "GIF", "JPEG"]
     _legal_filters = ["NEAREST", "BICUBIC", "ANTIALIAS", "BILINEAR"]
 
-    def __init__(self, source_directory, ground_truth_directory=None, output_directory="output", save_format="JPEG"):
+    def __init__(self, source_directory, output_directory="output", save_format="JPEG"):
         """
         Create a new Pipeline object pointing to a directory containing your
         original image dataset.
@@ -77,7 +76,7 @@ class Pipeline(object):
         # directory is added, so we place it all in a function of its own.
         self._populate(source_directory=source_directory,
                        output_directory=output_directory,
-                       ground_truth_directory=ground_truth_directory,
+                       ground_truth_directory=None,
                        ground_truth_output_directory=output_directory)
 
         self.save_format = save_format
@@ -307,26 +306,24 @@ class Pipeline(object):
         # Python's own List exceptions can handle erroneous user input.
         self.operations.pop(operation_index)
 
-    def add_further_directory(self, new_source_directory, new_output_directory="output",
-                              new_ground_truth_source_directory=None):
+    def add_further_directory(self, new_source_directory, new_output_directory="output"):
         """
         Add a further directory containing images you wish to scan for augmentation.
         
         :param new_source_directory: The directory to scan for images.
         :param new_output_directory: The directory to use for outputted, 
          augmented images.
-        :param new_ground_truth_source_directory: A directory containing
         :type new_source_directory: String
         :type new_output_directory: String
-        :type new_ground_truth_source_directory: String
         :return: None
         """
         if not os.path.exists(new_source_directory):
             raise IOError("The path does not appear to exist.")
 
-        self.augmentor_images += self._populate(source_directory=new_source_directory,
-                                                output_directory=new_output_directory,
-                                                ground_truth_directory=new_ground_truth_source_directory)
+        self._populate(source_directory=new_source_directory,
+                       output_directory=new_output_directory,
+                       ground_truth_directory=None,
+                       ground_truth_output_directory=new_output_directory)
 
     def status(self):
         """
@@ -357,9 +354,9 @@ class Pipeline(object):
                 operation_index += 1
             print()
 
-        print("There are %s image(s) in the source directory." % len(self.image_list))
+        print("There are %s image(s) in the source directory." % len(self.augmentor_images))
 
-        if len(self.image_list) != 0:
+        if len(self.augmentor_images) != 0:
             print("Dimensions:")
             for distinct_dimension in self.distinct_dimensions:
                 print("\tWidth: %s Height: %s" % (distinct_dimension[0], distinct_dimension[1]))
@@ -469,11 +466,19 @@ class Pipeline(object):
         
         .. note:: This function will rotate **in place**, and crop the largest 
          possible rectangle from the rotated image.
+         
+        In practice, angles larger than 25 degrees result in images that 
+        do not render correctly, therefore there is a limit of 25 degrees
+        for this function.
+         
+        If this function returns images that are not rendered correctly, then
+        you must reduce the :attr:`max_left_rotation` and
+        :attr:`max_right_rotation` arguments!
 
         :param max_left_rotation: The maximum number of degrees the image can
          be rotated to the left.
         :param max_right_rotation: The maximum number of degrees the image can
-         be rotated to the left.
+         be rotated to the right.
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
         :type max_left_rotation: Integer
@@ -483,13 +488,13 @@ class Pipeline(object):
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
-        if not 0 <= max_left_rotation <= 180:
-            raise ValueError("The max_left_rotation argument must be between 0 and 180.")
-        if not 0 <= max_right_rotation <= 180:
-            raise ValueError("The max_right_rotation argument must be between 0 and 180.")
+        if not 0 <= max_left_rotation <= 25:
+            raise ValueError("The max_left_rotation argument must be between 0 and 25.")
+        if not 0 <= max_right_rotation <= 25:
+            raise ValueError("The max_right_rotation argument must be between 0 and 25.")
         else:
-            self.add_operation(RotateRange(probability=probability, max_left_rotation=max_left_rotation,
-                                           max_right_rotation=max_right_rotation))
+            self.add_operation(RotateRange(probability=probability, max_left_rotation=ceil(max_left_rotation),
+                                           max_right_rotation=ceil(max_right_rotation)))
 
     def flip_top_bottom(self, probability):
         """
@@ -543,7 +548,7 @@ class Pipeline(object):
         else:
             self.add_operation(Flip(probability=probability, top_bottom_left_right="RANDOM"))
 
-    def random_distortion(self, probability, grid_width, grid_height, magnitude, randomise_magnitude=True):
+    def random_distortion(self, probability, grid_width, grid_height, magnitude):
         """
         Performs a random, elastic distortion on an image.
 
@@ -553,6 +558,11 @@ class Pipeline(object):
         pronounced, and less granular distortions. Larger numbers will result
         in finer, more granular distortions. The magnitude of the distortions
         can be controlled using magnitude. This can be random or fixed.
+        
+        *Good* values for parameters are between 2 and 10 for the grid
+        width and height, with a magnitude of between 1 and 10. Using values
+        outside of these approximate ranges may result in unpredictable 
+        behaviour.
 
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
@@ -561,25 +571,17 @@ class Pipeline(object):
         :param grid_height: The number of rectangles in the grid's vertical
          axis.
         :param magnitude: The magnitude of the distortions.
-        :param randomise_magnitude: Specifies whether the magnitude should be 
-         used as a range if :attr:`True`, or as a constant value, if 
-         :attr:`False`. If :attr:`True` the magnitude is selected randomly 
-         from between 0 and :attr:`magnitude`.
         :type probability: Float
         :type grid_width: Integer
         :type grid_height: Integer
         :type magnitude: Integer
-        :type randomise_magnitude: Boolean
         :return: None
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
-        elif not isinstance(randomise_magnitude, bool):
-            raise ValueError("The randomise_magnitude argument must be either True or False.")
         else:
             self.add_operation(Distort(probability=probability, grid_width=grid_width,
-                                       grid_height=grid_height, magnitude=magnitude,
-                                       randomise_magnitude=randomise_magnitude))
+                                       grid_height=grid_height, magnitude=magnitude))
 
     def zoom(self, probability, min_factor, max_factor):
         """
@@ -591,6 +593,9 @@ class Pipeline(object):
         
         To zoom by a constant amount, set :attr:`min_factor` and
         :attr:`max_factor` to the same value.
+        
+        .. seealso:: See :func:`zoom_random` for zooming into random areas 
+         of the image.
         
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed. 
@@ -608,17 +613,47 @@ class Pipeline(object):
         else:
             self.add_operation(Zoom(probability=probability, min_factor=min_factor, max_factor=max_factor))
 
+    def zoom_random(self, probability, percentage_area, randomise_percentage_area=False):
+        """
+        Zooms into an image at a random location within the image. 
+        
+        You can randomise the zoom level by setting the 
+        :attr:`randomise_percentage_area` argument to true. 
+        
+        .. seealso:: See :func:`zoom` for zooming into the centre of images.
+
+        :param probability: The probability that the function will execute
+         when the image is passed through the pipeline.
+        :param percentage_area: The area, as a percentage of the current
+         image's area, to crop.
+        :param randomise_percentage_area: If True, will use 
+         :attr:`percentage_area` as an upper bound and randomise the crop from
+         between 0 and :attr:`percentage_area`. 
+        :return: None
+        """
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        elif not 0.1 <= percentage_area < 1:
+            raise ValueError("The percentage_area argument must be greater than 0.1 and less than 1.")
+        elif not isinstance(randomise_percentage_area, bool):
+            raise ValueError("The randomise_percentage_area argument must be True or False.")
+        else:
+            self.add_operation(ZoomRandom(probability=probability, percentage_area=percentage_area, randomise=randomise_percentage_area))
+
     def crop_by_size(self, probability, width, height, centre=True):
         """
         Crop an image according to a set of dimensions.
-
+    
         Crop each image according to :attr:`width` and :attr:`height`, by
         default at the centre of each image, otherwise at a random location
         within the image.
-
+    
         .. seealso:: See :func:`crop_random` to crop a random, non-centred
          area of the image.
-        
+    
+        If the crop area exceeds the size of the image, this function will
+        crop the entire area of the image.
+    
         :param probability: The probability that the function will execute
          when the image is passed through the pipeline.
         :param width: The width of the desired crop.
@@ -643,7 +678,7 @@ class Pipeline(object):
         else:
             self.add_operation(Crop(probability=probability, width=width, height=height, centre=centre))
 
-    def crop_centre(self, probability, percentage_area):
+    def crop_centre(self, probability, percentage_area, randomise_percentage_area=False):
         """
         Crops the centre of an image as a percentage of the image's area.
         
@@ -651,17 +686,25 @@ class Pipeline(object):
          when the image is passed through the pipeline.
         :param percentage_area: The area, as a percentage of the current
          image's area, to crop.
+        :param randomise_percentage_area: If True, will use 
+         :attr:`percentage_area` as an upper bound and randomise the crop from
+         between 0 and :attr:`percentage_area`. 
         :type probability: Float
         :type percentage_area: Float
+        :type randomise_percentage_area: Boolean
         :return: None
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
-        elif not 0 < percentage_area < 1:
-            raise ValueError("The percentage_area argument must be greater than 0 and less than 1.")
-        self.add_operation(CropPercentage(probability=probability, percentage_area=percentage_area, centre=True))
+        elif not 0.1 <= percentage_area < 1:
+            raise ValueError("The percentage_area argument must be greater than 0.1 and less than 1.")
+        elif not isinstance(randomise_percentage_area, bool):
+            raise ValueError("The randomise_percentage_area argument must be True or False.")
+        else:
+            self.add_operation(CropPercentage(probability=probability, percentage_area=percentage_area, centre=True,
+                                              randomise_percentage_area=randomise_percentage_area))
 
-    def crop_random(self, probability, percentage_area):
+    def crop_random(self, probability, percentage_area, randomise_percentage_area=False):
         """
         Crop a random area of an image, based on the percentage area to be
         returned.
@@ -673,16 +716,23 @@ class Pipeline(object):
          when the image is passed through the pipeline.
         :param percentage_area: The area, as a percentage of the current
          image's area, to crop.
+        :param randomise_percentage_area: If True, will use 
+         :attr:`percentage_area` as an upper bound and randomise the crop from
+         between 0 and :attr:`percentage_area`. 
         :type probability: Float
         :type percentage_area: Float
+        :type randomise_percentage_area: Boolean
         :return: None
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
-        elif not 0 < percentage_area < 1:
-            raise ValueError("The percentage_area argument must be greater than 0 and less than 1.")
+        elif not 0.1 <= percentage_area < 1:
+            raise ValueError("The percentage_area argument must be greater than 0.1 and less than 1.")
+        elif not isinstance(randomise_percentage_area, bool):
+            raise ValueError("The randomise_percentage_area argument must be True or False.")
         else:
-            self.add_operation(CropPercentage(probability=probability, percentage_area=percentage_area, centre=False))
+            self.add_operation(CropPercentage(probability=probability, percentage_area=percentage_area, centre=False,
+                                              randomise_percentage_area=randomise_percentage_area))
 
     def histogram_equalisation(self, probability=1.0):
         """
@@ -701,9 +751,11 @@ class Pipeline(object):
 
     def scale(self, probability, scale_factor):
         """
-        Scale (enlarge) an image, while maintaining its aspect ratio. This 
+        Scale (enlarge) an image, while maintaining its aspect ratio. This
         returns an image with larger dimensions than the original image.
-
+        
+        Use :func:`resize` to resize an image to absolute pixel values. 
+    
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
         :param scale_factor: The factor to scale by, which must be greater
@@ -874,19 +926,24 @@ class Pipeline(object):
         """
         Shear the image by a specified number of degrees.
 
+        In practice, shear angles of more than 25 degrees can cause
+        unpredictable behaviour. If you are observing images that are
+        incorrectly rendered (e.g. they do not contain any information) 
+        then reduce the shear angles.
+
         :param probability: The probability that the operation is performed. 
         :param max_shear_left: The max number of degrees to shear to the left.
-         Cannot be larger than 90 degrees.
+         Cannot be larger than 25 degrees.
         :param max_shear_right: The max number of degrees to shear to the 
-         right. Cannot be larger than 90 degrees.
+         right. Cannot be larger than 25 degrees.
         :return: None
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
-        elif not 0 < max_shear_left <= 90:
-            raise ValueError("The max_shear_left argument must be between 0 and 90.")
-        elif not 0 < max_shear_right <= 90:
-            raise ValueError("The max_shear_right argument must be between 0 and 90.")
+        elif not 0 < max_shear_left <= 25:
+            raise ValueError("The max_shear_left argument must be between 0 and 25.")
+        elif not 0 < max_shear_right <= 25:
+            raise ValueError("The max_shear_right argument must be between 0 and 25.")
         else:
             self.add_operation(Shear(probability=probability,
                                      max_shear_left=max_shear_left,
