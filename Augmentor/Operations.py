@@ -112,7 +112,6 @@ class HistogramEqualisation(Operation):
         :type image: PIL.Image
         :return: The transformed image of type PIL.Image
         """
-        # TODO: We may need to apply this to each channel:
         # If an image is a colour image, the histogram will
         # will be computed on the flattened image, which fires
         # a warning.
@@ -222,8 +221,6 @@ class BlackAndWhite(Operation):
         :return: The converted image as type PIL.Image
         """
         image = ImageOps.grayscale(image)
-        # See the Stack Overflow question:
-        # http://stackoverflow.com/questions/18777873/convert-rgb-to-black-or-white
         # An alternative would be to use PIL.ImageOps.posterize(image=image, bits=1)
         return image.point(lambda x: 0 if x < self.threshold else 255, '1')
 
@@ -1036,8 +1033,6 @@ class Distort(Operation):
          by the class to apply the transformations to the image.
         :param magnitude: Controls the degree to which each distortion is 
          applied to the overlaying distortion grid.
-        :param randomise_magnitude: Controls whether the distortion magnitude
-         is randomised or fixed.
         :type probability: Float
         :type grid_width: Integer
         :type grid_height: Integer
@@ -1185,21 +1180,28 @@ class Zoom(Operation):
         :return: The zoomed in image as type PIL.Image
         """
         factor = round(random.uniform(self.min_factor, self.max_factor), 2)
-        original_width, original_height = image.size
-        # TODO: Join these two functions together so that we don't have this image_zoom variable lying around.
-        image_zoomed = image.resize((int(round(image.size[0] * factor)), int(round(image.size[1] * factor))))
 
+        w, h = image.size
+
+        # TODO: Join these two functions together so that we don't have this image_zoom variable lying around.
+        image_zoomed = image.resize((int(round(image.size[0] * factor)), int(round(image.size[1] * factor))), resample=Image.BICUBIC)
+        w_zoomed, h_zoomed = image_zoomed.size
+
+        return image_zoomed.crop(((w_zoomed / 2) - (w / 2), (h_zoomed / 2) - (h / 2), (w_zoomed / 2) + (w / 2), (h_zoomed / 2) + (h / 2)))
+
+        ################################################################################################################
         # Return the centre of the zoomed image, so that it is the same size as the original image
-        half_the_width = image_zoomed.size[0] / 2
-        half_the_height = image_zoomed.size[1] / 2
-        return image_zoomed.crop(
-            (
-                half_the_width - ceil((original_width / 2.)),
-                half_the_height - ceil((original_height / 2.)),
-                half_the_width + floor((original_width / 2.)),
-                half_the_height + floor((original_height / 2.))
-            )
-        )
+        # original_width, original_height = image.size
+        # half_the_width = image_zoomed.size[0] / 2
+        # half_the_height = image_zoomed.size[1] / 2
+        # return image_zoomed.crop(
+        #     (
+        #         half_the_width - ceil((original_width / 2.)),
+        #         half_the_height - ceil((original_height / 2.)),
+        #         half_the_width + floor((original_width / 2.)),
+        #         half_the_height + floor((original_height / 2.))
+        #     )
+        # )
 
 
 class ZoomRandom(Operation):
