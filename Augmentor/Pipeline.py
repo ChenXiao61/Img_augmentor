@@ -21,6 +21,7 @@ from .ImageUtilities import scan_directory, AugmentorImage
 import os
 import random
 import uuid
+import warnings
 
 from tqdm import tqdm
 from PIL import Image
@@ -39,7 +40,7 @@ class Pipeline(object):
     _valid_formats = ["PNG", "BMP", "GIF", "JPEG"]
     _legal_filters = ["NEAREST", "BICUBIC", "ANTIALIAS", "BILINEAR"]
 
-    def __init__(self, source_directory, output_directory="output", save_format="JPEG"):
+    def __init__(self, source_directory=None, output_directory="output", save_format="JPEG"):
         """
         Create a new Pipeline object pointing to a directory containing your
         original image dataset.
@@ -69,15 +70,17 @@ class Pipeline(object):
         self.augmentor_images = []
         self.distinct_dimensions = set()
         self.distinct_formats = set()
-        # TODO: Refactor this out
+        # TODO: Refactor this out as we do not use it anymore
         self.ground_truth_image_list = {}
+
 
         # Now we populate some fields, which we may need to do again later if another
         # directory is added, so we place it all in a function of its own.
-        self._populate(source_directory=source_directory,
-                       output_directory=output_directory,
-                       ground_truth_directory=None,
-                       ground_truth_output_directory=output_directory)
+        if source_directory is not None:
+            self._populate(source_directory=source_directory,
+                           output_directory=output_directory,
+                           ground_truth_directory=None,
+                           ground_truth_output_directory=output_directory)
 
         self.save_format = save_format
         self.operations = []
@@ -184,9 +187,12 @@ class Pipeline(object):
         :type save_to_disk: Boolean
         :return: The augmented image.
         """
-        self.image_counter += 1
+        self.image_counter += 1  # TODO: See if I can remove this...
 
-        image = Image.open(augmentor_image.image_path)
+        if augmentor_image.image_path is not None:
+            image = Image.open(augmentor_image.image_path)
+        else:
+            image = augmentor_image.image_PIL
 
         for operation in self.operations:
             r = round(random.uniform(0, 1), 1)
@@ -207,6 +213,7 @@ class Pipeline(object):
                 print("Error writing %s." % file_name)
 
         return image
+
 
     def sample(self, n):
         """
@@ -248,6 +255,9 @@ class Pipeline(object):
 
     def apply_current_pipeline(self, image_path, save_to_disk=False):
         """
+        .. warning::
+         This function has been deprecated in favour of :func:`apply_from_path()`.
+
         Apply the current pipeline to a single image, returning the
         transformed image. By default, the transformed image is not saved 
         to disk, and is returned to the user.
@@ -265,7 +275,28 @@ class Pipeline(object):
         :type save_to_disk: Boolean
         :return: The transformed image.
         """
-        return self._execute(AugmentorImage(os.path.abspath(image_path), None), save_to_disk)
+
+        warnings.warn("This function has been deprecated in favour of sample_with_path() and sample_with_array().",
+                      DeprecationWarning)
+
+        return self.apply_from_path(image_path=image_path, save_to_disk=save_to_disk)
+
+    def sample_with_path(self, image_path, save_to_disk=False):
+        raise NotImplementedError("This method is currently not implemented.")
+
+    def sample_with_array(self, image_array, save_to_disk=False):
+
+        a = AugmentorImage(image_path=None, output_directory=None)
+        a.image_PIL = Image.fromarray(image_array)
+
+        return self._execute(a, save_to_disk)
+
+    def sample_with_image(self, image, save_to_disk=False):
+        raise NotImplementedError("This method is currently not implemented.")
+
+    def image_generator(self, n):
+        for i in range(n):
+            yield self.sample(1)
 
     def add_operation(self, operation):
         """
@@ -376,6 +407,12 @@ class Pipeline(object):
         :return: None
         """
         random.seed(seed)
+
+    # TODO: Add this feature ASAP
+    def subtract_mean(self, probability=1):
+        # For implementation example, see bottom of:
+        # https://patrykchrabaszcz.github.io/Imagenet32/
+        self.add_operation(Mean(probability=probability))
 
     def rotate90(self, probability):
         """

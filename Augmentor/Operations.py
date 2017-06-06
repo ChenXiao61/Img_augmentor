@@ -1258,6 +1258,14 @@ class ZoomRandom(Operation):
         return image.resize((w, h), resample=Image.BICUBIC)
 
 
+class Mean(Operation):
+    def __init__(self, probability):
+        Operation.__init__(self, probability)
+
+    def perform_operation(self, image):
+        # TODO: Implement
+        return image
+
 class Custom(Operation):
     """
     Class that allows for a custom operations to be performed using Augmentor's

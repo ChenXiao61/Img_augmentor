@@ -40,6 +40,7 @@ class AugmentorImage(object):
         self._image_path = None
         self._output_directory = None
         self._file_format = None  # TODO: pass this for each image.
+        self._image_PIL = None
 
         # Now we call the setters that we require.
         self.image_path = image_path
@@ -75,10 +76,19 @@ class AugmentorImage(object):
 
     @image_path.setter
     def image_path(self, value):
-        if os.path.exists(value):
-            self._image_path = value
-        else:
-            raise IOError("The file specified does not exist.")
+        self._image_path = value
+        #if os.path.exists(value):
+        #    self._image_path = value
+        #else:
+        #    raise IOError("The file specified does not exist.")
+
+    @property
+    def image_PIL(self):
+        return self._image_PIL
+
+    @image_PIL.setter
+    def image_PIL(self, value):
+        self._image_PIL = value
 
     @property
     def image_file_name(self):
