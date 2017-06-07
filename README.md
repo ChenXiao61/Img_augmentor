@@ -1,6 +1,11 @@
 ![AugmentorLogo](https://github.com/mdbloice/AugmentorFiles/blob/master/Misc/AugmentorLogo.png)
 
-[![Documentation Status](https://readthedocs.org/projects/augmentor/badge/?version=latest)](http://augmentor.readthedocs.io/en/latest/?badge=latest) [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md) [![Project Status: WIP - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip) [![PyPI](https://img.shields.io/badge/pypi-v0.1.3-blue.svg?maxAge=2592000)](https://pypi.python.org/pypi/Augmentor) [![Supported Python Versions](https://img.shields.io/badge/python-2.7%2C%203.3--3.6-orange.svg)](https://pypi.python.org/pypi/Augmentor)
+[![Documentation Status](https://readthedocs.org/projects/augmentor/badge/?version=latest)](http://augmentor.readthedocs.io/en/latest/?badge=latest)
+[![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md)
+[![Project Status: WIP - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip)
+[![PyPI](https://img.shields.io/badge/pypi-v0.1.3-blue.svg?maxAge=2592000)](https://pypi.python.org/pypi/Augmentor)
+[![Supported Python Versions](https://img.shields.io/badge/python-2.7%2C%203.3--3.6-orange.svg)](https://pypi.python.org/pypi/Augmentor)
+[![Build Status](https://travis-ci.org/mdbloice/Augmentor.svg?branch=master)](https://travis-ci.org/mdbloice/Augmentor)
 
 Image augmentation library in Python for machine learning. A Julia version of the package is also being developed as a sister project and is available [here](https://github.com/Evizero/Augmentor.jl).
 
