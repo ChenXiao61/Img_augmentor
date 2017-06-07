@@ -16,7 +16,7 @@ dist/
 data/
 build/
 back/
-test/
+.cache/
 .tox/
 _build
 _static
