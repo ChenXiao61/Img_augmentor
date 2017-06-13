@@ -36,6 +36,8 @@ import os
 import random
 import warnings
 
+import colorsys
+
 # Python 2-3 compatibility - not currently needed.
 # try:
 #    from StringIO import StringIO
@@ -1265,6 +1267,51 @@ class Mean(Operation):
     def perform_operation(self, image):
         # TODO: Implement
         return image
+
+
+class HSVShifting(Operation):
+
+    def __init__(self, probability, hue_shift, saturation_scale, saturation_shift, value_scale, value_shift):
+        # Call the superclass's constructor (meaning you must
+        # supply a probability value):
+        Operation.__init__(self, probability)
+
+        # Set your custom operation's member variables here as required:
+        self.hue_shift = hue_shift
+        self.saturation_scale = saturation_scale
+        self.saturation_shift = saturation_shift
+        self.value_scale = value_scale
+        self.value_shift = value_shift
+
+        self.rgb_to_hsv = np.vectorize(colorsys.rgb_to_hsv)
+        self.hsv_to_rgb = np.vectorize(colorsys.hsv_to_rgb)
+
+    def perform_operation(self, image):
+        rgb = np.array(image, 'float64')
+        # the rgb to hsv transformation expects values between 0 and 1
+        rgb /= 255.
+
+        # transform to hsv
+        hsv = np.array(self.rgb_to_hsv(rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]))
+
+        # do the scalings & shiftings
+        hsv[0] += np.random.uniform(-self.hue_shift, self.hue_shift)
+        hsv[1] *= np.random.uniform(1 / (1 + self.saturation_scale), 1 + self.saturation_scale)
+        hsv[1] += np.random.uniform(-self.saturation_shift, self.saturation_shift)
+        hsv[2] *= np.random.uniform(1 / (1 + self.value_scale), 1 + self.value_scale)
+        hsv[2] += np.random.uniform(-self.value_shift, self.value_shift)
+
+        # cut off invalid values
+        hsv.clip(0, 1, hsv)
+
+        # transform back to rgb and build the image together in the right way (e.g. 32x32x3)
+        rgb = np.stack(self.hsv_to_rgb(hsv[0], hsv[1], hsv[2]), axis=2)
+
+        # round to full numbers
+        rgb = np.uint8(np.round(rgb * 255.))
+
+        # convert back to image
+        return Image.fromarray(rgb, "RGB")
 
 class Custom(Operation):
     """
