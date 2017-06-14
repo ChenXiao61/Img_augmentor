@@ -22,6 +22,7 @@ import os
 import random
 import uuid
 import warnings
+import numbers
 
 from tqdm import tqdm
 from PIL import Image
@@ -489,6 +490,26 @@ class Pipeline(object):
             raise ValueError(Pipeline._probability_error_text)
         else:
             self.add_operation(Rotate(probability=probability, rotation=-1))
+
+    def rotate_alt(self, probability, rotation):
+
+        # If a scalar, rotate by that amount
+        # If a list, use as from, to, step
+        # If a set, use as discrete values
+
+        if isinstance(rotation, numbers.Real):
+            self.add_operation(Rotate(probability=probability))
+        elif isinstance(rotation, tuple):
+            print
+            "Rotate by one of %s" % list(rotation)
+            r = random.sample(rotation, 1)[0]
+        elif isinstance(rotation, list):
+            print
+            "Rotate between %s and %s in steps of %s" % (r[0], r[1], r[2])
+            r = np.arange(*rotation)
+            r = random.choice(r)
+
+        pass
 
     def rotate(self, probability, max_left_rotation, max_right_rotation):
         """
