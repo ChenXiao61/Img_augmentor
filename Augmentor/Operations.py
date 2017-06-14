@@ -1313,6 +1313,7 @@ class HSVShifting(Operation):
         # convert back to image
         return Image.fromarray(rgb, "RGB")
 
+
 class Custom(Operation):
     """
     Class that allows for a custom operations to be performed using Augmentor's
