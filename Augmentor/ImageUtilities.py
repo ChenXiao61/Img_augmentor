@@ -12,7 +12,9 @@ from builtins import *
 
 import os
 import glob
-
+import numbers
+import random
+import numpy as np
 
 class AugmentorImage(object):
     """
@@ -119,6 +121,16 @@ class AugmentorImage(object):
         # TODO: Include some kind of fuzzy search.
         if os.path.isfile(value):
             self._ground_truth = value
+
+
+def parse_user_parameter(user_param):
+
+    if isinstance(user_param, numbers.Real):
+        return user_param
+    elif isinstance(user_param, tuple):
+        return random.sample(user_param, 1)[0]
+    elif isinstance(user_param, list):
+        return random.choice(np.arange(*user_param))
 
 
 def extract_paths_and_extensions(image_path):
