@@ -609,6 +609,52 @@ class Pipeline(object):
         else:
             self.add_operation(Distort(probability=probability, grid_width=grid_width,
                                        grid_height=grid_height, magnitude=magnitude))
+            
+    def gaussian_distortion(self, probability, grid_width, grid_height, magnitude, corner, method, mex=0.5, mey=0.5, 
+                            sdx=0.05, sdy=0.05):
+        """
+        Performs a random, elastic gaussian distortion on an image.
+
+        This function performs a randomised, elastic gaussian distortion controlled
+        by the parameters specified. The grid width and height controls how
+        fine the distortions are. Smaller sizes will result in larger, more
+        pronounced, and less granular distortions. Larger numbers will result
+        in finer, more granular distortions. The magnitude of the distortions
+        can be controlled using magnitude. This can be random or fixed.
+        
+        *Good* values for parameters are between 2 and 10 for the grid
+        width and height, with a magnitude of between 1 and 10. Using values
+        outside of these approximate ranges may result in unpredictable 
+        behaviour.
+
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :param grid_width: The number of rectangles in the grid's horizontal
+         axis.
+        :param grid_height: The number of rectangles in the grid's vertical
+         axis.
+        :param magnitude: The magnitude of the distortions.
+        :param corner: which corner of picture to distort. 
+                Possible values: "bell"(circular surface applied), "ul"(upper left), "ur"(upper right),
+                "dl"(down left), "dr"(down right)
+        :param method: possible values: "in"(apply max magnitude to the chosen corner), "out"(inverse of method in)       
+        :param mex, mey, sdx, sdy: used to generate 3d surface for similar distortions.
+                                    Surface is based on normal distribution (math.exp(-(((x-mex)**2)/sdx + ((y-mey)**2)/sdy)))         
+        :type probability: Float
+        :type grid_width: Integer
+        :type grid_height: Integer
+        :type magnitude: Integer
+        :type corner: String
+        :type method: String
+        :type mex, mex, sdx, sdy: Float
+        :return: None
+        """
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        else:
+            self.add_operation(gausDistort(probability=probability, grid_width=grid_width,
+                                       grid_height=grid_height, magnitude=magnitude, corner=corner, method=method,  mex=mex,
+                                       mey=mey, sdx=sdx, sdy=sdy))        
 
     def zoom(self, probability, min_factor, max_factor):
         """
