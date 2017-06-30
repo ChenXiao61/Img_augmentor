@@ -635,19 +635,36 @@ class Pipeline(object):
          axis.
         :param magnitude: The magnitude of the distortions.
         :param corner: which corner of picture to distort. 
-                Possible values: "bell"(circular surface applied), "ul"(upper left), "ur"(upper right),
-                "dl"(down left), "dr"(down right)
-        :param method: possible values: "in"(apply max magnitude to the chosen corner), "out"(inverse of method in)       
-        :param mex, mey, sdx, sdy: used to generate 3d surface for similar distortions.
-                                    Surface is based on normal distribution (math.exp(-(((x-mex)**2)/sdx + ((y-mey)**2)/sdy)))         
+         Possible values: "bell"(circular surface applied), "ul"(upper left),
+         "ur"(upper right), "dl"(down left), "dr"(down right).
+        :param method: possible values: "in"(apply max magnitude to the chosen
+         corner), "out"(inverse of method in).
+        :param mex: used to generate 3d surface for similar distortions.
+         Surface is based on normal distribution.
+        :param mey: used to generate 3d surface for similar distortions.
+         Surface is based on normal distribution.
+        :param sdx: used to generate 3d surface for similar distortions.
+         Surface is based on normal distribution.
+        :param sdy: used to generate 3d surface for similar distortions.
+         Surface is based on normal distribution.
         :type probability: Float
         :type grid_width: Integer
         :type grid_height: Integer
         :type magnitude: Integer
         :type corner: String
         :type method: String
-        :type mex, mex, sdx, sdy: Float
+        :type mex: Float
+        :type mey: Float
+        :type sdx: Float
+        :type sdy: Float
         :return: None
+
+        For values :attr:`mex`, :attr:`mey`, :attr:`sdx`, and :attr:`sdy` the
+        surface is based on the normal distribution:
+
+        .. math::
+
+         e^{-\\frac{(x-\\text{mex})^2}{sdx} + \\frac{(y-\\text{mey})^2}{sdy}}
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)

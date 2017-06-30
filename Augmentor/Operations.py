@@ -470,16 +470,19 @@ class RotateRange(Operation):
     returned by this function. That is to say, that after a rotation
     has been performed, the largest possible area of the same aspect ratio
     of the original image is cropped from the skewed image, and this is 
-    then resized to match the original image size. The 
-    :ref:`rotating` section describes this in detail and has example 
-    images to demonstrate this.
+    then resized to match the original image size.
+
+    The method by which this is performed is described as follows:
 
     .. math::
 
         E = \\frac{\\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}}\\Big(X-\\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}} Y\\Big)}{1-\\frac{(\\sin{\\theta_{a}})^2}{(\\sin{\\theta_{b}})^2}}
 
-    which describes how :math:`E` is derived, and then follows :math:`B = Y - E` and :math:`A = \\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}} B`.
+    which describes how :math:`E` is derived, and then follows
+    :math:`B = Y - E` and :math:`A = \\frac{\\sin{\\theta_{a}}}{\\sin{\\theta_{b}}} B`.
 
+    The :ref:`rotating` section describes this in detail and has example
+    images to demonstrate this.
     """
     def __init__(self, probability, max_left_rotation, max_right_rotation):
         """
@@ -1175,18 +1178,35 @@ class GaussianDistortion(Operation):
         :param magnitude: Controls the degree to which each distortion is 
          applied to the overlaying distortion grid.
         :param corner: which corner of picture to distort. 
-                Possible values: "bell"(circular surface applied), "ul"(upper left), "ur"(upper right),
-                "dl"(down left), "dr"(down right)
-        :param method: possible values: "in"(apply max magnitude to the chosen corner), "out"(inverse of method in)       
-        :param mex, mey, sdx, sdy: used to generate 3d surface for similar distortions.
-                                    Surface is based on normal distribution (math.exp(-(((x-mex)**2)/sdx + ((y-mey)**2)/sdy))) 
+         Possible values: "bell"(circular surface applied), "ul"(upper left),
+         "ur"(upper right), "dl"(down left), "dr"(down right).
+        :param method: possible values: "in"(apply max magnitude to the chosen
+         corner), "out"(inverse of method in).
+        :param mex: used to generate 3d surface for similar distortions.
+         Surface is based on normal distribution.
+        :param mey: used to generate 3d surface for similar distortions.
+         Surface is based on normal distribution.
+        :param sdx: used to generate 3d surface for similar distortions.
+         Surface is based on normal distribution.
+        :param sdy: used to generate 3d surface for similar distortions.
+         Surface is based on normal distribution.
         :type probability: Float
         :type grid_width: Integer
         :type grid_height: Integer
         :type magnitude: Integer
         :type corner: String
         :type method: String
-        :type mex, mex, sdx, sdy: Float
+        :type mex: Float
+        :type mey: Float
+        :type sdx: Float
+        :type sdy: Float
+
+        For values :attr:`mex`, :attr:`mey`, :attr:`sdx`, and :attr:`sdy` the
+        surface is based on the normal distribution:
+
+        .. math::
+
+         e^{-\\frac{(x-\\text{mex})^2}{sdx} + \\frac{(y-\\text{mey})^2}{sdy}}
         """
         Operation.__init__(self, probability)
         self.grid_width = grid_width
