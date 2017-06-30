@@ -13,6 +13,7 @@ from Augmentor import Operations
 
 from util_funcs import create_colour_temp_image, create_greyscale_temp_image
 
+
 def test_in_memory_distortions():
     tmp, tmpdir = create_colour_temp_image((800, 800), "JPEG")
 

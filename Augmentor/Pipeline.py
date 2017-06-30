@@ -16,7 +16,7 @@ from __future__ import (absolute_import, division,
 from builtins import *
 
 from .Operations import *
-from .ImageUtilities import scan_directory, AugmentorImage
+from .ImageUtilities import scan_directory, scan, AugmentorImage
 
 import os
 import random
@@ -67,13 +67,14 @@ class Pipeline(object):
         random.seed()
 
         # TODO: Allow a single image to be added when initialising.
+        # Initialise some variables for the Pipeline object.
         self.image_counter = 0
         self.augmentor_images = []
         self.distinct_dimensions = set()
         self.distinct_formats = set()
-        # TODO: Refactor this out as we do not use it anymore
-        self.ground_truth_image_list = {}
-
+        self.save_format = save_format
+        self.operations = []
+        self.class_labels = []
 
         # Now we populate some fields, which we may need to do again later if another
         # directory is added, so we place it all in a function of its own.
@@ -82,12 +83,6 @@ class Pipeline(object):
                            output_directory=output_directory,
                            ground_truth_directory=None,
                            ground_truth_output_directory=output_directory)
-
-        self.save_format = save_format
-        self.operations = []
-
-        # print("Initialised with %s image(s) found in selected directory." % len(self.augmentor_images))
-        # print("Output directory set to %s." % self.output_directory)
 
     def _populate(self, source_directory, output_directory, ground_truth_directory, ground_truth_output_directory):
         """
@@ -115,13 +110,6 @@ class Pipeline(object):
         :return: None
         """
 
-        ####
-        # NOTE.
-        # A lot of this functionality, such as checking for paths that exist
-        # and that they are writable, etc., will eventually be moved to the
-        # AugmentorImage class in the ImageUtilities module.
-        ####
-
         # Check if the source directory for the original images to augment exists at all
         if not os.path.exists(source_directory):
             raise IOError("The source directory you specified does not exist.")
@@ -131,29 +119,26 @@ class Pipeline(object):
             if not os.path.exists(ground_truth_directory):
                 raise IOError("The ground truth source directory you specified does not exist.")
 
-        # Get the absolute path of the output directory specified.
+        # Get absolute path for output
         abs_output_directory = os.path.join(source_directory, output_directory)
 
-        # Check if the output directory exists, if it does not attempt to create it
-        # and raise an exception if this fails.
-        if not os.path.exists(abs_output_directory):
-            try:
-                os.makedirs(abs_output_directory)
-            except IOError:
-                print("Insufficient rights to read or write output directory (%s)" % abs_output_directory)
+        # Scan the directory that user supplied.
+        self.augmentor_images, self.class_labels = scan(source_directory, abs_output_directory)
 
-        # Use the ImageUtilities class's scan_directory function to find images in the
-        # source_directory folder.
-        self.image_list = scan_directory(source_directory)
-
-        # Create AugmentorImage objects for each of the images in the source directory.
-        for image_path in scan_directory(source_directory):
-            single_augmentor_image = AugmentorImage(image_path=image_path,
-                                                    output_directory=abs_output_directory)
-            if ground_truth_directory:
-                single_augmentor_image.ground_truth = os.path.join(os.path.abspath(ground_truth_directory),
-                                                                   os.path.basename(image_path))
-            self.augmentor_images.append(single_augmentor_image)
+        # Make output directory/directories
+        if len(self.class_labels) <= 1:  # This may be 0 in the case of a folder generated
+            if not os.path.exists(abs_output_directory):
+                try:
+                    os.makedirs(abs_output_directory)
+                except IOError:
+                    print("Insufficient rights to read or write output directory (%s)" % abs_output_directory)
+        else:
+            for class_label in self.class_labels:
+                if not os.path.exists(os.path.join(abs_output_directory, str(class_label[0]))):
+                    try:
+                        os.makedirs(os.path.join(abs_output_directory, str(class_label[0])))
+                    except IOError:
+                        print("Insufficient rights to read or write output directory (%s)" % abs_output_directory)
 
         # Check the images, read their dimensions, and remove them if they cannot be read
         # TODO: Do not throw an error here, just remove the image and continue.
@@ -165,7 +150,7 @@ class Pipeline(object):
             except IOError:
                 print("There is a problem with image %s in your source directory. "
                       "It is unreadable and will not be included when augmenting."
-                      % os.path.basename(augmentor_image.image_path))
+                      % augmentor_image.image_path)
                 self.augmentor_images.remove(augmentor_image)
 
         # Finally, we will print some informational messages.
@@ -207,8 +192,6 @@ class Pipeline(object):
                 # TODO: Fix this!
                 if image.mode != "RGB":
                     image = image.convert("RGB")
-                # For testing this cab be commented out to create only one output image.
-                # file_name = "test"
                 image.save(os.path.join(augmentor_image.output_directory, file_name), self.save_format)
             except IOError:
                 print("Error writing %s." % file_name)
@@ -492,7 +475,9 @@ class Pipeline(object):
             self.add_operation(Rotate(probability=probability, rotation=-1))
 
     def rotate_alt(self, probability, rotation):
-        # Placeholder - to be implemented.         
+
+
+
         pass
 
     def rotate(self, probability, max_left_rotation, max_right_rotation):

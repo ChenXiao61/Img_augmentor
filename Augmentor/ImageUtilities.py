@@ -14,6 +14,7 @@ import os
 import glob
 import numbers
 import random
+import warnings
 import numpy as np
 
 class AugmentorImage(object):
@@ -43,6 +44,8 @@ class AugmentorImage(object):
         self._output_directory = None
         self._file_format = None  # TODO: pass this for each image.
         self._image_PIL = None
+        self._class_label = None
+        self._class_label_int = None
 
         # Now we call the setters that we require.
         self.image_path = image_path
@@ -105,6 +108,22 @@ class AugmentorImage(object):
         return os.path.basename(self.image_path)
 
     @property
+    def class_label(self):
+        return self._class_label
+
+    @class_label.setter
+    def class_label(self, value):
+        self._class_label = value
+
+    @property
+    def class_label_int(self):
+        return self._class_label_int
+
+    @class_label_int.setter
+    def class_label_int(self, value):
+        self._class_label_int = value
+
+    @property
     def ground_truth(self):
         """
         The :attr:`ground_truth` property contains an absolute path to the
@@ -149,6 +168,55 @@ def extract_paths_and_extensions(image_path):
     return file_name, extension, root_path
 
 
+def scan(source_directory, abs_output_directory):
+
+    files_and_directories = glob.glob(os.path.join(os.path.abspath(source_directory), '*'))
+
+    directory_count = 0
+    directories = []
+
+    class_labels = []
+
+    for f in files_and_directories:
+        if os.path.isdir(f):
+            if f != abs_output_directory:
+                directories.append(f)
+                directory_count += 1
+
+    directories = sorted(directories)
+    label_counter = 0
+
+    if directory_count == 0:
+
+        augmentor_images = []
+        parent_directory_name = os.path.basename(os.path.abspath(os.path.join(source_directory, os.pardir)))
+
+        for image_path in scan_directory(source_directory):
+            a = AugmentorImage(image_path=image_path, output_directory=abs_output_directory)
+            a.class_label = parent_directory_name
+            a.class_label_int = label_counter
+            augmentor_images.append(a)
+
+            class_labels.append((label_counter, parent_directory_name))
+
+        return augmentor_images, class_labels
+
+    elif directory_count != 0:
+        augmentor_images = []
+
+        for d in directories:
+            output_directory = os.path.join(abs_output_directory, os.path.split(d)[1])
+            for image_path in scan_directory(d):
+                a = AugmentorImage(image_path=image_path, output_directory=output_directory)
+                a.class_label = os.path.split(d)[1]
+                a.class_label_int = label_counter
+                augmentor_images.append(a)
+            class_labels.append((os.path.split(d)[1], label_counter))
+            label_counter += 1
+
+        return augmentor_images, class_labels
+
+
 def scan_directory(source_directory):
     """
     Scan a directory for images, returning any images found with the
@@ -170,5 +238,24 @@ def scan_directory(source_directory):
         file_types.extend([str.upper(str(x)) for x in file_types])
         for file_type in file_types:
             list_of_files.extend(glob.glob(os.path.join(os.path.abspath(source_directory), file_type)))
+
+    return list_of_files
+
+
+def scan_directory_with_classes(source_directory):
+    warnings.warn("The scan_directory_with_classes() function has been deprecated.", DeprecationWarning)
+    l = glob.glob(os.path.join(source_directory, '*'))
+
+    directories = []
+
+    for f in l:
+        if os.path.isdir(f):
+            directories.append(f)
+
+    list_of_files = {}
+
+    for d in directories:
+        list_of_files_current_folder = scan_directory(d)
+        list_of_files[os.path.split(d)[1]] = list_of_files_current_folder
 
     return list_of_files
