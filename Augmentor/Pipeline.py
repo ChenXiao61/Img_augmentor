@@ -652,9 +652,11 @@ class Pipeline(object):
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         else:
-            self.add_operation(gausDistort(probability=probability, grid_width=grid_width,
-                                       grid_height=grid_height, magnitude=magnitude, corner=corner, method=method,  mex=mex,
-                                       mey=mey, sdx=sdx, sdy=sdy))        
+            self.add_operation(GaussianDistortion(probability=probability, grid_width=grid_width,
+                                                    grid_height=grid_height,
+                                                    magnitude=magnitude, corner=corner,
+                                                    method=method,  mex=mex,
+                                                    mey=mey, sdx=sdx, sdy=sdy))
 
     def zoom(self, probability, min_factor, max_factor):
         """

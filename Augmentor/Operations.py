@@ -1145,7 +1145,7 @@ class Distort(Operation):
 
         return image.transform(image.size, Image.MESH, generated_mesh, resample=Image.BICUBIC)
 
-class gausDistort(Operation):
+class GaussianDistortion(Operation):
     """
     This class performs randomised, elastic gaussian distortions on images.
     """
