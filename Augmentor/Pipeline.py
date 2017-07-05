@@ -19,10 +19,12 @@ from .Operations import *
 from .ImageUtilities import scan_directory, scan, AugmentorImage
 
 import os
+import sys
 import random
 import uuid
 import warnings
 import numbers
+import numpy as np
 
 from tqdm import tqdm
 from PIL import Image
@@ -154,8 +156,12 @@ class Pipeline(object):
                 self.augmentor_images.remove(augmentor_image)
 
         # Finally, we will print some informational messages.
-        print("Initialised with %s image(s) found in selected directory." % len(self.augmentor_images))
-        print("Output directory set to %s." % abs_output_directory)
+
+        sys.stdout.write("Initialised with %s image(s) found in selected directory.\n" % len(self.augmentor_images))
+        sys.stdout.write("Output directory set to %s." % abs_output_directory)
+
+        #print("Initialised with %s image(s) found in selected directory." % len(self.augmentor_images))
+        #print("Output directory set to %s." % abs_output_directory)
 
     def _execute(self, augmentor_image, save_to_disk=True):
         """
@@ -198,7 +204,6 @@ class Pipeline(object):
 
         return image
 
-
     def sample(self, n):
         """
         Generate :attr:`n` number of samples from the current pipeline.
@@ -236,6 +241,9 @@ class Pipeline(object):
                     progress_bar.update(1)
                 sample_count += 1
         progress_bar.close()
+
+    def stream_images(self):
+        pass
 
     def apply_current_pipeline(self, image_path, save_to_disk=False):
         """
@@ -277,6 +285,15 @@ class Pipeline(object):
 
     def sample_with_image(self, image, save_to_disk=False):
         raise NotImplementedError("This method is currently not implemented.")
+
+    def get_categorical_labels(self):
+
+        class_labels_np = np.array([x.class_label_int for x in self.augmentor_images])
+        one_hot_encoding = np.zeros((class_labels_np.size, class_labels_np.max() + 1))
+        one_hot_encoding[np.arange(class_labels_np.size), class_labels_np] = 1
+        one_hot_encoding = one_hot_encoding.astype(np.uint)
+
+        return one_hot_encoding
 
     def image_generator(self, n):
         for i in range(n):
@@ -476,8 +493,6 @@ class Pipeline(object):
 
     def rotate_alt(self, probability, rotation):
 
-
-
         pass
 
     def rotate(self, probability, max_left_rotation, max_right_rotation):
@@ -664,7 +679,7 @@ class Pipeline(object):
 
         .. math::
 
-         e^{-\\frac{(x-\\text{mex})^2}{sdx} + \\frac{(y-\\text{mey})^2}{sdy}}
+         e^{- \Big( \\frac{(x-\\text{mex})^2}{\\text{sdx}} + \\frac{(y-\\text{mey})^2}{\\text{sdy}} \Big) }
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)

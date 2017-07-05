@@ -1206,7 +1206,7 @@ class GaussianDistortion(Operation):
 
         .. math::
 
-         e^{-\\frac{(x-\\text{mex})^2}{sdx} + \\frac{(y-\\text{mey})^2}{sdy}}
+         e^{- \Big( \\frac{(x-\\text{mex})^2}{\\text{sdx}} + \\frac{(y-\\text{mey})^2}{\\text{sdy}} \Big) }
         """
         Operation.__init__(self, probability)
         self.grid_width = grid_width
