@@ -242,9 +242,6 @@ class Pipeline(object):
                 sample_count += 1
         progress_bar.close()
 
-    def stream_images(self):
-        pass
-
     def apply_current_pipeline(self, image_path, save_to_disk=False):
         """
         .. warning::
@@ -255,7 +252,7 @@ class Pipeline(object):
         to disk, and is returned to the user.
 
         This method can be used to pass a single image through the
-        pipeline, but will not save the transformed to disk by
+        pipeline, but will not save the transformed image to disk by
         default. To save to disk, supply a :attr:`save_to_disk`
         argument set to True.
 
@@ -286,7 +283,7 @@ class Pipeline(object):
     def sample_with_image(self, image, save_to_disk=False):
         raise NotImplementedError("This method is currently not implemented.")
 
-    def get_categorical_labels(self):
+    def categorical_labels(self):
 
         class_labels_np = np.array([x.class_label_int for x in self.augmentor_images])
         one_hot_encoding = np.zeros((class_labels_np.size, class_labels_np.max() + 1))
@@ -295,9 +292,11 @@ class Pipeline(object):
 
         return one_hot_encoding
 
-    def image_generator(self, n):
-        for i in range(n):
-            yield self.sample(1)
+    def image_generator(self):
+        while True:
+            im_index = random.randint(0, len(self.augmentor_images))
+            yield self._execute(self.augmentor_images[im_index], save_to_disk=False), \
+                self.augmentor_images[im_index].class_label_int
 
     def add_operation(self, operation):
         """
