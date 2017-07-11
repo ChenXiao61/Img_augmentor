@@ -298,6 +298,74 @@ class Pipeline(object):
             yield self._execute(self.augmentor_images[im_index], save_to_disk=False), \
                 self.augmentor_images[im_index].class_label_int
 
+    def image_generator_with_replacement(self):
+        while True:
+            batch_indices = list(range(0, len(self.augmentor_images)))
+            for i in range(0, len(self.augmentor_images)):
+                im_index = random.choice(batch_indices)
+                batch_indices.remove(im_index)
+                yield self._execute(self.augmentor_images[im_index], save_to_disk=False), self.augmentor_images[im_index].class_label_int
+
+    def keras_image_generator(self, image_format='channels_first'):
+        """
+        Returns an image generator that will sample from the current pipeline
+        indefinitely, as long as it is called.
+
+        .. warning::
+         This function returns images from the current pipleline
+         **without replacement**.
+
+        .. seealso::
+         See :func:`keras_image_generator_with_replacement()` for
+         a generator that samples with replacement.
+
+        You must configure the generator to provide data in the same
+        format that Keras is configured for. You can use the functions
+        :func:`keras.backend.image_data_format()` and
+        :func:`keras.backend.set_image_data_format()` to get and set
+        Keras' image format at runtime.
+
+        .. code-block:: python
+
+            >>> from keras import backend as K
+            >>> K.image_data_format()
+            'channels_first'
+            >>> K.set_image_data_format('channels_last')
+            >>> K.image_data_format()
+            'channels_last'
+
+        By default, Augmentor uses ``'channels_first'``.
+
+        :param image_format: Either ``'channels_first'`` (default) or
+         ``'channels_last'``.
+        :type image_format: String
+        :return: An image generator.
+        """
+
+        while True:
+            batch_indices = list(range(0, len(self.augmentor_images)))
+            for i in range(0, len(self.augmentor_images)):
+                im_index = random.choice(batch_indices)
+                batch_indices.remove(im_index)
+                im_PIL = self._execute(self.augmentor_images[im_index], save_to_disk=False)
+                im_array = np.asarray(im_PIL)
+
+                if image_format == 'channels_first':
+                    num_of_channels = len(im_PIL.getbands())
+                    im_array = im_array.reshape(num_of_channels, im_PIL.width, im_PIL.height)
+                    yield im_array, self.augmentor_images[im_index].class_label_int
+                elif image_format == 'channels_last':
+                    num_of_channels = len(im_PIL.getbands())
+                    im_array = im_array.reshape(im_PIL.width, im_PIL.height, num_of_channels)
+                    yield im_array, self.augmentor_images[im_index].class_label_int
+
+    def keras_image_generator_with_replacement(self, image_format='channels_first'):
+        while True:
+            im_index = random.randint(0, len(self.augmentor_images))
+            im_PIL = self._execute(self.augmentor_images[im_index], save_to_disk=False)
+            im_array = np.asarray(im_PIL)
+            yield im_array, self.augmentor_images[im_index].class_label_int
+
     def add_operation(self, operation):
         """
         Add an operation directly to the pipeline. Can be used to add custom
