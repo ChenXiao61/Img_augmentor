@@ -46,6 +46,7 @@ class AugmentorImage(object):
         self._image_PIL = None
         self._class_label = None
         self._class_label_int = None
+        self._label_pair = None
 
         # Now we call the setters that we require.
         self.image_path = image_path
@@ -141,6 +142,9 @@ class AugmentorImage(object):
         if os.path.isfile(value):
             self._ground_truth = value
 
+    @property
+    def label_pair(self):
+        return self.class_label_int, self.class_label
 
 def parse_user_parameter(user_param):
 

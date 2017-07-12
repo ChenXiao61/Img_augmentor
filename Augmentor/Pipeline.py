@@ -157,7 +157,7 @@ class Pipeline(object):
 
         # Finally, we will print some informational messages.
 
-        sys.stdout.write("Initialised with %s image(s) found in selected directory.\n" % len(self.augmentor_images))
+        sys.stdout.write("Initialised with %s image(s) found.\n" % len(self.augmentor_images))
         sys.stdout.write("Output directory set to %s." % abs_output_directory)
 
         #print("Initialised with %s image(s) found in selected directory." % len(self.augmentor_images))
@@ -442,24 +442,31 @@ class Pipeline(object):
         :return: None
         """
         # TODO: Return this as a dictionary of some kind and print from the dict if in console
-        print("There are %s operation(s) in the current pipeline." % len(self.operations))
+        print("Operations: %s" % len(self.operations))
 
         if len(self.operations) != 0:
             operation_index = 0
             for operation in self.operations:
-                print("Index %s:\n\tOperation %s (probability: %s):" % (operation_index, operation, operation.probability))
+                print("\t%s: %s (" % (operation_index, operation), end="")
                 for operation_attribute, operation_value in operation.__dict__.items():
-                    print("\t\tAttribute: %s (%s)" % (operation_attribute, operation_value))
+                    print("%s=%s " % (operation_attribute, operation_value), end="")
+                print(")")
                 operation_index += 1
-            print()
 
-        print("There are %s image(s) in the source directory." % len(self.augmentor_images))
+        print("Images: %s" % len(self.augmentor_images))
+
+        label_pairs = sorted(set([x.label_pair for x in self.augmentor_images]))
+
+        print("Classes: %s" % len(label_pairs))
+
+        for label_pair in label_pairs:
+            print ("\tClass index: %s Class label: %s " % (label_pair[0], label_pair[1]))
 
         if len(self.augmentor_images) != 0:
-            print("Dimensions:")
+            print("Dimensions: %s" % len(self.distinct_dimensions))
             for distinct_dimension in self.distinct_dimensions:
                 print("\tWidth: %s Height: %s" % (distinct_dimension[0], distinct_dimension[1]))
-            print("Formats:")
+            print("Formats: %s" % len(self.distinct_formats))
             for distinct_format in self.distinct_formats:
                 print("\t %s" % distinct_format)
 
