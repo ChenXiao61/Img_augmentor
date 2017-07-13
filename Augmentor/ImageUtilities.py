@@ -47,6 +47,7 @@ class AugmentorImage(object):
         self._class_label = None
         self._class_label_int = None
         self._label_pair = None
+        self._categorical_label = None
 
         # Now we call the setters that we require.
         self.image_path = image_path
@@ -125,6 +126,14 @@ class AugmentorImage(object):
         self._class_label_int = value
 
     @property
+    def categorical_label(self):
+        return self._categorical_label
+
+    @categorical_label.setter
+    def categorical_label(self, value):
+        self._categorical_label = value
+
+    @property
     def ground_truth(self):
         """
         The :attr:`ground_truth` property contains an absolute path to the
@@ -199,6 +208,7 @@ def scan(source_directory, abs_output_directory):
             a = AugmentorImage(image_path=image_path, output_directory=abs_output_directory)
             a.class_label = parent_directory_name
             a.class_label_int = label_counter
+            a.categorical_label = np.ndarray(1, dtype=np.uint32)  # TODO: Fix, as this is not good. Maybe leave as None.
             augmentor_images.append(a)
 
             class_labels.append((label_counter, parent_directory_name))
@@ -211,9 +221,12 @@ def scan(source_directory, abs_output_directory):
         for d in directories:
             output_directory = os.path.join(abs_output_directory, os.path.split(d)[1])
             for image_path in scan_directory(d):
+                categorical_label = np.zeros(directory_count, dtype=np.uint32)
                 a = AugmentorImage(image_path=image_path, output_directory=output_directory)
                 a.class_label = os.path.split(d)[1]
                 a.class_label_int = label_counter
+                categorical_label[label_counter] = 1
+                a.categorical_label = categorical_label
                 augmentor_images.append(a)
             class_labels.append((os.path.split(d)[1], label_counter))
             label_counter += 1

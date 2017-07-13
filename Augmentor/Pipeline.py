@@ -342,6 +342,8 @@ class Pipeline(object):
         :return: An image generator.
         """
 
+        # TODO: Always return at least the original dataset as well as the augmented dataset
+
         while True:
             batch_indices = list(range(0, len(self.augmentor_images)))
             for i in range(0, len(self.augmentor_images)):
@@ -352,19 +354,20 @@ class Pipeline(object):
 
                 if image_format == 'channels_first':
                     num_of_channels = len(im_PIL.getbands())
-                    im_array = im_array.reshape(num_of_channels, im_PIL.width, im_PIL.height)
-                    yield im_array, self.augmentor_images[im_index].class_label_int
+                    im_array = im_array.reshape(1, num_of_channels, im_PIL.width, im_PIL.height)
+                    yield im_array, self.augmentor_images[im_index].categorical_label
                 elif image_format == 'channels_last':
                     num_of_channels = len(im_PIL.getbands())
-                    im_array = im_array.reshape(im_PIL.width, im_PIL.height, num_of_channels)
-                    yield im_array, self.augmentor_images[im_index].class_label_int
+                    im_array = im_array.reshape(1, im_PIL.width, im_PIL.height, num_of_channels)
+                    yield im_array, self.augmentor_images[im_index].categorical_label
 
     def keras_image_generator_with_replacement(self, image_format='channels_first'):
-        while True:
-            im_index = random.randint(0, len(self.augmentor_images))
-            im_PIL = self._execute(self.augmentor_images[im_index], save_to_disk=False)
-            im_array = np.asarray(im_PIL)
-            yield im_array, self.augmentor_images[im_index].class_label_int
+        raise NotImplementedError("This method is currently not implemented. Use keras_image_generator().")
+        #while True:
+        #    im_index = random.randint(0, len(self.augmentor_images))
+        #    im_PIL = self._execute(self.augmentor_images[im_index], save_to_disk=False)
+        #    im_array = np.asarray(im_PIL)
+        #    yield im_array, self.augmentor_images[im_index].class_label_int
 
     def add_operation(self, operation):
         """
