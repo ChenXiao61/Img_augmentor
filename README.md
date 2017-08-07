@@ -7,9 +7,11 @@
 [![PyPI](https://img.shields.io/badge/pypi-v0.1.3-blue.svg?maxAge=2592000)](https://pypi.python.org/pypi/Augmentor)
 [![Supported Python Versions](https://img.shields.io/badge/python-2.7%2C%203.3--3.6-blue.svg)](https://pypi.python.org/pypi/Augmentor)
 
-Image augmentation library in Python for machine learning. A Julia version of the package is also being developed as a sister project and is available [here](https://github.com/Evizero/Augmentor.jl).
+Augmentor is an image augmentation library in Python for machine learning. It aims to make image augmentation platform and framework independent, more convenient, less error prone, and reproducible. It employs a stochastic approach using building blocks that allow for operations to be pieced together in a pipeline.
 
 ## Installation
+
+Augmentor is written in Python. A Julia version of the package is also being developed as a sister project and is available [here](https://github.com/Evizero/Augmentor.jl).
 
 Install using `pip` from the command line:
 
