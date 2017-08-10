@@ -283,9 +283,11 @@ class Pipeline(object):
     def sample_with_image(self, image, save_to_disk=False):
         raise NotImplementedError("This method is currently not implemented.")
 
-    def categorical_labels(self):
+    @staticmethod
+    def categorical_labels(numerical_labels):
 
-        class_labels_np = np.array([x.class_label_int for x in self.augmentor_images])
+        # class_labels_np = np.array([x.class_label_int for x in numerical_labels])
+        class_labels_np = np.array(numerical_labels)
         one_hot_encoding = np.zeros((class_labels_np.size, class_labels_np.max() + 1))
         one_hot_encoding[np.arange(class_labels_np.size), class_labels_np] = 1
         one_hot_encoding = one_hot_encoding.astype(np.uint)
@@ -298,26 +300,18 @@ class Pipeline(object):
             yield self._execute(self.augmentor_images[im_index], save_to_disk=False), \
                 self.augmentor_images[im_index].class_label_int
 
-    def image_generator_with_replacement(self):
-        while True:
-            batch_indices = list(range(0, len(self.augmentor_images)))
-            for i in range(0, len(self.augmentor_images)):
-                im_index = random.choice(batch_indices)
-                batch_indices.remove(im_index)
-                yield self._execute(self.augmentor_images[im_index], save_to_disk=False), self.augmentor_images[im_index].class_label_int
-
-    def keras_image_generator(self, image_format='channels_first'):
+    def keras_generator(self, batch_size, image_data_format="channels_last"):
         """
         Returns an image generator that will sample from the current pipeline
         indefinitely, as long as it is called.
 
         .. warning::
          This function returns images from the current pipleline
-         **without replacement**.
+         **with replacement**.
 
         .. seealso::
-         See :func:`keras_image_generator_with_replacement()` for
-         a generator that samples with replacement.
+         See :func:`keras_image_generator_without_replacement()` for
+         a generator that samples without replacement.
 
         You must configure the generator to provide data in the same
         format that Keras is configured for. You can use the functions
@@ -334,40 +328,131 @@ class Pipeline(object):
             >>> K.image_data_format()
             'channels_last'
 
-        By default, Augmentor uses ``'channels_first'``.
+        By default, Augmentor uses ``'channels_last'``.
 
-        :param image_format: Either ``'channels_first'`` (default) or
-         ``'channels_last'``.
+        :param image_format: Either ``'channels_last'`` (default) or
+         ``'channels_first'``.
         :type image_format: String
         :return: An image generator.
         """
 
-        # TODO: Always return at least the original dataset as well as the augmented dataset
+        if image_data_format != "channels_first" or "channels_last":
+            warnings.warn("To work with Keras, must be one of channels_first or channels_last.")
 
         while True:
-            batch_indices = list(range(0, len(self.augmentor_images)))
-            for i in range(0, len(self.augmentor_images)):
-                im_index = random.choice(batch_indices)
-                batch_indices.remove(im_index)
-                im_PIL = self._execute(self.augmentor_images[im_index], save_to_disk=False)
-                im_array = np.asarray(im_PIL)
 
-                if image_format == 'channels_first':
-                    num_of_channels = len(im_PIL.getbands())
-                    im_array = im_array.reshape(1, num_of_channels, im_PIL.width, im_PIL.height)
-                    yield im_array, self.augmentor_images[im_index].categorical_label
-                elif image_format == 'channels_last':
-                    num_of_channels = len(im_PIL.getbands())
-                    im_array = im_array.reshape(1, im_PIL.width, im_PIL.height, num_of_channels)
-                    yield im_array, self.augmentor_images[im_index].categorical_label
+            # Randomly select 25 images for augmentation and yield the
+            # augmented images.
+            # X = np.array([])
+            # y = np.array([])
+            # The correct thing to do here is to pre-allocate
+            # batch = np.ndarray((batch_size, 28, 28, 1))
 
-    def keras_image_generator_with_replacement(self, image_format='channels_first'):
-        raise NotImplementedError("This method is currently not implemented. Use keras_image_generator().")
-        #while True:
-        #    im_index = random.randint(0, len(self.augmentor_images))
-        #    im_PIL = self._execute(self.augmentor_images[im_index], save_to_disk=False)
-        #    im_array = np.asarray(im_PIL)
-        #    yield im_array, self.augmentor_images[im_index].class_label_int
+            X = []
+            y = []
+
+            for i in range(batch_size):
+
+                # Pre-allocate
+                # batch[i:i+28]
+
+                # Select random image, get image array and label
+                random_image_index = random.randint(0, len(self.augmentor_images)-1)
+                numpy_array = np.asarray(self._execute(self.augmentor_images[random_image_index], save_to_disk=False))
+                label = self.augmentor_images[random_image_index].categorical_label
+
+                # Reshape
+                w = numpy_array.shape[0]
+                h = numpy_array.shape[1]
+
+                if np.ndim(numpy_array) == 2:
+                    l = 1
+                else:
+                    l = np.shape(numpy_array)[2]
+
+                if image_data_format == "channels_last":
+                    numpy_array = numpy_array.reshape(w, h, l)
+                elif image_data_format == "channels_first":
+                    numpy_array = numpy_array.reshape(l, w, h)
+
+                X.append(numpy_array)
+                y.append(label)
+
+            X = np.asarray(X)
+            y = np.asarray(y)
+
+            X = X.astype('float32')
+            y = y.astype('int32')
+            X /= 255
+
+            yield (X, y)
+
+    def _execute_with_array(self, image):
+
+        pil_image = Image.fromarray(image)
+
+        for operation in self.operations:
+            r = round(random.uniform(0, 1), 1)
+            if r <= operation.probability:
+                pil_image = operation.perform_operation(pil_image)
+
+        numpy_array = np.asarray(pil_image)
+
+        return numpy_array
+
+    def keras_generator_from_array(self, images, labels, batch_size, image_data_format="channels_last"):
+        # We will expect an matrix in the shape (l, x, y)
+        # where l is the number of images
+
+        # Check if the labels and images align
+        if len(images) != len(labels):
+            raise IndexError("The number of images does not match the number of labels.")
+
+        while True:
+
+            X = []
+            y = []
+
+            for i in range(batch_size):
+
+                random_image_index = random.randint(0, len(images)-1)
+
+                numpy_array = self._execute_with_array(images[random_image_index])
+
+                w = numpy_array.shape[0]
+                h = numpy_array.shape[1]
+
+                if np.ndim(numpy_array) == 2:
+                    l = 1
+                else:
+                    l = np.shape(numpy_array)[2]
+
+                if image_data_format == "channels_last":
+                    numpy_array = numpy_array.reshape(w, h, l)
+                elif image_data_format == "channels_first":
+                    numpy_array = numpy_array.reshape(l, w, h)
+
+                X.append(numpy_array)
+                y.append(labels[random_image_index])
+
+            X = np.asarray(X)
+            y = np.asarray(y)
+            # y = Pipeline.categorical_labels(y)
+
+            #X = X.astype('float32')
+            #y = y.astype('int32')
+            #X /= 255
+
+            yield(X, y)
+
+
+    def fit_generator(self):
+        """
+        This function should perform a fit on any augmentation that needs to look at all
+        data in the pipeline, such as feature-wise normalisation.
+        :return:
+        """
+        raise NotImplementedError("This function has yet to be implemented.")
 
     def add_operation(self, operation):
         """

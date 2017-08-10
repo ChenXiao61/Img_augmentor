@@ -208,7 +208,7 @@ def scan(source_directory, abs_output_directory):
             a = AugmentorImage(image_path=image_path, output_directory=abs_output_directory)
             a.class_label = parent_directory_name
             a.class_label_int = label_counter
-            a.categorical_label = np.ndarray(1, dtype=np.uint32)  # TODO: Fix, as this is not good. Maybe leave as None.
+            a.categorical_label = [label_counter]  # TODO: Fix, as this is not good. Maybe leave as None.
             augmentor_images.append(a)
 
             class_labels.append((label_counter, parent_directory_name))
@@ -244,6 +244,7 @@ def scan_directory(source_directory):
     :type source_directory: String
     :return: A list of images found in the :attr:`source_directory`
     """
+    # TODO: GIFs are highly problematic. It may make sense to drop GIF support.
     file_types = ['*.jpg', '*.bmp', '*.jpeg', '*.gif', '*.img', '*.png']
 
     list_of_files = []
