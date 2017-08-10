@@ -175,7 +175,7 @@ def test_generator():
     batch_size = len(p.augmentor_images)
     g = p.keras_generator(batch_size=batch_size)
 
-    batch = g.next()
+    batch = next(g)
     # A tuple should be returned, containing the augmentented images and their labels
     assert len(batch) == 2
 
@@ -254,7 +254,7 @@ def test_generator_image_scan():
 
     g = p.keras_generator(batch_size=batch_size)
 
-    X, y = g.next()
+    X, y = next(g)
 
     # The number of classes must equal the number of sub directories
     assert np.shape(y)[0] == batch_size

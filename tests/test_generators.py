@@ -47,7 +47,7 @@ def test_keras_generator_from_disk():
 
     g = p.keras_generator(batch_size=batch_size, image_data_format="channels_last")
 
-    X, y = g.next()
+    X, y = next(g)
 
     assert len(X) == batch_size
     assert len(X) == batch_size
@@ -57,7 +57,7 @@ def test_keras_generator_from_disk():
 
     # Call next() more than the total number of images in the pipeline
     for i in range(20):
-        X, y = g.next()
+        X, y = next(g)
         assert len(X) == batch_size
         assert len(X) == batch_size
         assert len(X) == len(y)
@@ -65,7 +65,7 @@ def test_keras_generator_from_disk():
 
     g2 = p.keras_generator(batch_size=batch_size, image_data_format="channels_first")
 
-    X2, y2 = g2.next()
+    X2, y2 = next(g2)
 
     assert len(X2) == batch_size
     assert len(X2) == batch_size
@@ -96,7 +96,7 @@ def test_generator_with_array_data():
 
     g = p.keras_generator_from_array(image_matrix, labels, batch_size=batch_size)
 
-    X, y = g.next()
+    X, y = next(g)
 
     assert len(X) == batch_size
     assert len(y) == batch_size
@@ -116,7 +116,7 @@ def test_generator_with_array_data():
 
     g2 = p2.keras_generator_from_array(image_matrix_2d, labels_2d, batch_size=batch_size)
 
-    X2, y2 = g2.next()
+    X2, y2 = next(g2)
 
     assert len(X2) == batch_size
     assert len(y2) == batch_size
