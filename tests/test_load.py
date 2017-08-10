@@ -149,6 +149,129 @@ def test_initialise_with_ten_images():
     shutil.rmtree(tmpdir)
 
 
+def test_generator():
+
+    tmpdir = tempfile.mkdtemp()
+    tmps = []
+
+    num_of_images = 10
+    width = 800
+    height = 800
+
+    for i in range(num_of_images):
+        tmps.append(tempfile.NamedTemporaryFile(dir=tmpdir, suffix='.JPEG'))
+
+        bytestream = io.BytesIO()
+
+        im = Image.new('RGB', (width,height))
+        im.save(bytestream, 'JPEG')
+
+        tmps[i].file.write(bytestream.getvalue())
+        tmps[i].flush()
+
+    p = Augmentor.Pipeline(tmpdir)
+
+    # Test a generator on the same number of images in the folder.
+    batch_size = len(p.augmentor_images)
+    g = p.keras_generator(batch_size=batch_size)
+
+    batch = g.next()
+    # A tuple should be returned, containing the augmentented images and their labels
+    assert len(batch) == 2
+
+    X = batch[0]
+    y = batch[1]
+
+    # They should be the same size/length e.g. 100 images and 100 labels
+    assert len(X) == len(y)
+
+    assert len(X) == batch_size
+    assert len(y) == batch_size
+
+    # Because we have in this case one class, y should be of shape (batch_size, 1)
+    assert np.shape(y)[0] == batch_size
+    assert np.shape(y)[1] == 1
+
+    assert np.shape(X)[0] == batch_size
+    assert np.shape(X)[1] == width
+    assert np.shape(X)[2] == height
+    assert np.shape(X)[3] == 3  # For RGB we should have 3 layers
+
+    # All labels in y should = 0 because we only have one class.
+    for label in y:
+        assert label == 0
+
+    # Close all temporary files which will also delete them automatically
+    for i in range(len(tmps)):
+        tmps[i].close()
+
+    # Finally remove the directory (and everything in it) as mkdtemp does
+    # not delete itself after closing automatically
+    shutil.rmtree(tmpdir)
+
+
+def test_generator_image_scan():
+
+    num_of_sub_dirs = random.randint(1, 10)
+    num_of_im_files = random.randint(1, 10)
+
+    output_directory = "some_folder"
+
+    # Make an empty temporary directory
+    initial_temp_directory = tempfile.mkdtemp()
+
+    sub_dirs = []
+
+    # Make num_of_sub_dirs subdirectories of this initial directory
+    for _ in range(num_of_sub_dirs):
+        sub_dirs.append(tempfile.mkdtemp(dir=initial_temp_directory))
+
+    tmp_files = []
+    image_counter = 0
+
+    # Just to mix things up, we can create different file types
+    suffix_filetypes = [('.PNG', 'PNG'),
+                        ('.JPEG', 'JPEG'),
+                        #('.GIF', 'GIF'),
+                        ('.JPG', 'JPEG'),
+                        ('.png', 'PNG'),
+                        ('.jpeg', 'JPEG'),
+                        #('.gif', 'GIF'),
+                        ('.jpg', 'JPEG')]
+
+    # Make num_of_im_files images in each sub directory.
+    for sub_dir in sub_dirs:
+        for iterator in range(num_of_im_files):
+            suffix_filetype = random.choice(suffix_filetypes)
+            tmp_files.append(tempfile.NamedTemporaryFile(dir=os.path.abspath(sub_dir), suffix=suffix_filetype[0]))
+            im = Image.fromarray(np.uint8(np.random.rand(80, 80, 3) * 255))
+            im.save(tmp_files[image_counter].name, suffix_filetype[1])
+            image_counter += 1
+
+    p = Augmentor.Pipeline(initial_temp_directory, output_directory=output_directory)
+
+    batch_size = random.randint(1, 1000)
+
+    g = p.keras_generator(batch_size=batch_size)
+
+    X, y = g.next()
+
+    # The number of classes must equal the number of sub directories
+    assert np.shape(y)[0] == batch_size
+    assert np.shape(y)[1] == num_of_sub_dirs
+    assert len(y) == batch_size
+
+    # Clean up
+    for tmp_file in tmp_files:
+        tmp_file.close()
+
+    for sub_dir in sub_dirs:
+        shutil.rmtree(sub_dir)
+
+    shutil.rmtree(os.path.join(initial_temp_directory, output_directory))
+    shutil.rmtree(initial_temp_directory)
+
+
 def test_class_image_scan():
     # Some constants
     num_of_sub_dirs = random.randint(1, 10)
