@@ -54,6 +54,12 @@ p.sample(10000)
 
 which will generate 10,000 augmented images based on your specifications. By default these will be written to the disk in a directory named `output` relative to the path specified when initialising the `p` pipeline object above.
 
+## Integration with Keras with Generators
+Augmentor can be used as a replacement for Keras' augmentation functionality. Augmentor can create a generator which produces augmented data indefinitely, according to the pipeline you have defined. See the following notebooks for details:
+
+- Reading images from a local directory, augmenting them, and using a generator to pass the new images to a Keras convolutional neural network, see [`Augmentor_Keras.ipynb`](https://github.com/mdbloice/Augmentor/blob/master/notebooks/Augmentor_Keras.ipynb)
+- Augmenting data in-memory (in array format) and using a generator to pass these new images to the Keras neural network, see [`Augmentor_Keras_Array_Data.ipynb`](https://github.com/mdbloice/Augmentor/blob/master/notebooks/Augmentor_Keras_Array_Data.ipynb)
+
 ## Main Features
 
 ### Elastic Distortions
