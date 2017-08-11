@@ -204,6 +204,25 @@ class Pipeline(object):
 
         return image
 
+    def _execute_with_array(self, image):
+        """
+        Private method used to execute a pipeline on array or matrix data.
+        :param image: The image to pass through the pipeline.
+        :type image: Array like object.
+        :return: The augmented image.
+        """
+
+        pil_image = Image.fromarray(image)
+
+        for operation in self.operations:
+            r = round(random.uniform(0, 1), 1)
+            if r <= operation.probability:
+                pil_image = operation.perform_operation(pil_image)
+
+        numpy_array = np.asarray(pil_image)
+
+        return numpy_array
+
     def sample(self, n):
         """
         Generate :attr:`n` number of samples from the current pipeline.
@@ -242,50 +261,31 @@ class Pipeline(object):
                 sample_count += 1
         progress_bar.close()
 
-    def apply_current_pipeline(self, image_path, save_to_disk=False):
-        """
-        .. warning::
-         This function has been deprecated in favour of :func:`apply_from_path()`.
-
-        Apply the current pipeline to a single image, returning the
-        transformed image. By default, the transformed image is not saved 
-        to disk, and is returned to the user.
-
-        This method can be used to pass a single image through the
-        pipeline, but will not save the transformed image to disk by
-        default. To save to disk, supply a :attr:`save_to_disk`
-        argument set to True.
-
-        :param image_path: The path to the image to pass through the current 
-         pipeline.
-        :param save_to_disk: Whether to save the image to disk. Defaults to
-         False.
-        :type image_path: String
-        :type save_to_disk: Boolean
-        :return: The transformed image.
-        """
-
-        warnings.warn("This function has been deprecated in favour of sample_with_path() and sample_with_array().",
-                      DeprecationWarning)
-
-        return self.apply_from_path(image_path=image_path, save_to_disk=save_to_disk)
-
-    def sample_with_path(self, image_path, save_to_disk=False):
-        raise NotImplementedError("This method is currently not implemented.")
-
     def sample_with_array(self, image_array, save_to_disk=False):
+        """
+        Sample from the pipeline using a single image in array-like format.
 
+        .. seealso::
+         See :func:`keras_image_generator_without_replacement()` for
+
+        :param image_array:
+        :param save_to_disk:
+        :return:
+        """
         a = AugmentorImage(image_path=None, output_directory=None)
         a.image_PIL = Image.fromarray(image_array)
 
         return self._execute(a, save_to_disk)
 
-    def sample_with_image(self, image, save_to_disk=False):
-        raise NotImplementedError("This method is currently not implemented.")
-
     @staticmethod
     def categorical_labels(numerical_labels):
+        """
+        Return categorical labels for an array of 0-based numerical labels.
 
+        :param numerical_labels: The numerical labels.
+        :type numerical_labels: Array-like list.
+        :return: The categorical labels.
+        """
         # class_labels_np = np.array([x.class_label_int for x in numerical_labels])
         class_labels_np = np.array(numerical_labels)
         one_hot_encoding = np.zeros((class_labels_np.size, class_labels_np.max() + 1))
@@ -306,12 +306,8 @@ class Pipeline(object):
         indefinitely, as long as it is called.
 
         .. warning::
-         This function returns images from the current pipleline
+         This function returns images from the current pipeline
          **with replacement**.
-
-        .. seealso::
-         See :func:`keras_image_generator_without_replacement()` for
-         a generator that samples without replacement.
 
         You must configure the generator to provide data in the same
         format that Keras is configured for. You can use the functions
@@ -330,9 +326,11 @@ class Pipeline(object):
 
         By default, Augmentor uses ``'channels_last'``.
 
-        :param image_format: Either ``'channels_last'`` (default) or
+        :param batch_size: The number of images to return per batch.
+        :type batch_size: Integer
+        :param image_data_format: Either ``'channels_last'`` (default) or
          ``'channels_first'``.
-        :type image_format: String
+        :type image_data_format: String
         :return: An image generator.
         """
 
@@ -387,21 +385,46 @@ class Pipeline(object):
 
             yield (X, y)
 
-    def _execute_with_array(self, image):
 
-        pil_image = Image.fromarray(image)
-
-        for operation in self.operations:
-            r = round(random.uniform(0, 1), 1)
-            if r <= operation.probability:
-                pil_image = operation.perform_operation(pil_image)
-
-        numpy_array = np.asarray(pil_image)
-
-        return numpy_array
 
     def keras_generator_from_array(self, images, labels, batch_size, image_data_format="channels_last"):
-        # We will expect an matrix in the shape (l, x, y)
+        """
+        Returns an image generator that will sample from the current pipeline
+        indefinitely, as long as it is called.
+
+        .. warning::
+         This function returns images from :attr:`images`
+         **with replacement**.
+
+        You must configure the generator to provide data in the same
+        format that Keras is configured for. You can use the functions
+        :func:`keras.backend.image_data_format()` and
+        :func:`keras.backend.set_image_data_format()` to get and set
+        Keras' image format at runtime.
+
+        .. code-block:: python
+
+            >>> from keras import backend as K
+            >>> K.image_data_format()
+            'channels_first'
+            >>> K.set_image_data_format('channels_last')
+            >>> K.image_data_format()
+            'channels_last'
+
+        By default, Augmentor uses ``'channels_last'``.
+
+        :param images: The images to augment using the current pipeline.
+        :type images: Array-like matrix in the form ``(l, x, y)``, where
+         :attr:`l` is the number of images, :attr:`x` is the image width
+         and :attr:`y` is the image height.
+        :param labels: The label associated with each image in :attr:`images`.
+        :param batch_size: The number of images to return per batch.
+        :param image_data_format: Either ``'channels_last'`` (default) or
+         ``'channels_first'``.
+        :return: An image generator.
+        """
+
+        # Here, we will expect an matrix in the shape (l, x, y)
         # where l is the number of images
 
         # Check if the labels and images align
@@ -437,22 +460,12 @@ class Pipeline(object):
 
             X = np.asarray(X)
             y = np.asarray(y)
-            # y = Pipeline.categorical_labels(y)
 
             #X = X.astype('float32')
             #y = y.astype('int32')
             #X /= 255
 
             yield(X, y)
-
-
-    def fit_generator(self):
-        """
-        This function should perform a fit on any augmentation that needs to look at all
-        data in the pipeline, such as feature-wise normalisation.
-        :return:
-        """
-        raise NotImplementedError("This function has yet to be implemented.")
 
     def add_operation(self, operation):
         """
