@@ -334,7 +334,7 @@ class Pipeline(object):
         :return: An image generator.
         """
 
-        if image_data_format != "channels_first" or "channels_last":
+        if image_data_format not in ["channels_first", "channels_last"]:
             warnings.warn("To work with Keras, must be one of channels_first or channels_last.")
 
         while True:
@@ -384,8 +384,6 @@ class Pipeline(object):
             X /= 255
 
             yield (X, y)
-
-
 
     def keras_generator_from_array(self, images, labels, batch_size, image_data_format="channels_last"):
         """
@@ -585,10 +583,10 @@ class Pipeline(object):
         random.seed(seed)
 
     # TODO: Add this feature ASAP
-    def subtract_mean(self, probability=1):
-        # For implementation example, see bottom of:
-        # https://patrykchrabaszcz.github.io/Imagenet32/
-        self.add_operation(Mean(probability=probability))
+    # def subtract_mean(self, probability=1):
+    #    # For implementation example, see bottom of:
+    #    # https://patrykchrabaszcz.github.io/Imagenet32/
+    #    self.add_operation(Mean(probability=probability))
 
     def rotate90(self, probability):
         """
