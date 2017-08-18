@@ -1561,21 +1561,23 @@ class RandomErasing(Operation):
         w_occlusion_max = int(w * self.rectangle_area)
         h_occlusion_max = int(h * self.rectangle_area)
 
-        w_occlusion_min = int(w_occlusion_max * 0.1)
-        h_occlusion_min = int(h_occlusion_max * 0.1)
+        w_occlusion_min = int(w * 0.1)
+        h_occlusion_min = int(h * 0.1)
 
         w_occlusion = random.randint(w_occlusion_min, w_occlusion_max)
-        h_occlusion = random.randint(h_occlusion_min, w_occlusion_max)
+        h_occlusion = random.randint(h_occlusion_min, h_occlusion_max)
 
         if len(image.getbands()) == 1:
             rectangle = Image.fromarray(np.uint8(np.random.rand(w_occlusion, h_occlusion) * 255))
         else:
             rectangle = Image.fromarray(np.uint8(np.random.rand(w_occlusion, h_occlusion, len(image.getbands())) * 255))
 
-        random_position_x = random.randint(0, w)
-        random_position_y = random.randint(0, h)
+        random_position_x = random.randint(0, w - w_occlusion)
+        random_position_y = random.randint(0, h - h_occlusion)
 
-        return image.paste(rectangle, (random_position_x, random_position_y))
+        image.paste(rectangle, (random_position_x, random_position_y))
+
+        return image
 
 
 class Custom(Operation):

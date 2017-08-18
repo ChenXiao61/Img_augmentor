@@ -198,6 +198,7 @@ class Pipeline(object):
                 # TODO: Fix this!
                 if image.mode != "RGB":
                     image = image.convert("RGB")
+                file_name = augmentor_image.class_label + "_" + file_name
                 image.save(os.path.join(augmentor_image.output_directory, file_name), self.save_format)
             except IOError:
                 print("Error writing %s." % file_name)
@@ -663,10 +664,6 @@ class Pipeline(object):
             raise ValueError(Pipeline._probability_error_text)
         else:
             self.add_operation(Rotate(probability=probability, rotation=-1))
-
-    def rotate_alt(self, probability, rotation):
-
-        pass
 
     def rotate(self, probability, max_left_rotation, max_right_rotation):
         """
@@ -1290,3 +1287,35 @@ class Pipeline(object):
             raise ValueError(Pipeline._probability_error_text)
         else:
             self.add_operation(Invert(probability=probability))
+
+    def random_erasing(self, probability, rectangle_area):
+        """
+        Work in progress. This operation performs a Random Erasing operation,
+        as described in
+        `https://arxiv.org/abs/1708.04896 <https://arxiv.org/abs/1708.04896>`_
+        by Zhong et al.
+
+        Its purpose is to make models robust to occlusion, by randomly
+        replacing rectangular regions with random pixel values.
+
+        For greyscale images the random pixels values will also be greyscale,
+        and for RGB images the random pixels values will be in RGB.
+
+        This operation is subject to change, the original work describes
+        several ways of filling the random regions, including a random
+        solid colour or greyscale value. Currently this operations uses
+        the method which yielded the best results in the tests performed
+        by Zhong et al.
+
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :param rectangle_area: The percentage area of the image to occlude
+         with the random rectangle, between 0.1 and 1.
+        :return:
+        """
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        elif not 0.1 < rectangle_area <= 1:
+            raise ValueError("The rectangle_area must be between 0 and 1.")
+        else:
+            self.add_operation(RandomErasing(probability=probability, rectangle_area=rectangle_area))
