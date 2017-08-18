@@ -149,7 +149,7 @@ Random Erasing is a technique used to make models robust to occlusion. This may 
 |----------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
 | ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/city-road-street-italy-scaled.jpg) | ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/city-road-street-italy-animation.gif) |
 
-See <http://augmentor.readthedocs.io/en/master/code.html#module-Augmentor.Operations> for usage.
+See <http://augmentor.readthedocs.io/en/master/code.html#Augmentor.Pipeline.Pipeline.random_erasing> for usage.
 
 ### Chaining Operations in a Pipeline
 
