@@ -54,6 +54,15 @@ p.sample(10000)
 
 which will generate 10,000 augmented images based on your specifications. By default these will be written to the disk in a directory named `output` relative to the path specified when initialising the `p` pipeline object above.
 
+If you do not wish to save to disk, you can use a generator (in this case with Keras):
+
+```python
+g = p.keras_generator(batch_size=128)
+images, labels = next(g)
+```
+
+which returns a batch of images of size 128 and their corresponding labels. Generators return data indefinitely, and can be used to train neural networks with augmented data on the fly.
+
 ## Integration with Keras using Generators
 Augmentor can be used as a replacement for Keras' augmentation functionality. Augmentor can create a generator which produces augmented data indefinitely, according to the pipeline you have defined. See the following notebooks for details:
 
