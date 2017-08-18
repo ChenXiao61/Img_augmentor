@@ -202,13 +202,15 @@ def scan(source_directory, abs_output_directory):
     if directory_count == 0:
 
         augmentor_images = []
-        parent_directory_name = os.path.basename(os.path.abspath(os.path.join(source_directory, os.pardir)))
+        # This was wrong
+        # parent_directory_name = os.path.basename(os.path.abspath(os.path.join(source_directory, os.pardir)))
+        parent_directory_name = os.path.basename(os.path.abspath(source_directory))
 
         for image_path in scan_directory(source_directory):
             a = AugmentorImage(image_path=image_path, output_directory=abs_output_directory)
             a.class_label = parent_directory_name
             a.class_label_int = label_counter
-            a.categorical_label = [label_counter]  # TODO: Fix, as this is not good. Maybe leave as None.
+            a.categorical_label = [label_counter]
             augmentor_images.append(a)
 
             class_labels.append((label_counter, parent_directory_name))
