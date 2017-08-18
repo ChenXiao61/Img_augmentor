@@ -208,6 +208,11 @@ You can use `urllib` to obtain the skin lesion image in order to reproduce the a
 
 Note: For Python 3, use `from urllib.request import urlretrieve`.
 
+## Citing Augmentor
+If you find this package useful and wish to cite it, you can use
+
+Marcus D. Bloice, Christof Stocker, and Andreas Holzinger, *Augmentor: An Image Augmentation Library for Machine Learning*, arXiv preprint **arXiv:1708.04680**, <https://arxiv.org/abs/1708.04680>, 2017.
+
 ## Asciicast
 
 Click the preview below to view a video demonstration of Augmentor in use:
