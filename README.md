@@ -72,7 +72,7 @@ Augmentor can be used as a replacement for Keras' augmentation functionality. Au
 ## Per-Class Augmentation Strategies
 Augmentor allows for pipelines to be defined per class. That is, you can define different augmentation strategies on a class-by-class basis for a given classification problem.
 
-See an example of this in the following Jupyter notebook: [`Augmentor_Keras.ipynb`](https://github.com/mdbloice/Augmentor/blob/master/notebooks/Augmentor_Keras.ipynb)
+See an example of this in the following Jupyter notebook: [`Per_Class_Augmentation_Strategy.ipynb`](https://github.com/mdbloice/Augmentor/blob/master/notebooks/Per_Class_Augmentation_Strategy.ipynb)
 
 ## Main Features
 
