@@ -69,6 +69,11 @@ Augmentor can be used as a replacement for Keras' augmentation functionality. Au
 - Reading images from a local directory, augmenting them at run-time, and using a generator to pass the augmented stream of images to a Keras convolutional neural network, see [`Augmentor_Keras.ipynb`](https://github.com/mdbloice/Augmentor/blob/master/notebooks/Augmentor_Keras.ipynb)
 - Augmenting data in-memory (in array format) and using a generator to pass these new images to the Keras neural network, see [`Augmentor_Keras_Array_Data.ipynb`](https://github.com/mdbloice/Augmentor/blob/master/notebooks/Augmentor_Keras_Array_Data.ipynb)
 
+## Per-Class Augmentation Strategies
+Augmentor allows for pipelines to be defined per class. That is, you can define different augmentation strategies on a class-by-class basis for a given classification problem.
+
+See an example of this in the following Jupyter notebook: [`Augmentor_Keras.ipynb`](https://github.com/mdbloice/Augmentor/blob/master/notebooks/Augmentor_Keras.ipynb)
+
 ## Main Features
 
 ### Elastic Distortions
