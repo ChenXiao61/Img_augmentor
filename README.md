@@ -63,19 +63,6 @@ images, labels = next(g)
 
 which returns a batch of images of size 128 and their corresponding labels. Generators return data indefinitely, and can be used to train neural networks with augmented data on the fly.
 
-## Tutorial Notebooks
-
-### Integration with Keras using Generators
-Augmentor can be used as a replacement for Keras' augmentation functionality. Augmentor can create a generator which produces augmented data indefinitely, according to the pipeline you have defined. See the following notebooks for details:
-
-- Reading images from a local directory, augmenting them at run-time, and using a generator to pass the augmented stream of images to a Keras convolutional neural network, see [`Augmentor_Keras.ipynb`](https://github.com/mdbloice/Augmentor/blob/master/notebooks/Augmentor_Keras.ipynb)
-- Augmenting data in-memory (in array format) and using a generator to pass these new images to the Keras neural network, see [`Augmentor_Keras_Array_Data.ipynb`](https://github.com/mdbloice/Augmentor/blob/master/notebooks/Augmentor_Keras_Array_Data.ipynb)
-
-### Per-Class Augmentation Strategies
-Augmentor allows for pipelines to be defined per class. That is, you can define different augmentation strategies on a class-by-class basis for a given classification problem.
-
-See an example of this in the following Jupyter notebook: [`Per_Class_Augmentation_Strategy.ipynb`](https://github.com/mdbloice/Augmentor/blob/master/notebooks/Per_Class_Augmentation_Strategy.ipynb)
-
 ## Main Features
 
 ### Elastic Distortions
@@ -174,6 +161,19 @@ p.flip_left_right(probability=0.5)
 p.flip_top_bottom(probability=0.5)
 p.sample(100)
 ```
+
+## Tutorial Notebooks
+
+### Integration with Keras using Generators
+Augmentor can be used as a replacement for Keras' augmentation functionality. Augmentor can create a generator which produces augmented data indefinitely, according to the pipeline you have defined. See the following notebooks for details:
+
+- Reading images from a local directory, augmenting them at run-time, and using a generator to pass the augmented stream of images to a Keras convolutional neural network, see [`Augmentor_Keras.ipynb`](https://github.com/mdbloice/Augmentor/blob/master/notebooks/Augmentor_Keras.ipynb)
+- Augmenting data in-memory (in array format) and using a generator to pass these new images to the Keras neural network, see [`Augmentor_Keras_Array_Data.ipynb`](https://github.com/mdbloice/Augmentor/blob/master/notebooks/Augmentor_Keras_Array_Data.ipynb)
+
+### Per-Class Augmentation Strategies
+Augmentor allows for pipelines to be defined per class. That is, you can define different augmentation strategies on a class-by-class basis for a given classification problem.
+
+See an example of this in the following Jupyter notebook: [`Per_Class_Augmentation_Strategy.ipynb`](https://github.com/mdbloice/Augmentor/blob/master/notebooks/Per_Class_Augmentation_Strategy.ipynb)
 
 ## Complete Example
 
