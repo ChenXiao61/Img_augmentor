@@ -16,7 +16,7 @@ authors:
 affiliations:
  - name: Institute for Medical Informatics, Statistics and Documentation, Medical University of Graz, Austria
    index: 1
-date: 17 Aug 2017
+date: 22 Sep 2017
 bibliography: paper.bib
 ---
 
