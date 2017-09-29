@@ -583,7 +583,7 @@ class Pipeline(object):
         """
         random.seed(seed)
 
-    # TODO: Add this feature ASAP
+    # TODO: Implement
     # def subtract_mean(self, probability=1):
     #    # For implementation example, see bottom of:
     #    # https://patrykchrabaszcz.github.io/Imagenet32/
