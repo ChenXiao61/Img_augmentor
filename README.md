@@ -54,6 +54,8 @@ p.sample(10000)
 
 which will generate 10,000 augmented images based on your specifications. By default these will be written to the disk in a directory named `output` relative to the path specified when initialising the `p` pipeline object above.
 
+### Keras and PyTorch
+
 If you do not wish to save to disk, you can use a generator (in this case with Keras):
 
 ```python
@@ -62,6 +64,16 @@ images, labels = next(g)
 ```
 
 which returns a batch of images of size 128 and their corresponding labels. Generators return data indefinitely, and can be used to train neural networks with augmented data on the fly.
+
+Alternatively, you can integrate it with PyTorch:
+
+```python
+import torchvision
+transforms = torchvision.transforms.Compose([
+    p.torch_transform(),
+    torchvision.transforms.ToTensor(),
+])
+```
 
 ## Main Features
 
