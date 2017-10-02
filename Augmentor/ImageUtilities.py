@@ -19,20 +19,20 @@ import numpy as np
 
 class AugmentorImage(object):
     """
-    Wrapper class containing paths to images, as well as a number of other 
-    parameters, that are used by the Pipeline and Operation modules to perform 
+    Wrapper class containing paths to images, as well as a number of other
+    parameters, that are used by the Pipeline and Operation modules to perform
     augmentation.
-     
-    Each image that is found by Augmentor during the initialisation of a 
+
+    Each image that is found by Augmentor during the initialisation of a
     Pipeline object is contained with a new AugmentorImage object.
     """
     def __init__(self, image_path, output_directory):
         """
         To initialise an AugmentorImage object for any image, the image's
         file path is required, as well as that image's output directory,
-        which defines where any augmented images are stored. 
-        
-        :param image_path: The full path to an image. 
+        which defines where any augmented images are stored.
+
+        :param image_path: The full path to an image.
         :param output_directory: The directory where augmented images for this
          image should be saved.
         """
@@ -56,9 +56,9 @@ class AugmentorImage(object):
     @property
     def output_directory(self):
         """
-        The :attr:`output_directory` property contains a path to the directory 
+        The :attr:`output_directory` property contains a path to the directory
         to which augmented images will be saved for this instance.
-        
+
         :getter: Returns this image's output directory.
         :setter: Sets this image's output directory.
         :type: String
@@ -74,7 +74,7 @@ class AugmentorImage(object):
         """
         The :attr:`image_path` property contains the absolute file path to the
         image.
-        
+
         :getter: Returns this image's image path.
         :setter: Sets this image's image path
         :type: String
@@ -101,9 +101,9 @@ class AugmentorImage(object):
     def image_file_name(self):
         """
         The :attr:`image_file_name` property contains the **file name** of the
-        image contained in this instance. **There is no setter for this 
+        image contained in this instance. **There is no setter for this
         property.**
-        
+
         :getter: Returns this image's file name.
         :type: String
         """
@@ -138,7 +138,7 @@ class AugmentorImage(object):
         """
         The :attr:`ground_truth` property contains an absolute path to the
         ground truth file for an image.
-        
+
         :getter: Returns this image's ground truth file path.
         :setter: Sets this image's ground truth file path.
         :type: String
@@ -181,8 +181,9 @@ def extract_paths_and_extensions(image_path):
     return file_name, extension, root_path
 
 
-def scan(source_directory, abs_output_directory):
+def scan(source_directory, output_directory):
 
+    abs_output_directory  = os.path.abspath(output_directory)
     files_and_directories = glob.glob(os.path.join(os.path.abspath(source_directory), '*'))
 
     directory_count = 0
@@ -241,7 +242,7 @@ def scan_directory(source_directory):
     Scan a directory for images, returning any images found with the
     extensions ``.jpg``, ``.JPG``, ``.jpeg``, ``.JPEG``, ``.gif``, ``.GIF``,
     ``.img``, ``.IMG``, ``.png`` or ``.PNG``.
-    
+
     :param source_directory: The directory to scan for images.
     :type source_directory: String
     :return: A list of images found in the :attr:`source_directory`
