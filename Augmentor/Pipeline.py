@@ -3,12 +3,12 @@
 # Licensed under the terms of the MIT Licence.
 """
 The Pipeline module is the user facing API for the Augmentor package. It
-contains the :class:`~Augmentor.Pipeline.Pipeline` class which is used to 
+contains the :class:`~Augmentor.Pipeline.Pipeline` class which is used to
 create pipeline objects, which can be used to build an augmentation pipeline
-by adding operations to the pipeline object. 
+by adding operations to the pipeline object.
 
-For a good overview of how to use Augmentor, along with code samples and 
-example images, can be seen in the :ref:`mainfeatures` section.  
+For a good overview of how to use Augmentor, along with code samples and
+example images, can be seen in the :ref:`mainfeatures` section.
 """
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
@@ -89,19 +89,19 @@ class Pipeline(object):
     def _populate(self, source_directory, output_directory, ground_truth_directory, ground_truth_output_directory):
         """
         Private method for populating member variables with AugmentorImage
-        objects for each of the images found in the source directory 
+        objects for each of the images found in the source directory
         specified by the user. It also populates a number of fields such as
         the :attr:`output_directory` member variable, used later when saving
         images to disk.
-        
-        This method is used by :func:`__init__`. 
-        
+
+        This method is used by :func:`__init__`.
+
         :param source_directory: The directory to scan for images.
         :param output_directory: The directory to set for saving files.
-         Defaults to a directory named output relative to 
+         Defaults to a directory named output relative to
          :attr:`source_directory`.
-        :param ground_truth_directory: A directory containing ground truth 
-         files for the associated images in the :attr:`source_directory` 
+        :param ground_truth_directory: A directory containing ground truth
+         files for the associated images in the :attr:`source_directory`
          directory.
         :param ground_truth_output_directory: A path to a directory to store
          the output of the operations on the ground truth data set.
@@ -167,7 +167,7 @@ class Pipeline(object):
         """
         Private method. Used to pass an image through the current pipeline,
         and return the augmented image.
-        
+
         The returned image can then either be saved to disk or simply passed
         back to the user. Currently this is fixed to True, as Augmentor
         has only been implemented to save to disk at present.
@@ -500,7 +500,7 @@ class Pipeline(object):
         operations to a pipeline.
 
         To add custom operations to a pipeline, subclass from the
-        Operation abstract base class, overload its methods, and insert the 
+        Operation abstract base class, overload its methods, and insert the
         new object into the pipeline using this method.
 
          .. seealso:: The :class:`.Operation` class.
@@ -536,9 +536,9 @@ class Pipeline(object):
     def add_further_directory(self, new_source_directory, new_output_directory="output"):
         """
         Add a further directory containing images you wish to scan for augmentation.
-        
+
         :param new_source_directory: The directory to scan for images.
-        :param new_output_directory: The directory to use for outputted, 
+        :param new_output_directory: The directory to use for outputted,
          augmented images.
         :type new_source_directory: String
         :type new_output_directory: String
@@ -555,7 +555,7 @@ class Pipeline(object):
     def status(self):
         """
         Prints the status of the pipeline to the console. If you want to
-        remove an operation, use the index shown and the 
+        remove an operation, use the index shown and the
         :func:`remove_operation` method.
 
          .. seealso:: The :func:`remove_operation` function.
@@ -677,10 +677,10 @@ class Pipeline(object):
 
         This function will rotate by either 90, 180, or 270 degrees. This is
         useful to avoid scenarios where images may be rotated back to their
-        original positions (such as a :func:`rotate90` and a :func:`rotate270` 
-        being performed directly afterwards. The random rotation is chosen 
-        uniformly from 90, 180, or 270 degrees. The probability controls the 
-        chance of the operation being performed at all, and does not affect 
+        original positions (such as a :func:`rotate90` and a :func:`rotate270`
+        being performed directly afterwards. The random rotation is chosen
+        uniformly from 90, 180, or 270 degrees. The probability controls the
+        chance of the operation being performed at all, and does not affect
         the rotation degree.
 
         :param probability: A value between 0 and 1 representing the
@@ -703,14 +703,14 @@ class Pipeline(object):
         wish to rotate the images by an exact number of degrees, set both
         :attr:`max_left_rotation` and :attr:`max_right_rotation` to the same
         value.
-        
-        .. note:: This function will rotate **in place**, and crop the largest 
+
+        .. note:: This function will rotate **in place**, and crop the largest
          possible rectangle from the rotated image.
-         
-        In practice, angles larger than 25 degrees result in images that 
+
+        In practice, angles larger than 25 degrees result in images that
         do not render correctly, therefore there is a limit of 25 degrees
         for this function.
-         
+
         If this function returns images that are not rendered correctly, then
         you must reduce the :attr:`max_left_rotation` and
         :attr:`max_right_rotation` arguments!
@@ -798,10 +798,10 @@ class Pipeline(object):
         pronounced, and less granular distortions. Larger numbers will result
         in finer, more granular distortions. The magnitude of the distortions
         can be controlled using magnitude. This can be random or fixed.
-        
+
         *Good* values for parameters are between 2 and 10 for the grid
         width and height, with a magnitude of between 1 and 10. Using values
-        outside of these approximate ranges may result in unpredictable 
+        outside of these approximate ranges may result in unpredictable
         behaviour.
 
         :param probability: A value between 0 and 1 representing the
@@ -822,8 +822,8 @@ class Pipeline(object):
         else:
             self.add_operation(Distort(probability=probability, grid_width=grid_width,
                                        grid_height=grid_height, magnitude=magnitude))
-            
-    def gaussian_distortion(self, probability, grid_width, grid_height, magnitude, corner, method, mex=0.5, mey=0.5, 
+
+    def gaussian_distortion(self, probability, grid_width, grid_height, magnitude, corner, method, mex=0.5, mey=0.5,
                             sdx=0.05, sdy=0.05):
         """
         Performs a random, elastic gaussian distortion on an image.
@@ -834,10 +834,10 @@ class Pipeline(object):
         pronounced, and less granular distortions. Larger numbers will result
         in finer, more granular distortions. The magnitude of the distortions
         can be controlled using magnitude. This can be random or fixed.
-        
+
         *Good* values for parameters are between 2 and 10 for the grid
         width and height, with a magnitude of between 1 and 10. Using values
-        outside of these approximate ranges may result in unpredictable 
+        outside of these approximate ranges may result in unpredictable
         behaviour.
 
         :param probability: A value between 0 and 1 representing the
@@ -847,7 +847,7 @@ class Pipeline(object):
         :param grid_height: The number of rectangles in the grid's vertical
          axis.
         :param magnitude: The magnitude of the distortions.
-        :param corner: which corner of picture to distort. 
+        :param corner: which corner of picture to distort.
          Possible values: "bell"(circular surface applied), "ul"(upper left),
          "ur"(upper right), "dl"(down left), "dr"(down right).
         :param method: possible values: "in"(apply max magnitude to the chosen
@@ -891,19 +891,19 @@ class Pipeline(object):
     def zoom(self, probability, min_factor, max_factor):
         """
         Zoom in to an image, while **maintaining its size**. The amount by
-        which the image is zoomed is a randomly chosen value between 
+        which the image is zoomed is a randomly chosen value between
         :attr:`min_factor` and :attr:`max_factor`.
-        
+
         Typical values may be ``min_factor=1.1`` and ``max_factor=1.5``.
-        
+
         To zoom by a constant amount, set :attr:`min_factor` and
         :attr:`max_factor` to the same value.
-        
-        .. seealso:: See :func:`zoom_random` for zooming into random areas 
+
+        .. seealso:: See :func:`zoom_random` for zooming into random areas
          of the image.
-        
+
         :param probability: A value between 0 and 1 representing the
-         probability that the operation should be performed. 
+         probability that the operation should be performed.
         :param min_factor: The minimum factor by which to zoom the image.
         :param max_factor: The maximum factor by which to zoom the image.
         :type probability: Float
@@ -920,20 +920,20 @@ class Pipeline(object):
 
     def zoom_random(self, probability, percentage_area, randomise_percentage_area=False):
         """
-        Zooms into an image at a random location within the image. 
-        
-        You can randomise the zoom level by setting the 
-        :attr:`randomise_percentage_area` argument to true. 
-        
+        Zooms into an image at a random location within the image.
+
+        You can randomise the zoom level by setting the
+        :attr:`randomise_percentage_area` argument to true.
+
         .. seealso:: See :func:`zoom` for zooming into the centre of images.
 
         :param probability: The probability that the function will execute
          when the image is passed through the pipeline.
         :param percentage_area: The area, as a percentage of the current
          image's area, to crop.
-        :param randomise_percentage_area: If True, will use 
+        :param randomise_percentage_area: If True, will use
          :attr:`percentage_area` as an upper bound and randomise the crop from
-         between 0 and :attr:`percentage_area`. 
+         between 0 and :attr:`percentage_area`.
         :return: None
         """
         if not 0 < probability <= 1:
@@ -948,17 +948,17 @@ class Pipeline(object):
     def crop_by_size(self, probability, width, height, centre=True):
         """
         Crop an image according to a set of dimensions.
-    
+
         Crop each image according to :attr:`width` and :attr:`height`, by
         default at the centre of each image, otherwise at a random location
         within the image.
-    
+
         .. seealso:: See :func:`crop_random` to crop a random, non-centred
          area of the image.
-    
+
         If the crop area exceeds the size of the image, this function will
         crop the entire area of the image.
-    
+
         :param probability: The probability that the function will execute
          when the image is passed through the pipeline.
         :param width: The width of the desired crop.
@@ -986,14 +986,14 @@ class Pipeline(object):
     def crop_centre(self, probability, percentage_area, randomise_percentage_area=False):
         """
         Crops the centre of an image as a percentage of the image's area.
-        
+
         :param probability: The probability that the function will execute
          when the image is passed through the pipeline.
         :param percentage_area: The area, as a percentage of the current
          image's area, to crop.
-        :param randomise_percentage_area: If True, will use 
+        :param randomise_percentage_area: If True, will use
          :attr:`percentage_area` as an upper bound and randomise the crop from
-         between 0 and :attr:`percentage_area`. 
+         between 0 and :attr:`percentage_area`.
         :type probability: Float
         :type percentage_area: Float
         :type randomise_percentage_area: Boolean
@@ -1021,9 +1021,9 @@ class Pipeline(object):
          when the image is passed through the pipeline.
         :param percentage_area: The area, as a percentage of the current
          image's area, to crop.
-        :param randomise_percentage_area: If True, will use 
+        :param randomise_percentage_area: If True, will use
          :attr:`percentage_area` as an upper bound and randomise the crop from
-         between 0 and :attr:`percentage_area`. 
+         between 0 and :attr:`percentage_area`.
         :type probability: Float
         :type percentage_area: Float
         :type randomise_percentage_area: Boolean
@@ -1042,7 +1042,7 @@ class Pipeline(object):
     def histogram_equalisation(self, probability=1.0):
         """
         Apply histogram equalisation to the image.
-        
+
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed. For histogram,
          equalisation it is recommended that the probability be set to 1.
@@ -1058,9 +1058,9 @@ class Pipeline(object):
         """
         Scale (enlarge) an image, while maintaining its aspect ratio. This
         returns an image with larger dimensions than the original image.
-        
-        Use :func:`resize` to resize an image to absolute pixel values. 
-    
+
+        Use :func:`resize` to resize an image to absolute pixel values.
+
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
         :param scale_factor: The factor to scale by, which must be greater
@@ -1080,7 +1080,7 @@ class Pipeline(object):
         """
         Resize an image according to a set of dimensions specified by the
         user in pixels.
-        
+
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed. For resizing,
          it is recommended that the probability be set to 1.
@@ -1107,20 +1107,20 @@ class Pipeline(object):
 
     def skew_left_right(self, probability, magnitude=1):
         """
-        Skew an image by tilting it left or right by a random amount. The 
-        magnitude of this skew can be set to a maximum using the 
+        Skew an image by tilting it left or right by a random amount. The
+        magnitude of this skew can be set to a maximum using the
         magnitude parameter. This can be either a scalar representing the
         maximum tilt, or vector representing a range.
-        
+
         To see examples of the various skews, see :ref:`perspectiveskewing`.
-        
+
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
-        :param magnitude: The maximum tilt, which must be value between 0.1  
+        :param magnitude: The maximum tilt, which must be value between 0.1
          and 1.0, where 1 represents a tilt of 45 degrees.
         :type probability: Float
         :type magnitude: Float
-        :return: None 
+        :return: None
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
@@ -1131,20 +1131,20 @@ class Pipeline(object):
 
     def skew_top_bottom(self, probability, magnitude=1):
         """
-        Skew an image by tilting it forwards or backwards by a random amount. 
-        The magnitude of this skew can be set to a maximum using the 
+        Skew an image by tilting it forwards or backwards by a random amount.
+        The magnitude of this skew can be set to a maximum using the
         magnitude parameter. This can be either a scalar representing the
         maximum tilt, or vector representing a range.
-        
+
         To see examples of the various skews, see :ref:`perspectiveskewing`.
 
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
-        :param magnitude: The maximum tilt, which must be value between 0.1 
+        :param magnitude: The maximum tilt, which must be value between 0.1
          and 1.0, where 1 represents a tilt of 45 degrees.
         :type probability: Float
         :type magnitude: Float
-        :return: None 
+        :return: None
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
@@ -1158,16 +1158,16 @@ class Pipeline(object):
     def skew_tilt(self, probability, magnitude=1):
         """
         Skew an image by tilting in a random direction, either forwards,
-        backwards, left, or right, by a random amount. The magnitude of 
+        backwards, left, or right, by a random amount. The magnitude of
         this skew can be set to a maximum using the magnitude parameter.
-        This can be either a scalar representing the maximum tilt, or 
+        This can be either a scalar representing the maximum tilt, or
         vector representing a range.
-        
+
         To see examples of the various skews, see :ref:`perspectiveskewing`.
-        
+
         :param probability: A value between 0 and 1 representing the
-         probability that the operation should be performed. 
-        :param magnitude: The maximum tilt, which must be value between 0.1 
+         probability that the operation should be performed.
+        :param magnitude: The maximum tilt, which must be value between 0.1
          and 1.0, where 1 represents a tilt of 45 degrees.
         :type probability: Float
         :type magnitude: Float
@@ -1185,14 +1185,14 @@ class Pipeline(object):
     def skew_corner(self, probability, magnitude=1):
         """
         Skew an image towards one corner, randomly by a random magnitude.
-        
+
         To see examples of the various skews, see :ref:`perspectiveskewing`.
-        
+
         :param probability: A value between 0 and 1 representing the
-         probability that the operation should be performed. 
-        :param magnitude: The maximum skew, which must be value between 0.1 
+         probability that the operation should be performed.
+        :param magnitude: The maximum skew, which must be value between 0.1
          and 1.0.
-        :return: 
+        :return:
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
@@ -1206,13 +1206,13 @@ class Pipeline(object):
     def skew(self, probability, magnitude=1):
         """
         Skew an image in a random direction, either left to right,
-        top to bottom, or one of 8 corner directions. 
-        
+        top to bottom, or one of 8 corner directions.
+
         To see examples of all the skew types, see :ref:`perspectiveskewing`.
-        
+
         :param probability: A value between 0 and 1 representing the
-         probability that the operation should be performed. 
-        :param magnitude: The maximum skew, which must be value between 0.1 
+         probability that the operation should be performed.
+        :param magnitude: The maximum skew, which must be value between 0.1
          and 1.0.
         :type probability: Float
         :type magnitude: Float
@@ -1233,13 +1233,13 @@ class Pipeline(object):
 
         In practice, shear angles of more than 25 degrees can cause
         unpredictable behaviour. If you are observing images that are
-        incorrectly rendered (e.g. they do not contain any information) 
+        incorrectly rendered (e.g. they do not contain any information)
         then reduce the shear angles.
 
-        :param probability: The probability that the operation is performed. 
+        :param probability: The probability that the operation is performed.
         :param max_shear_left: The max number of degrees to shear to the left.
          Cannot be larger than 25 degrees.
-        :param max_shear_right: The max number of degrees to shear to the 
+        :param max_shear_right: The max number of degrees to shear to the
          right. Cannot be larger than 25 degrees.
         :return: None
         """
@@ -1256,11 +1256,11 @@ class Pipeline(object):
 
     def greyscale(self, probability):
         """
-        Convert images to greyscale. For this operation, setting the 
+        Convert images to greyscale. For this operation, setting the
         :attr:`probability` to 1.0 is recommended.
-        
+
         .. seealso:: The :func:`black_and_white` function.
-        
+
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed. For resizing,
          it is recommended that the probability be set to 1.
@@ -1275,11 +1275,11 @@ class Pipeline(object):
     def black_and_white(self, probability, threshold=128):
         """
         Convert images to black and white. In other words convert the image
-        to use a 1-bit, binary palette. The threshold defaults to 128, 
+        to use a 1-bit, binary palette. The threshold defaults to 128,
         but can be controlled using the :attr:`threshold` parameter.
-        
+
         .. seealso:: The :func:`greyscale` function.
-        
+
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed. For resizing,
          it is recommended that the probability be set to 1.
@@ -1300,12 +1300,12 @@ class Pipeline(object):
 
     def invert(self, probability):
         """
-        Invert an image. For this operation, setting the 
+        Invert an image. For this operation, setting the
         :attr:`probability` to 1.0 is recommended.
-        
+
         .. warning:: This function will cause errors if used on binary, 1-bit
          palette images (e.g. black and white).
-        
+
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed. For resizing,
          it is recommended that the probability be set to 1.
