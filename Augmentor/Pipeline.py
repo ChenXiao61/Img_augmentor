@@ -297,7 +297,7 @@ class Pipeline(object):
 
     def image_generator(self):
         while True:
-            im_index = random.randint(0, len(self.augmentor_images))
+            im_index = random.randint(0, len(self.augmentor_images)-1)  # Fix for issue 52.
             yield self._execute(self.augmentor_images[im_index], save_to_disk=False), \
                 self.augmentor_images[im_index].class_label_int
 
