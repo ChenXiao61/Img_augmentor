@@ -913,8 +913,8 @@ class Pipeline(object):
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
-        elif min_factor < 1:
-            raise ValueError("The min_factor argument must be greater than 1.")
+        elif min_factor <= 0:
+            raise ValueError("The min_factor argument must be greater than 0.")
         else:
             self.add_operation(Zoom(probability=probability, min_factor=min_factor, max_factor=max_factor))
 
