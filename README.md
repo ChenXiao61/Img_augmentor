@@ -155,7 +155,7 @@ Random Erasing is a technique used to make models robust to occlusion. This may 
 |----------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
 | ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/city-road-street-italy-scaled.jpg) | ![Original](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/city-road-street-italy-animation.gif) |
 
-See <http://augmentor.readthedocs.io/en/master/code.html#Augmentor.Pipeline.Pipeline.random_erasing> for usage.
+See the [Pipeline.random_erasing()](http://augmentor.readthedocs.io/en/master/code.html#Augmentor.Pipeline.Pipeline.random_erasing) documentation for usage.
 
 ### Chaining Operations in a Pipeline
 
@@ -247,6 +247,15 @@ You can use `urllib` to obtain the skin lesion image in order to reproduce the a
 ```
 
 Note: For Python 3, use `from urllib.request import urlretrieve`.
+
+## Tests
+To run the automated tests, clone the repository and run:
+
+```bash
+$ py.test -v
+```
+
+from the command line. To view the CI tests that are run after each commit, see <https://travis-ci.org/mdbloice/Augmentor>.
 
 ## Citing Augmentor
 If you find this package useful and wish to cite it, you can use
