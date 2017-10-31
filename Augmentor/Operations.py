@@ -1401,7 +1401,11 @@ class Zoom(Operation):
         image_zoomed = image.resize((int(round(image.size[0] * factor)), int(round(image.size[1] * factor))), resample=Image.BICUBIC)
         w_zoomed, h_zoomed = image_zoomed.size
 
-        return image_zoomed.crop(((w_zoomed / 2) - (w / 2), (h_zoomed / 2) - (h / 2), (w_zoomed / 2) + (w / 2), (h_zoomed / 2) + (h / 2)))
+        return image_zoomed.crop((floor((float(w_zoomed) / 2) - (float(w) / 2)),
+                                  floor((float(h_zoomed) / 2) - (float(h) / 2)),
+                                  floor((float(w_zoomed) / 2) + (float(w) / 2)),
+                                  floor((float(h_zoomed) / 2) + (float(h) / 2))))
+
 
         ################################################################################################################
         # Return the centre of the zoomed image, so that it is the same size as the original image
