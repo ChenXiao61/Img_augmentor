@@ -9,7 +9,7 @@ authors:
    orcid: 0000-0002-2468-4086
    affiliation: 1
  - name: Christof Stocker
-   orcid: 0000-0002-1276-7976 
+   orcid: 0000-0002-1276-7976
  - name: Andreas Holzinger
    orcid: 0000-0002-6786-5194
    affiliation: 1
@@ -33,6 +33,6 @@ The goal of the package, therefore, is to:
 - Provide less commonly implemented operations, such as the aforementioned elastic distortions
 - Enable fine level control of parameters of the augmentation procedure
 
-The software is available in Python [@augmentorPython] and Julia [@augmentorJulia] versions, the latter being optimised for speed [@bloice2017].
+The software is available in Python [@augmentorPython] and Julia [@augmentorJulia] versions, the latter being optimised for speed [@bloice2017]. The authors would also like the thank all those who have contributed to the project, a list of whom can be found on the contributors page of the GitHub repository: <https://github.com/mdbloice/Augmentor/graphs/contributors>.
 
 # References
