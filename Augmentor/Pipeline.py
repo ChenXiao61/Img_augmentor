@@ -386,7 +386,7 @@ class Pipeline(object):
 
             yield (X, y)
 
-    def keras_generator_from_array(self, images, labels, batch_size, image_data_format="channels_last"):
+    def keras_generator_from_array(self, images, labels, batch_size, normalise=False, image_data_format="channels_last"):
         """
         Returns an image generator that will sample from the current pipeline
         indefinitely, as long as it is called.
@@ -418,6 +418,9 @@ class Pipeline(object):
          and :attr:`y` is the image height.
         :param labels: The label associated with each image in :attr:`images`.
         :param batch_size: The number of images to return per batch.
+        :param normalise: True if pixels are to be normalised
+         to float32 values between 0 and 1, or False (default)
+         if pixels should be integer values between 0-255.
         :param image_data_format: Either ``'channels_last'`` (default) or
          ``'channels_first'``.
         :return: An image generator.
@@ -460,9 +463,9 @@ class Pipeline(object):
             X = np.asarray(X)
             y = np.asarray(y)
 
-            #X = X.astype('float32')
-            #y = y.astype('int32')
-            #X /= 255
+            if normalise:
+                X = X.astype('float32')
+                X /= 255
 
             yield(X, y)
 

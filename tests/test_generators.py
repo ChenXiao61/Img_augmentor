@@ -95,7 +95,7 @@ def test_generator_with_array_data():
     p = Augmentor.Pipeline()
     p.rotate(probability=1, max_right_rotation=10, max_left_rotation=10)
 
-    g = p.keras_generator_from_array(image_matrix, labels, batch_size=batch_size)
+    g = p.keras_generator_from_array(image_matrix, labels, batch_size=batch_size, normalise=False)
 
     X, y = next(g)
 
