@@ -402,7 +402,7 @@ class Skew(Operation):
         A = np.matrix(matrix, dtype=np.float)
         B = np.array(original_plane).reshape(8)
 
-        perspective_skew_coefficients_matrix = np.dot(np.linalg.inv(A.T * A) * A.T, B)
+        perspective_skew_coefficients_matrix = np.dot(np.linalg.pinv(A), B)
         perspective_skew_coefficients_matrix = np.array(perspective_skew_coefficients_matrix).reshape(8)
 
         return image.transform(image.size,
