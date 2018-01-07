@@ -58,7 +58,7 @@ class Pipeline(object):
         :param source_directory: A directory on your filesystem where your
          original images are stored.
         :param output_directory: Specifies where augmented images should be
-         saved to the disk. Default is the directory **source** relative to
+         saved to the disk. Default is the directory **output** relative to
          the path where the original image set was specified. If it does not
          exist it will be created.
         :param save_format: The file format to use when saving newly created,
