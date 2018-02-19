@@ -1,0 +1,78 @@
+import pytest
+
+# Context
+import os
+import sys
+sys.path.insert(0, os.path.abspath('.'))
+
+# Imports, some may not be needed.
+import Augmentor
+import tempfile
+import io
+import shutil
+import glob
+import random
+import numpy as np
+from PIL import Image
+
+
+def test_loading_ground_truth_images():
+    # Create directories for the standard images and the ground truth images.
+    standard_image_directory = tempfile.mkdtemp()
+    ground_truth_image_directory = tempfile.mkdtemp()
+
+    # Create images in each directory, but with the same names.
+    # First create a number of image names.
+    image_names = []
+    num_of_images = random.randint(1, 10)
+    for i in range(num_of_images):
+        image_names.append("im%s.png" % i)
+
+    # Create random images, one set of 'standard' images
+    # and another set of ground truth images.
+    standard_images = []
+    ground_truth_images = []
+
+    for image_name in image_names:
+        im = Image.fromarray(np.uint8(np.random.rand(80, 80, 3) * 255))  # (80, 80) for Greyscale
+        im_path = os.path.join(os.path.abspath(standard_image_directory), image_name)
+        im.save(im_path, 'PNG')
+        standard_images.append(im_path)
+
+    for image_name in image_names:
+        im = Image.fromarray(np.uint8(np.random.rand(80, 80, 3) * 255))  # (80, 80) for Greyscale
+        im_path = os.path.join(os.path.abspath(ground_truth_image_directory), image_name)
+        im.save(im_path, 'PNG')
+        ground_truth_images.append(im_path)
+
+    # Create a pipeline, then add the ground truth image directory.
+    p = Augmentor.Pipeline(standard_image_directory)
+    assert len(p.augmentor_images) == len(image_names)
+
+    # Add the ground truth directory.
+    p.ground_truth(ground_truth_image_directory)
+
+    # Check how many were found and make sure the
+    # count is the same as the number of ground truth
+    # images we created.
+    count = 0
+    for augmentor_image in p.augmentor_images:
+        if augmentor_image.ground_truth is not None:
+            count += 1
+
+    assert count == len(ground_truth_images)
+
+    # Check that each ground truth image is contained
+    # in the augmentor_images list.
+    stored_ground_truth_images = []
+    for augmentor_image in p.augmentor_images:
+        if augmentor_image.ground_truth is not None:
+            stored_ground_truth_images.append(augmentor_image.ground_truth)
+
+    for ground_truth_image in ground_truth_images:
+        assert ground_truth_image in stored_ground_truth_images
+
+    # Remove the directories that we used entirely
+    shutil.rmtree(standard_image_directory)
+    shutil.rmtree(ground_truth_image_directory)
+
