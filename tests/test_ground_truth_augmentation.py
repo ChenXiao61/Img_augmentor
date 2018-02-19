@@ -75,4 +75,3 @@ def test_loading_ground_truth_images():
     # Remove the directories that we used entirely
     shutil.rmtree(standard_image_directory)
     shutil.rmtree(ground_truth_image_directory)
-
