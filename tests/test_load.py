@@ -113,7 +113,7 @@ def test_initialise_with_ten_images():
 
         bytestream = io.BytesIO()
 
-        im = Image.new('RGB', (800,800))
+        im = Image.new('RGB', (800, 800))
         im.save(bytestream, 'JPEG')
 
         tmps[i].file.write(bytestream.getvalue())

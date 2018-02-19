@@ -95,7 +95,7 @@ def test_generator_with_array_data():
     p = Augmentor.Pipeline()
     p.rotate(probability=1, max_right_rotation=10, max_left_rotation=10)
 
-    g = p.keras_generator_from_array(image_matrix, labels, batch_size=batch_size, normalise=False)
+    g = p.keras_generator_from_array(image_matrix, labels, batch_size=batch_size, scaled=True)
 
     X, y = next(g)
 
@@ -106,7 +106,9 @@ def test_generator_with_array_data():
         assert y[i] == 0
 
     for i in range(len(X)):
-        im_pil = Image.fromarray(X[i])
+        x_converted = X[i] * 255
+        x_converted = x_converted.astype("uint8")
+        im_pil = Image.fromarray(x_converted)
         assert im_pil is not None
 
     image_matrix_2d = np.zeros((100, width, height), dtype='uint8')

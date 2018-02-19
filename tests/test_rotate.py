@@ -4,12 +4,11 @@ sys.path.insert(0, os.path.abspath('.'))
 
 import tempfile
 import shutil
-
 from PIL import Image
 from Augmentor import Operations
 
-def rotate_images(tmpdir, rot):
 
+def rotate_images(tmpdir, rot):
     original_dimensions = (800, 800)
 
     im_tmp = tmpdir.mkdir("subfolder").join('test.JPEG')
