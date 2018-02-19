@@ -17,6 +17,7 @@ import random
 import warnings
 import numpy as np
 
+
 class AugmentorImage(object):
     """
     Wrapper class containing paths to images, as well as a number of other
@@ -147,13 +148,13 @@ class AugmentorImage(object):
 
     @ground_truth.setter
     def ground_truth(self, value):
-        # TODO: Include some kind of fuzzy search.
         if os.path.isfile(value):
             self._ground_truth = value
 
     @property
     def label_pair(self):
         return self.class_label_int, self.class_label
+
 
 def parse_user_parameter(user_param):
 
@@ -183,7 +184,7 @@ def extract_paths_and_extensions(image_path):
 
 def scan(source_directory, output_directory):
 
-    abs_output_directory  = os.path.abspath(output_directory)
+    abs_output_directory = os.path.abspath(output_directory)
     files_and_directories = glob.glob(os.path.join(os.path.abspath(source_directory), '*'))
 
     directory_count = 0
@@ -214,7 +215,7 @@ def scan(source_directory, output_directory):
             a.categorical_label = [label_counter]
             augmentor_images.append(a)
 
-            class_labels.append((label_counter, parent_directory_name))
+        class_labels.append((label_counter, parent_directory_name))
 
         return augmentor_images, class_labels
 
@@ -228,7 +229,7 @@ def scan(source_directory, output_directory):
                 a = AugmentorImage(image_path=image_path, output_directory=output_directory)
                 a.class_label = os.path.split(d)[1]
                 a.class_label_int = label_counter
-                categorical_label[label_counter] = 1
+                categorical_label[label_counter] = 1  # Set to 1 with the index of the current class.
                 a.categorical_label = categorical_label
                 augmentor_images.append(a)
             class_labels.append((os.path.split(d)[1], label_counter))
