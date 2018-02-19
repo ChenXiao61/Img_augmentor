@@ -77,6 +77,7 @@ class Pipeline(object):
         self.save_format = save_format
         self.operations = []
         self.class_labels = []
+        self.process_ground_truth_images = False
 
         # Now we populate some fields, which we may need to do again later if another
         # directory is added, so we place it all in a function of its own.
@@ -128,7 +129,7 @@ class Pipeline(object):
         self.augmentor_images, self.class_labels = scan(source_directory, abs_output_directory)
 
         # Make output directory/directories
-        if len(self.class_labels) <= 1:  # This may be 0 in the case of a folder generated
+        if len(set(self.class_labels)) <= 1:  # Fixed bad bug by adding set() function here.
             if not os.path.exists(abs_output_directory):
                 try:
                     os.makedirs(abs_output_directory)
@@ -155,13 +156,8 @@ class Pipeline(object):
                       % augmentor_image.image_path)
                 self.augmentor_images.remove(augmentor_image)
 
-        # Finally, we will print some informational messages.
-
         sys.stdout.write("Initialised with %s image(s) found.\n" % len(self.augmentor_images))
         sys.stdout.write("Output directory set to %s." % abs_output_directory)
-
-        #print("Initialised with %s image(s) found in selected directory." % len(self.augmentor_images))
-        #print("Output directory set to %s." % abs_output_directory)
 
     def _execute(self, augmentor_image, save_to_disk=True):
         """
@@ -181,10 +177,13 @@ class Pipeline(object):
         """
         self.image_counter += 1  # TODO: See if I can remove this...
 
+        # LOAD THE IMAGE INTO MEMORY
         if augmentor_image.image_path is not None:
             image = Image.open(augmentor_image.image_path)
-        else:
-            image = augmentor_image.image_PIL
+
+        # IF WE HAVE A GROUND TRUTH IMAGE, LOAD THIS INTO MEMORY ALSO
+        if augmentor_image.ground_truth is not None:
+            ground_truth_image = Image.open(augmentor_image.ground_truth)
 
         for operation in self.operations:
             r = round(random.uniform(0, 1), 1)
@@ -196,14 +195,17 @@ class Pipeline(object):
             try:
                 # A strange error is forcing me to do this at the moment, but will fix later properly
                 # TODO: Fix this!
-                if image.mode != "RGB":
-                    image = image.convert("RGB")
+                # if image.mode != "RGB":
+                #     image = image.convert("RGB")
                 file_name = augmentor_image.class_label + "_" + file_name
                 image.save(os.path.join(augmentor_image.output_directory, file_name), self.save_format)
             except IOError:
                 print("Error writing %s." % file_name)
 
-        return image
+        return image  # Currently not needed as a return value for all functions, such as generators.
+
+    def test_ground_truth_augmentation(self, probability, min_scale, max_scale):
+        self.add_operation(ZoomGroundTruth(probability=probability, min_factor=min_scale, max_factor=max_scale))
 
     def _execute_with_array(self, image):
         """
@@ -264,19 +266,39 @@ class Pipeline(object):
 
     def sample_with_array(self, image_array, save_to_disk=False):
         """
-        Sample from the pipeline using a single image in array-like format.
+        Generate images using a single image in array-like format.
 
         .. seealso::
          See :func:`keras_image_generator_without_replacement()` for
 
-        :param image_array:
-        :param save_to_disk:
+        :param image_array: The image to pass through the pipeline.
+        :param save_to_disk: Whether to save to disk or not (default).
         :return:
         """
         a = AugmentorImage(image_path=None, output_directory=None)
         a.image_PIL = Image.fromarray(image_array)
 
         return self._execute(a, save_to_disk)
+
+    def map_ground_truth(self, directory):
+        # Point the Pipeline object to a new directory, containing
+        # complementary reference or ground truth images that
+        # should be augmented along with the original images in
+        # unison.
+
+        # datagen = ImageDataGenerator(
+        # featurewise_center=False,  # set input mean to 0 over the dataset
+        # samplewise_center=False,  # set each sample mean to 0
+        # featurewise_std_normalization=False,  # divide inputs by std of the dataset
+        # samplewise_std_normalization=False,  # divide each input by its std
+        # zca_whitening=False,  # apply ZCA whitening
+        # rotation_range=0,  # randomly rotate images in the range (degrees, 0 to 180)
+        # width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
+        # height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
+        # horizontal_flip=True,  # randomly flip images
+        # vertical_flip=False)  # randomly flip images
+
+        return None
 
     @staticmethod
     def categorical_labels(numerical_labels):
@@ -301,7 +323,7 @@ class Pipeline(object):
             yield self._execute(self.augmentor_images[im_index], save_to_disk=False), \
                 self.augmentor_images[im_index].class_label_int
 
-    def keras_generator(self, batch_size, image_data_format="channels_last"):
+    def keras_generator(self, batch_size, scaled=True, image_data_format="channels_last"):
         """
         Returns an image generator that will sample from the current pipeline
         indefinitely, as long as it is called.
@@ -329,6 +351,10 @@ class Pipeline(object):
 
         :param batch_size: The number of images to return per batch.
         :type batch_size: Integer
+        :param scaled: True (default) if pixels are to be converted
+         to float32 values between 0 and 1, or False if pixels should be
+         integer values between 0-255.
+        :type scaled: Boolean
         :param image_data_format: Either ``'channels_last'`` (default) or
          ``'channels_first'``.
         :type image_data_format: String
@@ -380,13 +406,13 @@ class Pipeline(object):
             X = np.asarray(X)
             y = np.asarray(y)
 
-            X = X.astype('float32')
-            y = y.astype('int32')
-            X /= 255
+            if scaled:
+                X = X.astype('float32')
+                X /= 255
 
             yield (X, y)
 
-    def keras_generator_from_array(self, images, labels, batch_size, normalise=False, image_data_format="channels_last"):
+    def keras_generator_from_array(self, images, labels, batch_size, scaled=True, image_data_format="channels_last"):
         """
         Returns an image generator that will sample from the current pipeline
         indefinitely, as long as it is called.
@@ -413,16 +439,26 @@ class Pipeline(object):
         By default, Augmentor uses ``'channels_last'``.
 
         :param images: The images to augment using the current pipeline.
-        :type images: Array-like matrix in the form ``(l, x, y)``, where
+        :type images: Array-like matrix. For greyscale images they can be
+         in the form ``(l, x, y)`` or ``(l, x, y, 1)``, where
          :attr:`l` is the number of images, :attr:`x` is the image width
-         and :attr:`y` is the image height.
+         and :attr:`y` is the image height. For RGB/A images, the matrix
+         should be in the form ``(l, x, y, n)``, where :attr:`n` is the
+         number of layers, e.g. 3 for RGB or 4 for RGBA and CMYK.
         :param labels: The label associated with each image in :attr:`images`.
+        :type labels: List.
         :param batch_size: The number of images to return per batch.
-        :param normalise: True if pixels are to be normalised
-         to float32 values between 0 and 1, or False (default)
-         if pixels should be integer values between 0-255.
+        :type batch_size: Integer
+        :param scaled: True (default) if pixels are to be converted
+         to float32 values between 0 and 1, or False if pixels should be
+         integer values between 0-255.
+        :type scaled: Boolean
         :param image_data_format: Either ``'channels_last'`` (default) or
-         ``'channels_first'``.
+         ``'channels_first'``. When ``'channels_last'`` is specified the
+         returned batch is in the form ``(batch_size, x, y, num_channels)``,
+         while for ``'channels_last'`` the batch is returned in the form
+         ``(batch_size, num_channels, x, y)``.
+        :param image_data_format: String
         :return: An image generator.
         """
 
@@ -442,20 +478,32 @@ class Pipeline(object):
 
                 random_image_index = random.randint(0, len(images)-1)
 
-                numpy_array = self._execute_with_array(images[random_image_index])
-
-                w = numpy_array.shape[0]
-                h = numpy_array.shape[1]
-
-                if np.ndim(numpy_array) == 2:
+                # Before passing the image we must format it in a shape that
+                # Pillow can understand, that is either (w, h) for greyscale
+                # or (w, h, num_channels) for RGB, RGBA, or CMYK images.
+                # PIL expects greyscale or B&W images in the form (w, h)
+                # and RGB(A) images images in the form (w, h, n) where n is
+                # the number of channels, which is 3 or 4.
+                # However, Keras often works with greyscale/B&W images in the
+                # form (w, h, 1). We will convert all images to (w, h) if they
+                #  are not RGB, otherwise we will use (w, h, n).
+                if np.ndim(images) == 3:
                     l = 1
                 else:
-                    l = np.shape(numpy_array)[2]
+                    l = np.shape(images)[-1]
 
-                if image_data_format == "channels_last":
-                    numpy_array = numpy_array.reshape(w, h, l)
-                elif image_data_format == "channels_first":
+                w = images[random_image_index].shape[0]
+                h = images[random_image_index].shape[1]
+
+                if l == 1:
+                    numpy_array = self._execute_with_array(np.reshape(images[random_image_index], (w, h)))
+                else:
+                    numpy_array = self._execute_with_array(np.reshape(images[random_image_index], (w, h, l)))
+
+                if image_data_format == "channels_first":
                     numpy_array = numpy_array.reshape(l, w, h)
+                elif image_data_format == "channels_last":
+                    numpy_array = numpy_array.reshape(w, h, l)
 
                 X.append(numpy_array)
                 y.append(labels[random_image_index])
@@ -463,7 +511,7 @@ class Pipeline(object):
             X = np.asarray(X)
             y = np.asarray(y)
 
-            if normalise:
+            if scaled:
                 X = X.astype('float32')
                 X /= 255
 
@@ -1350,3 +1398,103 @@ class Pipeline(object):
             raise ValueError("The rectangle_area must be between 0.1 and 1.")
         else:
             self.add_operation(RandomErasing(probability=probability, rectangle_area=rectangle_area))
+
+    def ground_truth(self, ground_truth_directory, ignore_file_extension=False):
+        """
+        Specifies a directory containing corresponding images that
+        constitute respective ground truth images for the images
+        in the current pipeline.
+
+        This function will search the directory specified by
+        :attr:`ground_truth_directory` and will associate each ground truth
+        image with the images in the pipeline by file name.
+
+        Therefore, an image titled ``cat321.jpg`` will match with the
+        image ``cat321.jpg`` in the :attr:`ground_truth_directory`.
+        The function respects each image's label, therefore the image
+        named ``cat321.jpg`` with the label ``cat`` will match the image
+        ``cat321.jpg`` in the subdirectory ``cat`` relative to
+        :attr:`ground_truth_directory`.
+
+        .. seealso:: See the :func:`sample_with_array` function if you
+         wish to supply images and their ground truths manually.
+
+        Typically used to specify a set of ground truth or gold standard
+        images that should be augmented alongside the original images
+        of a dataset, such as image masks or semantic segmentation ground
+        truth images.
+
+        A number of such data sets are openly available, see for example
+        `https://arxiv.org/pdf/1704.06857.pdf <https://arxiv.org/pdf/1704.06857.pdf>`_
+        (Garcia-Garcia et al., 2017).
+
+        :param ground_truth_directory: A directory containing the
+         ground truth images that correspond to the images in the
+         current pipeline.
+        :type ground_truth_directory: String
+        :param ignore_file_extension: False (default) if the file names are
+         must have matching extensions. True means that an image named
+         ``cat321.BMP`` will match ``cat321.jpg`` in the directory specified by
+         :attr`ground_truth_directory`.
+        :return: None.
+        """
+
+        num_of_ground_truth_images_added = 0
+
+        # Progress bar
+        progress_bar = tqdm(total=len(self.augmentor_images), desc="Processing", unit=' Images', leave=False)
+
+        if len(self.class_labels) == 1:
+            for augmentor_image_idx in range(len(self.augmentor_images)):
+                ground_truth_image = os.path.join(ground_truth_directory,
+                                                  self.augmentor_images[augmentor_image_idx].image_file_name)
+                if os.path.isfile(ground_truth_image):
+                    self.augmentor_images[augmentor_image_idx].ground_truth = ground_truth_image
+                    num_of_ground_truth_images_added += 1
+        else:
+            for i in range(len(self.class_labels)):
+                for augmentor_image_idx in range(len(self.augmentor_images)):
+                    ground_truth_image = os.path.join(ground_truth_directory,
+                                                      self.augmentor_images[augmentor_image_idx].class_label,
+                                                      self.augmentor_images[augmentor_image_idx].image_file_name)
+                    current_pipeline_image_extension = \
+                        os.path.splitext(self.augmentor_images[augmentor_image_idx].image_file_name)[1]
+                    if ignore_file_extension:
+                        # extensions_to_attempt = self._valid_formats.remove(current_pipeline_image_extension)
+                        # For now we will do nothing, but eventually this will
+                        # check for files that have different file endings.
+                        pass
+                    if os.path.isfile(ground_truth_image):
+                        if self.augmentor_images[augmentor_image_idx].class_label == self.class_labels[i][0]:
+                            # Check files are the same size. There may be a better way to do this.
+                            original_image_dimensions = \
+                                Image.open(self.augmentor_images[augmentor_image_idx].image_path).size
+                            ground_image_dimensions = Image.open(ground_truth_image).size
+                            if original_image_dimensions == ground_image_dimensions:
+                                self.augmentor_images[augmentor_image_idx].ground_truth = ground_truth_image
+                                num_of_ground_truth_images_added += 1
+                                progress_bar.update(1)
+
+        progress_bar.close()
+
+        if num_of_ground_truth_images_added != 0:
+            self.process_ground_truth_images = True
+
+        print("%s ground truth images found." % num_of_ground_truth_images_added)
+
+    def get_ground_truth_paths(self):
+        """
+        Returns a list of image and ground truth image path pairs. Used for
+        verification purposes to ensure the ground truth images match to the
+        images containing in the pipeline.
+
+        :return: A list of tuples containing the image path and ground truth
+         path pairs.
+        """
+        paths = []
+
+        for augmentor_image in self.augmentor_images:
+            print("Image path: %s\nGround truth path: %s\n---\n" % (augmentor_image.image_path, augmentor_image.ground_truth))
+            paths.append((augmentor_image.image_path, augmentor_image.ground_truth))
+
+        return paths
