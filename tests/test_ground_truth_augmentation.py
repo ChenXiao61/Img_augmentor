@@ -75,3 +75,44 @@ def test_loading_ground_truth_images():
     # Remove the directories that we used entirely
     shutil.rmtree(standard_image_directory)
     shutil.rmtree(ground_truth_image_directory)
+
+
+def test_zoom_ground_truth_temporary_class():
+    # Create directories for the standard images and the ground truth images.
+    standard_image_directory = tempfile.mkdtemp()
+    ground_truth_image_directory = tempfile.mkdtemp()
+
+    # Create images in each directory, but with the same names.
+    # First create a number of image names.
+    image_names = []
+    num_of_images = random.randint(1, 10)
+    for i in range(num_of_images):
+        image_names.append("im%s.png" % i)
+
+    # Create random images, one set of 'standard' images
+    # and another set of ground truth images.
+    standard_images = []
+    ground_truth_images = []
+
+    for image_name in image_names:
+        im = Image.fromarray(np.uint8(np.random.rand(80, 80, 3) * 255))  # (80, 80) for Greyscale
+        im_path = os.path.join(os.path.abspath(standard_image_directory), image_name)
+        im.save(im_path, 'PNG')
+        standard_images.append(im_path)
+
+    for image_name in image_names:
+        im = Image.fromarray(np.uint8(np.random.rand(80, 80, 3) * 255))  # (80, 80) for Greyscale
+        im_path = os.path.join(os.path.abspath(ground_truth_image_directory), image_name)
+        im.save(im_path, 'PNG')
+        ground_truth_images.append(im_path)
+
+    # Test the functionality using the ZoomGroundTruth test
+    # operation.
+
+    #
+    # NOT YET IMPLEMENTED.
+    #
+
+    # Remove the directories that we used entirely
+    shutil.rmtree(standard_image_directory)
+    shutil.rmtree(ground_truth_image_directory)
