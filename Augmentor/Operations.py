@@ -1646,16 +1646,13 @@ class ZoomGroundTruth(Operation):
         self.min_factor = min_factor
         self.max_factor = max_factor
 
-    def perform_operation(self, image, ground_truth_images):
+    def perform_operation(self, images):
         """
-        Zooms/scales the passed image and returns the new image.
+        Zooms/scales the passed images and returns the new images.
 
-        :param image: The image to be zoomed.
-        :type image: PIL.Image
-        :param ground_truth_images: An list containing an arbitrary number of
-         ground truth images.
-        :type ground_truth_images: List of PIl.Image images.
-        :return: The zoomed in images as type PIL.Image
+        :param images: An arbitrarily long list of image(s) to be zoomed.
+        :type images: List containing PIL.Image object(s).
+        :return: The zoomed in image(s) as a list of PIL.Image object(s).
         """
         factor = round(random.uniform(self.min_factor, self.max_factor), 2)
 
@@ -1672,11 +1669,9 @@ class ZoomGroundTruth(Operation):
                                       floor((float(w_zoomed) / 2) + (float(w) / 2)),
                                       floor((float(h_zoomed) / 2) + (float(h) / 2))))
 
-        if not ground_truth_images:
-            return do(image)
-        else:
-            augmented_ground_truth_images = []
-            image = do(image)
-            for ground_truth_image in ground_truth_images:
-                augmented_ground_truth_images.append(do(ground_truth_image))
-            return image, augmented_ground_truth_images
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
