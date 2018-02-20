@@ -177,10 +177,6 @@ class Pipeline(object):
         """
         # self.image_counter += 1  # TODO: See if I can remove this...
 
-        # LOAD THE IMAGE INTO MEMORY
-        # if augmentor_image.image_path is not None:
-        #    image = Image.open(augmentor_image.image_path)
-
         images = []
 
         if augmentor_image.image_path is not None:
@@ -197,26 +193,19 @@ class Pipeline(object):
             r = round(random.uniform(0, 1), 1)
             if r <= operation.probability:
                 images = operation.perform_operation(images)
-                #image = operation.perform_operation(image)
 
         if save_to_disk:
             file_name = str(uuid.uuid4()) + "." + self.save_format
             try:
-                # A strange error is forcing me to do this at the moment, but will fix later properly
                 # TODO: Fix this!
                 # if image.mode != "RGB":
                 #     image = image.convert("RGB")
-                # file_name = augmentor_image.class_label + "_" + file_name
-                # image.save(os.path.join(augmentor_image.output_directory, file_name), self.save_format)
-                #for image in images:
-                #    file_name = augmentor_image.class_label + "_" + str(current_image_counter) + "_" + file_name
-                #    image.save(os.path.join(augmentor_image.output_directory, file_name), self.save_format)
                 for i in range(len(images)):
                     if i == 0:
                         save_name = augmentor_image.class_label + "_original_" + file_name
                         images[i].save(os.path.join(augmentor_image.output_directory, save_name), self.save_format)
                     else:
-                        save_name = "_groundtruth_" + str(i) + "_" + augmentor_image.class_label + "_" + file_name
+                        save_name = "_groundtruth_(" + str(i) + ")_" + augmentor_image.class_label + "_" + file_name
                         images[i].save(os.path.join(augmentor_image.output_directory, save_name), self.save_format)
             except IOError:
                 print("Error writing %s." % file_name)
