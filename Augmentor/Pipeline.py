@@ -175,20 +175,29 @@ class Pipeline(object):
         :type save_to_disk: Boolean
         :return: The augmented image.
         """
-        self.image_counter += 1  # TODO: See if I can remove this...
+        # self.image_counter += 1  # TODO: See if I can remove this...
 
         # LOAD THE IMAGE INTO MEMORY
-        if augmentor_image.image_path is not None:
-            image = Image.open(augmentor_image.image_path)
+        # if augmentor_image.image_path is not None:
+        #    image = Image.open(augmentor_image.image_path)
 
-        # IF WE HAVE A GROUND TRUTH IMAGE, LOAD THIS INTO MEMORY ALSO
+        images = []
+
+        if augmentor_image.image_path is not None:
+            images.append(Image.open(augmentor_image.image_path))
+
         if augmentor_image.ground_truth is not None:
-            ground_truth_image = Image.open(augmentor_image.ground_truth)
+            if isinstance(augmentor_image.ground_truth, list):
+                for image in augmentor_image.ground_truth:
+                    images.append(Image.open(image))
+            else:
+                images.append(Image.open(augmentor_image.ground_truth))
 
         for operation in self.operations:
             r = round(random.uniform(0, 1), 1)
             if r <= operation.probability:
-                image = operation.perform_operation(image)
+                images = operation.perform_operation(images)
+                #image = operation.perform_operation(image)
 
         if save_to_disk:
             file_name = str(uuid.uuid4()) + "." + self.save_format
@@ -197,12 +206,22 @@ class Pipeline(object):
                 # TODO: Fix this!
                 # if image.mode != "RGB":
                 #     image = image.convert("RGB")
-                file_name = augmentor_image.class_label + "_" + file_name
-                image.save(os.path.join(augmentor_image.output_directory, file_name), self.save_format)
+                # file_name = augmentor_image.class_label + "_" + file_name
+                # image.save(os.path.join(augmentor_image.output_directory, file_name), self.save_format)
+                #for image in images:
+                #    file_name = augmentor_image.class_label + "_" + str(current_image_counter) + "_" + file_name
+                #    image.save(os.path.join(augmentor_image.output_directory, file_name), self.save_format)
+                for i in range(len(images)):
+                    if i == 0:
+                        save_name = augmentor_image.class_label + "_original_" + file_name
+                        images[i].save(os.path.join(augmentor_image.output_directory, save_name), self.save_format)
+                    else:
+                        save_name = "_groundtruth_" + str(i) + "_" + augmentor_image.class_label + "_" + file_name
+                        images[i].save(os.path.join(augmentor_image.output_directory, save_name), self.save_format)
             except IOError:
                 print("Error writing %s." % file_name)
 
-        return image  # Currently not needed as a return value for all functions, such as generators.
+        return images[0]  # Currently not needed as a return value for all functions, such as generators.
 
     def test_ground_truth_augmentation(self, probability, min_scale, max_scale):
         self.add_operation(ZoomGroundTruth(probability=probability, min_factor=min_scale, max_factor=max_scale))
@@ -1477,6 +1496,7 @@ class Pipeline(object):
 
         progress_bar.close()
 
+        # May not be required after all, check later.
         if num_of_ground_truth_images_added != 0:
             self.process_ground_truth_images = True
 
