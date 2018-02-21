@@ -102,7 +102,7 @@ class HistogramEqualisation(Operation):
         """
         Operation.__init__(self, probability)
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
         Performs histogram equalisation on the image passed as an argument
         and returns the equalised image. There are no user definable parameters
@@ -115,13 +115,17 @@ class HistogramEqualisation(Operation):
         # If an image is a colour image, the histogram will
         # will be computed on the flattened image, which fires
         # a warning.
-        # We may want to apply this instead to each colour channel,
-        # but I see no reason why right now. It would like to remove
-        # the need to catch these warnings, however.
+        # We may want to apply this instead to each colour channel.
+        def do(image):
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                return ImageOps.equalize(image)
 
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            return ImageOps.equalize(image)
+        augmented_images = []
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class Greyscale(Operation):
@@ -448,7 +452,7 @@ class RotateStandard(Operation):
         elif left_or_right == 1:
             rotation = random_right
 
-        return image.rotate(rotation, expand=self.expand)
+        return image.rotate(rotation, expand=self.expand, resample=Image.BICUBIC)
 
 
 class Rotate(Operation):
