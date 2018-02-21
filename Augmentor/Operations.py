@@ -147,7 +147,7 @@ class Greyscale(Operation):
         """
         Operation.__init__(self, probability)
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
         Converts the passed image to greyscale and returns the transformed
         image. There are no user definable parameters for this method.
@@ -156,7 +156,16 @@ class Greyscale(Operation):
         :type image: PIL.Image
         :return: The transformed image as type PIL.Image
         """
-        return ImageOps.grayscale(image)
+
+        def do(image):
+            return ImageOps.grayscale(image)
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class Invert(Operation):
