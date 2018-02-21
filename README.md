@@ -1,6 +1,6 @@
 ![AugmentorLogo](https://github.com/mdbloice/AugmentorFiles/blob/master/Misc/AugmentorLogo.png)
 
-Augmentor is an image augmentation library in Python for machine learning. It aims to make image augmentation platform and framework independent, more convenient, less error prone, and reproducible. It employs a stochastic approach using building blocks that allow for operations to be pieced together in a pipeline.
+Augmentor is an image augmentation library in Python for machine learning. It aims to be a platform and framework independent library, which is more convenient, allows for finer grained control over augmentation, and implements as many augmentation procedures as possible. It employs a stochastic approach using building blocks that allow for operations to be pieced together in a pipeline.
 
 [![PyPI](https://img.shields.io/badge/Augmentor-v0.1.10-blue.svg?maxAge=2592000)](https://pypi.python.org/pypi/Augmentor)
 [![Documentation Status](https://readthedocs.org/projects/augmentor/badge/?version=master)](https://augmentor.readthedocs.io/en/master/?badge=master)
