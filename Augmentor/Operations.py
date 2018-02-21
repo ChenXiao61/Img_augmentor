@@ -116,8 +116,9 @@ class HistogramEqualisation(Operation):
         # will be computed on the flattened image, which fires
         # a warning.
         # We may want to apply this instead to each colour channel,
-        # but I see no reason why right now. It would remove
+        # but I see no reason why right now. It would like to remove
         # the need to catch these warnings, however.
+
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             return ImageOps.equalize(image)
@@ -409,6 +410,45 @@ class Skew(Operation):
                                Image.PERSPECTIVE,
                                perspective_skew_coefficients_matrix,
                                resample=Image.BICUBIC)
+
+
+class RotateStandard(Operation):
+    """
+    Class to perform rotations without automatically cropping the images,
+    as opposed to the :class:`RotateRange` class.
+
+    .. seealso:: For arbitrary rotations, see the :class:`RotateRange` class.
+    .. seealso:: For 90 degree rotations, see the :class:`Rotate` class.
+    """
+
+    def __init__(self, probability, max_left_rotation, max_right_rotation, expand=False):
+        """
+        Documentation to appear.
+        """
+        Operation.__init__(self, probability)
+        self.max_left_rotation = -abs(max_left_rotation)   # Ensure always negative
+        self.max_right_rotation = abs(max_right_rotation)  # Ensure always positive
+        self.expand = expand
+
+    def perform_operation(self, image):
+        """
+        Documentation to appear.
+        :param image:
+        :return:
+        """
+        random_left = random.randint(self.max_left_rotation, 0)
+        random_right = random.randint(0, self.max_right_rotation)
+
+        left_or_right = random.randint(0, 1)
+
+        rotation = 0
+
+        if left_or_right == 0:
+            rotation = random_left
+        elif left_or_right == 1:
+            rotation = random_right
+
+        return image.rotate(rotation, expand=self.expand)
 
 
 class Rotate(Operation):
