@@ -795,6 +795,24 @@ class Pipeline(object):
             self.add_operation(RotateRange(probability=probability, max_left_rotation=ceil(max_left_rotation),
                                            max_right_rotation=ceil(max_right_rotation)))
 
+    def rotate_without_crop(self, probability, max_left_rotation, max_right_rotation, expand=False):
+        """
+        Rotate an image without automatically cropping.
+
+        Expand defaults to False, as this will result in different sizes for
+        images depending on the rotation.
+
+        Documentation to appear.
+
+        :param probability:
+        :param max_left_rotation:
+        :param max_right_rotation:
+        :param expand:
+        :return:
+        """
+        self.add_operation(RotateRange(probability=probability, max_left_rotation=ceil(max_left_rotation),
+                                       max_right_rotation=ceil(max_right_rotation), expand=expand))
+
     def flip_top_bottom(self, probability):
         """
         Flip (mirror) the image along its vertical axis, i.e. from top to
