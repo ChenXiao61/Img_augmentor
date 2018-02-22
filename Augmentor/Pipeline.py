@@ -288,26 +288,6 @@ class Pipeline(object):
 
         return self._execute(a, save_to_disk)
 
-    def map_ground_truth(self, directory):
-        # Point the Pipeline object to a new directory, containing
-        # complementary reference or ground truth images that
-        # should be augmented along with the original images in
-        # unison.
-
-        # datagen = ImageDataGenerator(
-        # featurewise_center=False,  # set input mean to 0 over the dataset
-        # samplewise_center=False,  # set each sample mean to 0
-        # featurewise_std_normalization=False,  # divide inputs by std of the dataset
-        # samplewise_std_normalization=False,  # divide each input by its std
-        # zca_whitening=False,  # apply ZCA whitening
-        # rotation_range=0,  # randomly rotate images in the range (degrees, 0 to 180)
-        # width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
-        # height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
-        # horizontal_flip=True,  # randomly flip images
-        # vertical_flip=False)  # randomly flip images
-
-        return None
-
     @staticmethod
     def categorical_labels(numerical_labels):
         """
@@ -960,10 +940,10 @@ class Pipeline(object):
             raise ValueError(Pipeline._probability_error_text)
         else:
             self.add_operation(GaussianDistortion(probability=probability, grid_width=grid_width,
-                                                    grid_height=grid_height,
-                                                    magnitude=magnitude, corner=corner,
-                                                    method=method,  mex=mex,
-                                                    mey=mey, sdx=sdx, sdy=sdy))
+                                                  grid_height=grid_height,
+                                                  magnitude=magnitude, corner=corner,
+                                                  method=method,  mex=mex,
+                                                  mey=mey, sdx=sdx, sdy=sdy))
 
     def zoom(self, probability, min_factor, max_factor):
         """
