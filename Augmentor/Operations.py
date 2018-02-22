@@ -73,15 +73,17 @@ class Operation(object):
         """
         return self.__class__.__name__
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
-        Perform the operation on the image. Each operation must at least
-        have this function, which accepts an image of type PIL.Image, performs
-        its operation, and returns an image of type PIL.Image.
+        Perform the operation on the passed images. Each operation must at least
+        have this function, which accepts a list containing objects of type
+        PIL.Image, performs its operation, and returns a new list containing
+        objects of type PIL.Image.
 
-        :param image: The image to transform.
-        :type image: PIL.Image
-        :return: The transformed image of type PIL.Image.
+        :param images: The image(s) to transform.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
         raise RuntimeError("Illegal call to base class.")
 
@@ -104,13 +106,15 @@ class HistogramEqualisation(Operation):
 
     def perform_operation(self, images):
         """
-        Performs histogram equalisation on the image passed as an argument
-        and returns the equalised image. There are no user definable parameters
-        for this method.
+        Performs histogram equalisation on the images passed as an argument
+        and returns the equalised images. There are no user definable
+        parameters for this method.
 
-        :param image: The image on which to perform the histogram equalisation.
-        :type image: PIL.Image
-        :return: The transformed image of type PIL.Image
+        :param images: The image(s) on which to perform the histogram
+         equalisation.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
         # If an image is a colour image, the histogram will
         # will be computed on the flattened image, which fires
@@ -152,9 +156,10 @@ class Greyscale(Operation):
         Converts the passed image to greyscale and returns the transformed
         image. There are no user definable parameters for this method.
 
-        :param image: The image to convert to greyscale.
-        :type image: PIL.Image
-        :return: The transformed image as type PIL.Image
+        :param images: The image to convert to greyscale.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
 
         def do(image):
@@ -184,16 +189,26 @@ class Invert(Operation):
         """
         Operation.__init__(self, probability)
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
         Negates the image passed as an argument. There are no user definable
         parameters for this method.
 
-        :param image: The image to negate.
-        :type image: PIL.Image
-        :return: The transformed image as type PIL.Image
+        :param images: The image(s) to negate.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
-        return ImageOps.invert(image)
+
+        def do(image):
+            return ImageOps.invert(image)
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class BlackAndWhite(Operation):
@@ -223,20 +238,32 @@ class BlackAndWhite(Operation):
         Operation.__init__(self, probability)
         self.threshold = threshold
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
         Convert the image passed as an argument to black and white, 1-bit
         monochrome. Uses the :attr:`threshold` passed to the constructor
         to control the cut-off point where a pixel is converted to black or
         white.
 
-        :param image: The image to convert into monochrome.
-        :type image: PIL.Image
-        :return: The converted image as type PIL.Image
+        :param images: The image to convert into monochrome.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
-        image = ImageOps.grayscale(image)
-        # An alternative would be to use PIL.ImageOps.posterize(image=image, bits=1)
-        return image.point(lambda x: 0 if x < self.threshold else 255, '1')
+
+        def do(image):
+            # An alternative would be to use
+            # PIL.ImageOps.posterize(image=image, bits=1)
+            # but this might be faster.
+            image = ImageOps.grayscale(image)
+            return image.point(lambda x: 0 if x < self.threshold else 255, '1')
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class Skew(Operation):
@@ -288,19 +315,31 @@ class Skew(Operation):
         self.skew_type = skew_type
         self.magnitude = magnitude
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
-        Perform the skew on the passed image and returns the transformed
-        image. Uses the :attr:`skew_type` and :attr:`magnitude` parameters to
-        control the type of skew to perform as well as the degree to which it
-        is performed.
+        Perform the skew on the passed image(s) and returns the transformed
+        image(s). Uses the :attr:`skew_type` and :attr:`magnitude` parameters
+        to control the type of skew to perform as well as the degree to which
+        it is performed.
 
-        :param image: The image to skew.
-        :type image: PIL.Image
-        :return: The skewed image as type PIL.Image
+        If a list of images is passed, they must have identical dimensions.
+        This is checked when we add the ground truth directory using
+        :func:`Pipeline.:func:`~Augmentor.Pipeline.Pipeline.ground_truth`
+        function.
+
+        However, if this check fails, the skew function will be skipped and
+        a warning thrown, in order to avoid an exception.
+
+        :param images: The image(s) to skew.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
 
-        w, h = image.size
+        # Width and height taken from first image in list.
+        # This requires that all ground truth images in the list
+        # have identical dimensions!
+        w, h = images[0].size
 
         x1 = 0
         x2 = h
@@ -320,7 +359,6 @@ class Skew(Operation):
         #    max_skew_amount /= self.magnitude
         #    skew_amount = max_skew_amount
 
-        # TODO: Fix this abomination
         if self.skew_type == "RANDOM":
             skew = random.choice(["TILT", "TILT_LEFT_RIGHT", "TILT_TOP_BOTTOM", "CORNER"])
         else:
@@ -419,10 +457,18 @@ class Skew(Operation):
         perspective_skew_coefficients_matrix = np.dot(np.linalg.pinv(A), B)
         perspective_skew_coefficients_matrix = np.array(perspective_skew_coefficients_matrix).reshape(8)
 
-        return image.transform(image.size,
-                               Image.PERSPECTIVE,
-                               perspective_skew_coefficients_matrix,
-                               resample=Image.BICUBIC)
+        def do(image):
+            return image.transform(image.size,
+                                   Image.PERSPECTIVE,
+                                   perspective_skew_coefficients_matrix,
+                                   resample=Image.BICUBIC)
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class RotateStandard(Operation):
@@ -430,7 +476,8 @@ class RotateStandard(Operation):
     Class to perform rotations without automatically cropping the images,
     as opposed to the :class:`RotateRange` class.
 
-    .. seealso:: For arbitrary rotations, see the :class:`RotateRange` class.
+    .. seealso:: For arbitrary rotations with automatic cropping, see
+     the :class:`RotateRange` class.
     .. seealso:: For 90 degree rotations, see the :class:`Rotate` class.
     """
 
@@ -443,12 +490,15 @@ class RotateStandard(Operation):
         self.max_right_rotation = abs(max_right_rotation)  # Ensure always positive
         self.expand = expand
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
         Documentation to appear.
-        :param image:
-        :return:
+
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
+
         random_left = random.randint(self.max_left_rotation, 0)
         random_right = random.randint(0, self.max_right_rotation)
 
@@ -461,7 +511,15 @@ class RotateStandard(Operation):
         elif left_or_right == 1:
             rotation = random_right
 
-        return image.rotate(rotation, expand=self.expand, resample=Image.BICUBIC)
+        def do(image):
+            return image.rotate(rotation, expand=self.expand, resample=Image.BICUBIC)
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class Rotate(Operation):
@@ -496,20 +554,31 @@ class Rotate(Operation):
     def __str__(self):
         return "Rotate " + str(self.rotation)
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
         Rotate an image by either 90, 180, or 270 degrees, or randomly from
         any of these.
 
-        :param image: The image to rotate.
-        :type image: PIL.Image
-        :return: The rotated image as type PIL.Image
+        :param images: The image(s) to rotate.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
-        if self.rotation == -1:
-            random_factor = random.randint(1, 3)
-            return image.rotate(90 * random_factor, expand=True)
-        else:
-            return image.rotate(self.rotation, expand=True)
+
+        random_factor = random.randint(1, 3)
+
+        def do(image):
+            if self.rotation == -1:
+                return image.rotate(90 * random_factor, expand=True)
+            else:
+                return image.rotate(self.rotation, expand=True)
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class RotateRange(Operation):
@@ -557,7 +626,7 @@ class RotateRange(Operation):
         self.max_left_rotation = -abs(max_left_rotation)   # Ensure always negative
         self.max_right_rotation = abs(max_right_rotation)  # Ensure always positive
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
         Perform the rotation on the passed :attr:`image` and return
         the transformed image. Uses the :attr:`max_left_rotation` and
@@ -565,11 +634,13 @@ class RotateRange(Operation):
         the amount of degrees to rotate by. Whether the image is rotated
         clockwise or anti-clockwise is chosen at random.
 
-        :param image: The image to rotate.
-        :type image: PIL.Image
-        :return: The rotated image as type PIL.Image
+        :param images: The image(s) to rotate.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
-        # TODO: Small rotations of 1 or 2 degrees sometimes results in black pixels in the corners. Fix.
+
+        # TODO: Small rotations of 1 or 2 degrees can create black pixels
         random_left = random.randint(self.max_left_rotation, 0)
         random_right = random.randint(0, self.max_right_rotation)
 
@@ -582,42 +653,50 @@ class RotateRange(Operation):
         elif left_or_right == 1:
             rotation = random_right
 
-        # Get size before we rotate
-        x = image.size[0]
-        y = image.size[1]
+        def do(image):
+            # Get size before we rotate
+            x = image.size[0]
+            y = image.size[1]
 
-        # Rotate, while expanding the canvas size
-        image = image.rotate(rotation, expand=True, resample=Image.BICUBIC)
+            # Rotate, while expanding the canvas size
+            image = image.rotate(rotation, expand=True, resample=Image.BICUBIC)
 
-        # Get size after rotation, which includes the empty space
-        X = image.size[0]
-        Y = image.size[1]
+            # Get size after rotation, which includes the empty space
+            X = image.size[0]
+            Y = image.size[1]
 
-        # Get our two angles needed for the calculation of the largest area
-        angle_a = abs(rotation)
-        angle_b = 90 - angle_a
+            # Get our two angles needed for the calculation of the largest area
+            angle_a = abs(rotation)
+            angle_b = 90 - angle_a
 
-        # Python deals in radians so get our radians
-        angle_a_rad = math.radians(angle_a)
-        angle_b_rad = math.radians(angle_b)
+            # Python deals in radians so get our radians
+            angle_a_rad = math.radians(angle_a)
+            angle_b_rad = math.radians(angle_b)
 
-        # Calculate the sins
-        angle_a_sin = math.sin(angle_a_rad)
-        angle_b_sin = math.sin(angle_b_rad)
+            # Calculate the sins
+            angle_a_sin = math.sin(angle_a_rad)
+            angle_b_sin = math.sin(angle_b_rad)
 
-        # Find the maximum area of the rectangle that could be cropped
-        E = (math.sin(angle_a_rad)) / (math.sin(angle_b_rad)) * \
-            (Y - X * (math.sin(angle_a_rad) / math.sin(angle_b_rad)))
-        E = E / 1 - (math.sin(angle_a_rad) ** 2 / math.sin(angle_b_rad) ** 2)
-        B = X - E
-        A = (math.sin(angle_a_rad) / math.sin(angle_b_rad)) * B
+            # Find the maximum area of the rectangle that could be cropped
+            E = (math.sin(angle_a_rad)) / (math.sin(angle_b_rad)) * \
+                (Y - X * (math.sin(angle_a_rad) / math.sin(angle_b_rad)))
+            E = E / 1 - (math.sin(angle_a_rad) ** 2 / math.sin(angle_b_rad) ** 2)
+            B = X - E
+            A = (math.sin(angle_a_rad) / math.sin(angle_b_rad)) * B
 
-        # Crop this area from the rotated image
-        # image = image.crop((E, A, X - E, Y - A))
-        image = image.crop((int(round(E)), int(round(A)), int(round(X - E)), int(round(Y - A))))
+            # Crop this area from the rotated image
+            # image = image.crop((E, A, X - E, Y - A))
+            image = image.crop((int(round(E)), int(round(A)), int(round(X - E)), int(round(Y - A))))
 
-        # Return the image, re-sized to the size of the image passed originally
-        return image.resize((x, y), resample=Image.BICUBIC)
+            # Return the image, re-sized to the size of the image passed originally
+            return image.resize((x, y), resample=Image.BICUBIC)
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class Resize(Operation):
@@ -646,17 +725,27 @@ class Resize(Operation):
         self.height = height
         self.resample_filter = resample_filter
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
         Resize the passed image and returns the resized image. Uses the
         parameters passed to the constructor to resize the passed image.
 
-        :param image: The image to resize.
-        :type image: PIL.Image
-        :return: The resized image as type PIL.Image
+        :param images: The image to resize.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
-        # TODO: Automatically change this to ANTIALIAS or BICUBIC depending on the size of the file
-        return image.resize((self.width, self.height), eval("Image.%s" % self.resample_filter))
+
+        def do(image):
+            # TODO: Automatically change this to ANTIALIAS or BICUBIC depending on the size of the file
+            return image.resize((self.width, self.height), eval("Image.%s" % self.resample_filter))
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class Flip(Operation):
@@ -685,26 +774,36 @@ class Flip(Operation):
         Operation.__init__(self, probability)
         self.top_bottom_left_right = top_bottom_left_right
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
         Mirror the image according to the `attr`:top_bottom_left_right`
         argument passed to the constructor and return the mirrored image.
 
-        :param image: The image to mirror.
-        :type image: PIL.Image
-        :return: The mirrored image as type PIL.Image
+        :param images: The image(s) to mirror.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
-        # TODO: Does it make sense to flip both ways?
-        if self.top_bottom_left_right == "LEFT_RIGHT":
-            return image.transpose(Image.FLIP_LEFT_RIGHT)
-        elif self.top_bottom_left_right == "TOP_BOTTOM":
-            return image.transpose(Image.FLIP_TOP_BOTTOM)
-        elif self.top_bottom_left_right == "RANDOM":
-            random_axis = random.randint(0, 1)
-            if random_axis == 0:
+
+        random_axis = random.randint(0, 1)
+
+        def do(image):
+            if self.top_bottom_left_right == "LEFT_RIGHT":
                 return image.transpose(Image.FLIP_LEFT_RIGHT)
-            elif random_axis == 1:
+            elif self.top_bottom_left_right == "TOP_BOTTOM":
                 return image.transpose(Image.FLIP_TOP_BOTTOM)
+            elif self.top_bottom_left_right == "RANDOM":
+                if random_axis == 0:
+                    return image.transpose(Image.FLIP_LEFT_RIGHT)
+                elif random_axis == 1:
+                    return image.transpose(Image.FLIP_TOP_BOTTOM)
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class Crop(Operation):
@@ -737,56 +836,38 @@ class Crop(Operation):
         self.height = height
         self.centre = centre
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
         Crop an area from an image, either from a random location or centred,
         using the dimensions supplied during instantiation.
 
-        :param image: The image to crop the area from.
-        :type image: PIL.Image
-        :return: The cropped area as an image of type PIL.Image
+        :param images: The image(s) to crop the area from.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
-        w, h = image.size
 
-        # Just return the original image if the crop is too large for the
-        # current image.
-        if self.width > w or self.height > h:
-            return image
+        def do(image):
 
-        if self.centre:
-            return image.crop(((w/2)-(self.width/2), (h/2)-(self.height/2), (w/2)+(self.width/2), (h/2)+(self.height/2)))
-        else:
-            left_shift = random.randint(0, int((w - self.width)))
-            down_shift = random.randint(0, int((h - self.height)))
-            return image.crop((left_shift, down_shift, self.width + left_shift, self.height + down_shift))
+            w, h = image.size
 
-        ################################################################################################################
-        #if self.centre:
-        #    new_width = self.width / 2.
-        #    new_height = self.height / 2.
-        #    half_the_width = w / 2
-        #    half_the_height = h / 2
-        #
-        #    return image.crop(
-        #        (
-        #            half_the_width - ceil(new_width),
-        #            half_the_height - ceil(new_height),
-        #            half_the_width + floor(new_width),
-        #            half_the_height + floor(new_height)
-        #        )
-        #    )
-        #else:
-        #    random_right_shift = random.randint(0, (w - self.width))
-        #    random_down_shift = random.randint(0, (h - self.height))
-        #
-        #    return image.crop(
-        #        (
-        #            random_right_shift,
-        #            random_down_shift,
-        #            self.width+random_right_shift,
-        #            self.height+random_down_shift
-        #        )
-        #    )
+            # TODO: Fix. We may want a full crop.
+            if self.width > w or self.height > h:
+                return image
+
+            if self.centre:
+                return image.crop(((w/2)-(self.width/2), (h/2)-(self.height/2), (w/2)+(self.width/2), (h/2)+(self.height/2)))
+            else:
+                left_shift = random.randint(0, int((w - self.width)))
+                down_shift = random.randint(0, int((h - self.height)))
+                return image.crop((left_shift, down_shift, self.width + left_shift, self.height + down_shift))
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class CropPercentage(Operation):
