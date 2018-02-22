@@ -179,5 +179,5 @@ def test_zoom_ground_truth_temporary_class():
     assert (num_samples * 2) == len(generated_files)
 
     # Remove the directories that we used entirely
-    #shutil.rmtree(standard_image_directory)
-    #shutil.rmtree(ground_truth_image_directory)
+    shutil.rmtree(standard_image_directory)
+    shutil.rmtree(ground_truth_image_directory)
