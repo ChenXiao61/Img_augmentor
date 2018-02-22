@@ -898,14 +898,15 @@ class CropPercentage(Operation):
         self.centre = centre
         self.randomise_percentage_area = randomise_percentage_area
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
-        Crop the passed :attr:`image` by percentage area, returning the crop as an
+        Crop the passed :attr:`images` by percentage area, returning the crop as an
         image.
 
-        :param image: The image to crop an area from.
-        :type image: PIL.Image
-        :return: The cropped area as an image of type PIL.Image
+        :param images: The image(s) to crop an area from.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
 
         if self.randomise_percentage_area:
@@ -913,16 +914,27 @@ class CropPercentage(Operation):
         else:
             r_percentage_area = self.percentage_area
 
-        w, h = image.size
+        # The images must be of identical size, which is checked by Pipeline.ground_truth().
+        w, h = images[0].size
+
         w_new = int(floor(w * r_percentage_area))  # TODO: Floor might return 0, so we need to check this.
         h_new = int(floor(h * r_percentage_area))
 
-        if self.centre:
-            return image.crop(((w/2)-(w_new/2), (h/2)-(h_new/2), (w/2)+(w_new/2), (h/2)+(h_new/2)))
-        else:
-            left_shift = random.randint(0, int((w - w_new)))
-            down_shift = random.randint(0, int((h - h_new)))
-            return image.crop((left_shift, down_shift, w_new + left_shift, h_new + down_shift))
+        left_shift = random.randint(0, int((w - w_new)))
+        down_shift = random.randint(0, int((h - h_new)))
+
+        def do(image):
+            if self.centre:
+                return image.crop(((w/2)-(w_new/2), (h/2)-(h_new/2), (w/2)+(w_new/2), (h/2)+(h_new/2)))
+            else:
+                return image.crop((left_shift, down_shift, w_new + left_shift, h_new + down_shift))
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class CropRandom(Operation):
@@ -942,15 +954,17 @@ class CropRandom(Operation):
         Operation.__init__(self, probability)
         self.percentage_area = percentage_area
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
         Randomly crop the passed image, returning the crop as a new image.
 
-        :param image: The image to crop.
-        :type image: PIL.Image
-        :return: The cropped region as an image of type PIL.Image
+        :param images: The image to crop.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
-        w, h = image.size
+
+        w, h = images[0].size
 
         w_new = int(floor(w * self.percentage_area))
         h_new = int(floor(h * self.percentage_area))
@@ -958,7 +972,15 @@ class CropRandom(Operation):
         random_left_shift = random.randint(0, int((w - w_new)))  # Note: randint() is from uniform distribution.
         random_down_shift = random.randint(0, int((h - h_new)))
 
-        return image.crop((random_left_shift, random_down_shift, w_new + random_left_shift, h_new + random_down_shift))
+        def do(image):
+            return image.crop((random_left_shift, random_down_shift, w_new + random_left_shift, h_new + random_down_shift))
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class Shear(Operation):
@@ -997,14 +1019,15 @@ class Shear(Operation):
         self.max_shear_left = max_shear_left
         self.max_shear_right = max_shear_right
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
         Shears the passed image according to the parameters defined during
         instantiation, and returns the sheared image.
 
-        :param image: The image to shear.
-        :type image: PIL.Image
-        :return: The sheared image of type PIL.Image
+        :param images: The image to shear.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
         ######################################################################
         # Old version which uses SciKit Image
@@ -1023,7 +1046,7 @@ class Shear(Operation):
         #     return Image.fromarray(img_as_ubyte(image_sheared))
         ######################################################################
 
-        width, height = image.size
+        width, height = images[0].size
 
         # For testing.
         # max_shear_left = 20
@@ -1031,9 +1054,6 @@ class Shear(Operation):
 
         angle_to_shear = int(random.uniform((abs(self.max_shear_left)*-1) - 1, self.max_shear_right + 1))
         if angle_to_shear != -1: angle_to_shear += 1
-
-        # We use the angle phi in radians later
-        phi = math.tan(math.radians(angle_to_shear))
 
         # Alternative method
         # Calculate our offset when cropping
@@ -1055,61 +1075,73 @@ class Shear(Operation):
         directions = ["x", "y"]
         direction = random.choice(directions)
 
-        if direction == "x":
-            # Here we need the unknown b, where a is
-            # the height of the image and phi is the
-            # angle we want to shear (our knowns):
-            # b = tan(phi) * a
-            shift_in_pixels = phi * height
+        def do(image):
 
-            if shift_in_pixels > 0:
-                shift_in_pixels = math.ceil(shift_in_pixels)
-            else:
-                shift_in_pixels = math.floor(shift_in_pixels)
+            # We use the angle phi in radians later
+            phi = math.tan(math.radians(angle_to_shear))
 
-            # For negative tilts, we reverse phi and set offset to 0
-            # Also matrix offset differs from pixel shift for neg
-            # but not for pos so we will copy this value in case
-            # we need to change it
-            matrix_offset = shift_in_pixels
-            if angle_to_shear <= 0:
-                shift_in_pixels = abs(shift_in_pixels)
-                matrix_offset = 0
-                phi = abs(phi) * -1
+            if direction == "x":
+                # Here we need the unknown b, where a is
+                # the height of the image and phi is the
+                # angle we want to shear (our knowns):
+                # b = tan(phi) * a
+                shift_in_pixels = phi * height
 
-            # Note: PIL expects the inverse scale, so 1/scale_factor for example.
-            transform_matrix = (1, phi, -matrix_offset,
-                                0, 1, 0)
+                if shift_in_pixels > 0:
+                    shift_in_pixels = math.ceil(shift_in_pixels)
+                else:
+                    shift_in_pixels = math.floor(shift_in_pixels)
 
-            image = image.transform((int(round(width + shift_in_pixels)), height),
-                                    Image.AFFINE,
-                                    transform_matrix,
-                                    Image.BICUBIC)
+                # For negative tilts, we reverse phi and set offset to 0
+                # Also matrix offset differs from pixel shift for neg
+                # but not for pos so we will copy this value in case
+                # we need to change it
+                matrix_offset = shift_in_pixels
+                if angle_to_shear <= 0:
+                    shift_in_pixels = abs(shift_in_pixels)
+                    matrix_offset = 0
+                    phi = abs(phi) * -1
 
-            image = image.crop((abs(shift_in_pixels), 0, width, height))
+                # Note: PIL expects the inverse scale, so 1/scale_factor for example.
+                transform_matrix = (1, phi, -matrix_offset,
+                                    0, 1, 0)
 
-            return image.resize((width, height), resample=Image.BICUBIC)
+                image = image.transform((int(round(width + shift_in_pixels)), height),
+                                        Image.AFFINE,
+                                        transform_matrix,
+                                        Image.BICUBIC)
 
-        elif direction == "y":
-            shift_in_pixels = phi * width
+                image = image.crop((abs(shift_in_pixels), 0, width, height))
 
-            matrix_offset = shift_in_pixels
-            if angle_to_shear <= 0:
-                shift_in_pixels = abs(shift_in_pixels)
-                matrix_offset = 0
-                phi = abs(phi) * -1
+                return image.resize((width, height), resample=Image.BICUBIC)
 
-            transform_matrix = (1, 0, 0,
-                                phi, 1, -matrix_offset)
+            elif direction == "y":
+                shift_in_pixels = phi * width
 
-            image = image.transform((width, int(round(height + shift_in_pixels))),
-                                    Image.AFFINE,
-                                    transform_matrix,
-                                    Image.BICUBIC)
+                matrix_offset = shift_in_pixels
+                if angle_to_shear <= 0:
+                    shift_in_pixels = abs(shift_in_pixels)
+                    matrix_offset = 0
+                    phi = abs(phi) * -1
 
-            image = image.crop((0, abs(shift_in_pixels), width, height))
+                transform_matrix = (1, 0, 0,
+                                    phi, 1, -matrix_offset)
 
-            return image.resize((width, height), resample=Image.BICUBIC)
+                image = image.transform((width, int(round(height + shift_in_pixels))),
+                                        Image.AFFINE,
+                                        transform_matrix,
+                                        Image.BICUBIC)
+
+                image = image.crop((0, abs(shift_in_pixels), width, height))
+
+                return image.resize((width, height), resample=Image.BICUBIC)
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class Scale(Operation):
@@ -1138,21 +1170,31 @@ class Scale(Operation):
         Operation.__init__(self, probability)
         self.scale_factor = scale_factor
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
-        Scale the passed :attr:`image` by the factor specified during
+        Scale the passed :attr:`images` by the factor specified during
         instantiation, returning the scaled image.
 
-        :param image: The image to scale.
-        :type image: PIL.Image
-        :return: The scaled image as type PIL.Image
+        :param images: The image to scale.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
-        w, h = image.size
 
-        new_h = int(h*self.scale_factor)
-        new_w = int(w*self.scale_factor)
+        def do(image):
+            w, h = image.size
 
-        return image.resize((new_w, new_h), resample=Image.BICUBIC)
+            new_h = int(h * self.scale_factor)
+            new_w = int(w * self.scale_factor)
+
+            return image.resize((new_w, new_h), resample=Image.BICUBIC)
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class Distort(Operation):
@@ -1189,16 +1231,18 @@ class Distort(Operation):
         # TODO: Implement non-random magnitude.
         self.randomise_magnitude = True
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
-        Distorts the passed image according to the parameters supplied during
+        Distorts the passed image(s) according to the parameters supplied during
         instantiation, returning the newly distorted image.
 
-        :param image: The image to be distorted.
-        :type image: PIL.Image
-        :return: The distorted image as type PIL.Image
+        :param images: The image(s) to be distorted.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
-        w, h = image.size
+
+        w, h = images[0].size
 
         horizontal_tiles = self.grid_width
         vertical_tiles = self.grid_height
@@ -1253,39 +1297,48 @@ class Distort(Operation):
             if i not in last_row and i not in last_column:
                 polygon_indices.append([i, i + 1, i + horizontal_tiles, i + 1 + horizontal_tiles])
 
-        for a, b, c, d in polygon_indices:
-            dx = random.randint(-self.magnitude, self.magnitude)
-            dy = random.randint(-self.magnitude, self.magnitude)
+        def do(image):
 
-            x1, y1, x2, y2, x3, y3, x4, y4 = polygons[a]
-            polygons[a] = [x1, y1,
-                           x2, y2,
-                           x3 + dx, y3 + dy,
-                           x4, y4]
+            for a, b, c, d in polygon_indices:
+                dx = random.randint(-self.magnitude, self.magnitude)
+                dy = random.randint(-self.magnitude, self.magnitude)
 
-            x1, y1, x2, y2, x3, y3, x4, y4 = polygons[b]
-            polygons[b] = [x1, y1,
-                           x2 + dx, y2 + dy,
-                           x3, y3,
-                           x4, y4]
+                x1, y1, x2, y2, x3, y3, x4, y4 = polygons[a]
+                polygons[a] = [x1, y1,
+                               x2, y2,
+                               x3 + dx, y3 + dy,
+                               x4, y4]
 
-            x1, y1, x2, y2, x3, y3, x4, y4 = polygons[c]
-            polygons[c] = [x1, y1,
-                           x2, y2,
-                           x3, y3,
-                           x4 + dx, y4 + dy]
+                x1, y1, x2, y2, x3, y3, x4, y4 = polygons[b]
+                polygons[b] = [x1, y1,
+                               x2 + dx, y2 + dy,
+                               x3, y3,
+                               x4, y4]
 
-            x1, y1, x2, y2, x3, y3, x4, y4 = polygons[d]
-            polygons[d] = [x1 + dx, y1 + dy,
-                           x2, y2,
-                           x3, y3,
-                           x4, y4]
+                x1, y1, x2, y2, x3, y3, x4, y4 = polygons[c]
+                polygons[c] = [x1, y1,
+                               x2, y2,
+                               x3, y3,
+                               x4 + dx, y4 + dy]
 
-        generated_mesh = []
-        for i in range(len(dimensions)):
-            generated_mesh.append([dimensions[i], polygons[i]])
+                x1, y1, x2, y2, x3, y3, x4, y4 = polygons[d]
+                polygons[d] = [x1 + dx, y1 + dy,
+                               x2, y2,
+                               x3, y3,
+                               x4, y4]
 
-        return image.transform(image.size, Image.MESH, generated_mesh, resample=Image.BICUBIC)
+            generated_mesh = []
+            for i in range(len(dimensions)):
+                generated_mesh.append([dimensions[i], polygons[i]])
+
+            return image.transform(image.size, Image.MESH, generated_mesh, resample=Image.BICUBIC)
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class GaussianDistortion(Operation):
@@ -1345,7 +1398,6 @@ class GaussianDistortion(Operation):
         self.grid_width = grid_width
         self.grid_height = grid_height
         self.magnitude = abs(magnitude)
-        # TODO: Implement non-random magnitude.
         self.randomise_magnitude = True
         self.corner = corner
         self.method = method
@@ -1354,16 +1406,17 @@ class GaussianDistortion(Operation):
         self.sdx = sdx
         self.sdy = sdy
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
-        Distorts the passed image according to the parameters supplied during
-        instantiation, returning the newly distorted image.
+        Distorts the passed image(s) according to the parameters supplied
+        during instantiation, returning the newly distorted image.
 
-        :param image: The image to be distorted.
-        :type image: PIL.Image
-        :return: The distorted image as type PIL.Image
+        :param images: The image(s) to be distorted.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
-        w, h = image.size
+        w, h = images[0].size
 
         horizontal_tiles = self.grid_width
         vertical_tiles = self.grid_height
@@ -1399,10 +1452,6 @@ class GaussianDistortion(Operation):
                                        width_of_square + (horizontal_tile * width_of_square),
                                        height_of_square + (height_of_square * vertical_tile)])
 
-        # For loop that generates polygons could be rewritten, but maybe harder to read?
-        # polygons = [x1,y1, x1,y2, x2,y2, x2,y1 for x1,y1, x2,y2 in dimensions]
-
-        # last_column = [(horizontal_tiles - 1) + horizontal_tiles * i for i in range(vertical_tiles)]
         last_column = []
         for i in range(vertical_tiles):
             last_column.append((horizontal_tiles-1)+horizontal_tiles*i)
@@ -1418,78 +1467,78 @@ class GaussianDistortion(Operation):
             if i not in last_row and i not in last_column:
                 polygon_indices.append([i, i + 1, i + horizontal_tiles, i + 1 + horizontal_tiles])
 
-        def sigmoidf(x,y, sdx=0.05, sdy=0.05, mex=0.5, mey=0.5, const=1):
-            #print(sdx, sdy, mex, mey, const)
+        def sigmoidf(x, y, sdx=0.05, sdy=0.05, mex=0.5, mey=0.5, const=1):
             sigmoid = lambda x1, y1:  (const * (math.exp(-(((x1-mex)**2)/sdx + ((y1-mey)**2)/sdy) )) + max(0,-const) - max(0, const))
             xl = np.linspace(0,1)
-            yl =  np.linspace(0, 1)
+            yl = np.linspace(0, 1)
             X, Y = np.meshgrid(xl, yl)
 
             Z = np.vectorize(sigmoid)(X, Y)
-            #res = (const * (math.exp(-((x-me)**2 + (y-me)**2)/sd )) + max(0,-const) - max(0, const))
             mino = np.amin(Z)
             maxo = np.amax(Z)
             res = sigmoid(x, y)
-            res= max(((((res - mino) * (1 - 0)) / (maxo - mino)) + 0), 0.01)*self.magnitude
+            res = max(((((res - mino) * (1 - 0)) / (maxo - mino)) + 0), 0.01)*self.magnitude
             return res
 
         def corner(x, y, corner="ul", method="out", sdx=0.05, sdy=0.05, mex=0.5, mey=0.5):
-            #NewValue = (((OldValue - OldMin) * (NewMax - NewMin)) / (OldMax - OldMin)) + NewMin
-            #x_min, x_max, y_min, y_max
-            ll = {'dr':(0, 0.5, 0, 0.5),'dl':(0.5,1, 0, 0.5),'ur':(0, 0.5, 0.5, 1), 'ul':( 0.5,1, 0.5, 1), 'bell':(0,1, 0,1)}
+            ll = {'dr': (0, 0.5, 0, 0.5), 'dl': (0.5, 1, 0, 0.5), 'ur': (0, 0.5, 0.5, 1), 'ul': (0.5, 1, 0.5, 1), 'bell': (0, 1, 0, 1)}
             new_c = ll[corner]
-            new_x= (((x - 0) * (new_c[1] - new_c[0])) / (1 - 0)) + new_c[0]
-            new_y= (((y - 0) * (new_c[3] - new_c[2])) / (1 - 0)) + new_c[2]
-            if method=="in":
-                const=1
+            new_x = (((x - 0) * (new_c[1] - new_c[0])) / (1 - 0)) + new_c[0]
+            new_y = (((y - 0) * (new_c[3] - new_c[2])) / (1 - 0)) + new_c[2]
+            if method == "in":
+                const = 1
             else:
-                if method=="out":
-                   const=-1
+                if method == "out":
+                    const =- 1
                 else:
-                   print('Mehtod can be "out" or "in", "in" used as default')
-                   const=1
+                    const = 1
             res = sigmoidf(x=new_x, y=new_y,sdx=sdx, sdy=sdy, mex=mex, mey=mey, const=const)
-            #print(x, y, new_x, new_y, self.magnitude,  res)
+
             return res
 
+        def do(image):
 
-        for a, b, c, d in polygon_indices:
-            #dx = random.randint(-self.magnitude, self.magnitude)
-            #dy = random.randint(-self.magnitude, self.magnitude)
-            x1, y1, x2, y2, x3, y3, x4, y4 = polygons[a]
-            #sigmax = sigmoid(x3, y3)
+            for a, b, c, d in polygon_indices:
+                x1, y1, x2, y2, x3, y3, x4, y4 = polygons[a]
 
-            sigmax= corner(x=x3/w, y=y3/h, corner=self.corner, method=self.method, sdx=self.sdx, sdy=self.sdy, mex=self.mex, mey=self.mey)
-            dx = np.random.normal(0, sigmax, 1)[0]
-            dy = np.random.normal(0, sigmax, 1)[0]
-            polygons[a] = [x1, y1,
-                           x2, y2,
-                           x3 + dx, y3 + dy,
-                           x4, y4]
+                sigmax = corner(x=x3/w, y=y3/h, corner=self.corner, method=self.method, sdx=self.sdx, sdy=self.sdy, mex=self.mex, mey=self.mey)
+                dx = np.random.normal(0, sigmax, 1)[0]
+                dy = np.random.normal(0, sigmax, 1)[0]
+                polygons[a] = [x1, y1,
+                               x2, y2,
+                               x3 + dx, y3 + dy,
+                               x4, y4]
 
-            x1, y1, x2, y2, x3, y3, x4, y4 = polygons[b]
-            polygons[b] = [x1, y1,
-                           x2 + dx, y2 + dy,
-                           x3, y3,
-                           x4, y4]
+                x1, y1, x2, y2, x3, y3, x4, y4 = polygons[b]
+                polygons[b] = [x1, y1,
+                               x2 + dx, y2 + dy,
+                               x3, y3,
+                               x4, y4]
 
-            x1, y1, x2, y2, x3, y3, x4, y4 = polygons[c]
-            polygons[c] = [x1, y1,
-                           x2, y2,
-                           x3, y3,
-                           x4 + dx, y4 + dy]
+                x1, y1, x2, y2, x3, y3, x4, y4 = polygons[c]
+                polygons[c] = [x1, y1,
+                               x2, y2,
+                               x3, y3,
+                               x4 + dx, y4 + dy]
 
-            x1, y1, x2, y2, x3, y3, x4, y4 = polygons[d]
-            polygons[d] = [x1 + dx, y1 + dy,
-                           x2, y2,
-                           x3, y3,
-                           x4, y4]
+                x1, y1, x2, y2, x3, y3, x4, y4 = polygons[d]
+                polygons[d] = [x1 + dx, y1 + dy,
+                               x2, y2,
+                               x3, y3,
+                               x4, y4]
 
-        generated_mesh = []
-        for i in range(len(dimensions)):
-            generated_mesh.append([dimensions[i], polygons[i]])
+            generated_mesh = []
+            for i in range(len(dimensions)):
+                generated_mesh.append([dimensions[i], polygons[i]])
 
-        return image.transform(image.size, Image.MESH, generated_mesh, resample=Image.BICUBIC)
+            return image.transform(image.size, Image.MESH, generated_mesh, resample=Image.BICUBIC)
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class Zoom(Operation):
@@ -1519,41 +1568,36 @@ class Zoom(Operation):
         self.min_factor = min_factor
         self.max_factor = max_factor
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
-        Zooms/scales the passed image and returns the new image.
+        Zooms/scales the passed image(s) and returns the new image.
 
-        :param image: The image to be zoomed.
-        :type image: PIL.Image
-        :return: The zoomed in image as type PIL.Image
+        :param images: The image(s) to be zoomed.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
         factor = round(random.uniform(self.min_factor, self.max_factor), 2)
 
-        w, h = image.size
+        def do(image):
+            w, h = image.size
 
-        # TODO: Join these two functions together so that we don't have this image_zoom variable lying around.
-        image_zoomed = image.resize((int(round(image.size[0] * factor)), int(round(image.size[1] * factor))), resample=Image.BICUBIC)
-        w_zoomed, h_zoomed = image_zoomed.size
+            image_zoomed = image.resize((int(round(image.size[0] * factor)),
+                                         int(round(image.size[1] * factor))),
+                                         resample=Image.BICUBIC)
+            w_zoomed, h_zoomed = image_zoomed.size
 
-        return image_zoomed.crop((floor((float(w_zoomed) / 2) - (float(w) / 2)),
-                                  floor((float(h_zoomed) / 2) - (float(h) / 2)),
-                                  floor((float(w_zoomed) / 2) + (float(w) / 2)),
-                                  floor((float(h_zoomed) / 2) + (float(h) / 2))))
+            return image_zoomed.crop((floor((float(w_zoomed) / 2) - (float(w) / 2)),
+                                      floor((float(h_zoomed) / 2) - (float(h) / 2)),
+                                      floor((float(w_zoomed) / 2) + (float(w) / 2)),
+                                      floor((float(h_zoomed) / 2) + (float(h) / 2))))
 
+        augmented_images = []
 
-        ################################################################################################################
-        # Return the centre of the zoomed image, so that it is the same size as the original image
-        # original_width, original_height = image.size
-        # half_the_width = image_zoomed.size[0] / 2
-        # half_the_height = image_zoomed.size[1] / 2
-        # return image_zoomed.crop(
-        #     (
-        #         half_the_width - ceil((original_width / 2.)),
-        #         half_the_height - ceil((original_height / 2.)),
-        #         half_the_width + floor((original_width / 2.)),
-        #         half_the_height + floor((original_height / 2.))
-        #     )
-        # )
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class ZoomRandom(Operation):
@@ -1581,17 +1625,18 @@ class ZoomRandom(Operation):
         self.percentage_area = percentage_area
         self.randomise = randomise
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
-        Randomly zoom into the passed :attr:`image` by first cropping the image
+        Randomly zoom into the passed :attr:`images` by first cropping the image
         based on the :attr:`percentage_area` argument, and then resizing the
         image to match the size of the input area.
 
         Effectively, you are zooming in on random areas of the image.
 
-        :param image: The image to crop an area from.
-        :type image: PIL.Image
-        :return: The cropped area as an image of type PIL.Image
+        :param images: The image to crop an area from.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
 
         if self.randomise:
@@ -1599,51 +1644,61 @@ class ZoomRandom(Operation):
         else:
             r_percentage_area = self.percentage_area
 
-        w, h = image.size
-        w_new = int(floor(w * r_percentage_area))  # TODO: Floor might return 0, so we need to check this.
+        w, h = images[0].size
+        w_new = int(floor(w * r_percentage_area))
         h_new = int(floor(h * r_percentage_area))
 
         random_left_shift = random.randint(0, (w - w_new))  # Note: randint() is from uniform distribution.
         random_down_shift = random.randint(0, (h - h_new))
-        image = image.crop((random_left_shift, random_down_shift, w_new + random_left_shift, h_new + random_down_shift))
 
-        return image.resize((w, h), resample=Image.BICUBIC)
+        def do(image):
+            image = image.crop((random_left_shift, random_down_shift, w_new + random_left_shift, h_new + random_down_shift))
+
+            return image.resize((w, h), resample=Image.BICUBIC)
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class HSVShifting(Operation):
-
+    """
+    CURRENTLY NOT IMPLEMENTED.
+    """
     def __init__(self, probability, hue_shift, saturation_scale, saturation_shift, value_scale, value_shift):
-        # Call the superclass's constructor (meaning you must
-        # supply a probability value):
         Operation.__init__(self, probability)
-
-        # Set your custom operation's member variables here as required:
         self.hue_shift = hue_shift
         self.saturation_scale = saturation_scale
         self.saturation_shift = saturation_shift
         self.value_scale = value_scale
         self.value_shift = value_shift
 
-    def perform_operation(self, image):
-        hsv = np.array(image.convert("HSV"), 'float64')
-        # scale the values to fit between 0 and 1
-        hsv /= 255.
+    def perform_operation(self, images):
 
-        # do the scalings & shiftings
-        hsv[..., 0] += np.random.uniform(-self.hue_shift, self.hue_shift)
-        hsv[..., 1] *= np.random.uniform(1 / (1 + self.saturation_scale), 1 + self.saturation_scale)
-        hsv[..., 1] += np.random.uniform(-self.saturation_shift, self.saturation_shift)
-        hsv[..., 2] *= np.random.uniform(1 / (1 + self.value_scale), 1 + self.value_scale)
-        hsv[..., 2] += np.random.uniform(-self.value_shift, self.value_shift)
+        def do(image):
+            hsv = np.array(image.convert("HSV"), 'float64')
+            hsv /= 255.
 
-        # cut off invalid values
-        hsv.clip(0, 1, hsv)
+            hsv[..., 0] += np.random.uniform(-self.hue_shift, self.hue_shift)
+            hsv[..., 1] *= np.random.uniform(1 / (1 + self.saturation_scale), 1 + self.saturation_scale)
+            hsv[..., 1] += np.random.uniform(-self.saturation_shift, self.saturation_shift)
+            hsv[..., 2] *= np.random.uniform(1 / (1 + self.value_scale), 1 + self.value_scale)
+            hsv[..., 2] += np.random.uniform(-self.value_shift, self.value_shift)
 
-        # round to full numbers
-        hsv = np.uint8(np.round(hsv * 255.))
+            hsv.clip(0, 1, hsv)
+            hsv = np.uint8(np.round(hsv * 255.))
 
-        # convert back to rgb image
-        return Image.fromarray(hsv, "HSV").convert("RGB")
+            return Image.fromarray(hsv, "HSV").convert("RGB")
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class RandomErasing(Operation):
@@ -1672,44 +1727,53 @@ class RandomErasing(Operation):
         Operation.__init__(self, probability)
         self.rectangle_area = rectangle_area
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
         Adds a random noise rectangle to a random area of the passed image,
         returning the original image with this rectangle superimposed.
 
-        :param image: The image to add a random noise rectangle to.
-        :type image: PIL.Image
-        :return: The image with the superimposed random rectangle as type
-         image PIL.Image
+        :param images: The image(s) to add a random noise rectangle to.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
         """
 
-        w, h = image.size
+        def do(image):
 
-        w_occlusion_max = int(w * self.rectangle_area)
-        h_occlusion_max = int(h * self.rectangle_area)
+            w, h = image.size
 
-        w_occlusion_min = int(w * 0.1)
-        h_occlusion_min = int(h * 0.1)
+            w_occlusion_max = int(w * self.rectangle_area)
+            h_occlusion_max = int(h * self.rectangle_area)
 
-        w_occlusion = random.randint(w_occlusion_min, w_occlusion_max)
-        h_occlusion = random.randint(h_occlusion_min, h_occlusion_max)
+            w_occlusion_min = int(w * 0.1)
+            h_occlusion_min = int(h * 0.1)
 
-        if len(image.getbands()) == 1:
-            rectangle = Image.fromarray(np.uint8(np.random.rand(w_occlusion, h_occlusion) * 255))
-        else:
-            rectangle = Image.fromarray(np.uint8(np.random.rand(w_occlusion, h_occlusion, len(image.getbands())) * 255))
+            w_occlusion = random.randint(w_occlusion_min, w_occlusion_max)
+            h_occlusion = random.randint(h_occlusion_min, h_occlusion_max)
 
-        random_position_x = random.randint(0, w - w_occlusion)
-        random_position_y = random.randint(0, h - h_occlusion)
+            if len(image.getbands()) == 1:
+                rectangle = Image.fromarray(np.uint8(np.random.rand(w_occlusion, h_occlusion) * 255))
+            else:
+                rectangle = Image.fromarray(np.uint8(np.random.rand(w_occlusion, h_occlusion, len(image.getbands())) * 255))
 
-        image.paste(rectangle, (random_position_x, random_position_y))
+            random_position_x = random.randint(0, w - w_occlusion)
+            random_position_y = random.randint(0, h - h_occlusion)
 
-        return image
+            image.paste(rectangle, (random_position_x, random_position_y))
+
+            return image
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
 
 
 class Custom(Operation):
     """
-    Class that allows for a custom operations to be performed using Augmentor's
+    Class that allows for a custom operation to be performed using Augmentor's
     standard :class:`~Augmentor.Pipeline.Pipeline` object.
     """
     def __init__(self, probability, custom_function, **function_arguments):
