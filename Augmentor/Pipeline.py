@@ -810,8 +810,8 @@ class Pipeline(object):
         :param expand:
         :return:
         """
-        self.add_operation(RotateRange(probability=probability, max_left_rotation=ceil(max_left_rotation),
-                                       max_right_rotation=ceil(max_right_rotation), expand=expand))
+        self.add_operation(RotateStandard(probability=probability, max_left_rotation=ceil(max_left_rotation),
+                                          max_right_rotation=ceil(max_right_rotation), expand=expand))
 
     def flip_top_bottom(self, probability):
         """
