@@ -23,4 +23,4 @@ def test_torch_transform():
     ])
 
     assert red != transforms(red)
-    assert g.perform_operation(red) == transforms(red)
+    assert g.perform_operation([red]) == transforms(red)
