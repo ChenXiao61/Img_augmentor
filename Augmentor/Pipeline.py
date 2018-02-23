@@ -197,7 +197,7 @@ class Pipeline(object):
         if save_to_disk:
             file_name = str(uuid.uuid4()) + "." + self.save_format
             try:
-                # TODO: Fix this!
+                # TODO: FIX THIS ASAP, PIL ALWAYS RETURNS ERRORS HERE!
                 # if image.mode != "RGB":
                 #     image = image.convert("RGB")
                 for i in range(len(images)):
