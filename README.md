@@ -54,6 +54,24 @@ p.sample(10000)
 
 which will generate 10,000 augmented images based on your specifications. By default these will be written to the disk in a directory named `output` relative to the path specified when initialising the `p` pipeline object above.
 
+### Ground Truth Data
+
+Images can be passed through the pipeline in groups of two or more so that ground truth data can be identically augmented.
+
+| Original image and mask                                                                                             | Augmented original and mask images generated                                                                     |
+|---------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| ![OriginalMask](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/original-with-mask.png) | ![AugmentedMask](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/ground-truth.gif)   |
+
+To augment ground truth data in parallel to any original data, add a ground truth directory to a pipeline using the `ground_truth` function:
+
+```python
+p = Augmentor.Pipeline("/path/to/images")
+# Point to a directory containing ground truth data.
+# Images with the same file names will be added as ground truth data
+# and augmented in parallel to the original data.
+p.ground_truth("/path/to/ground_truth_images")
+```
+
 ### Keras and PyTorch
 
 If you do not wish to save to disk, you can use a generator (in this case with Keras):
