@@ -527,6 +527,7 @@ class Pipeline(object):
             for operation in self.operations:
                 r = round(random.uniform(0, 1), 1)
                 if r <= operation.probability:
+                    image = [image]
                     image = operation.perform_operation(image)
 
             return image
