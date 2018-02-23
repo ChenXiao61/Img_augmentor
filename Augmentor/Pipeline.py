@@ -207,8 +207,8 @@ class Pipeline(object):
                     else:
                         save_name = "_groundtruth_(" + str(i) + ")_" + augmentor_image.class_label + "_" + file_name
                         images[i].save(os.path.join(augmentor_image.output_directory, save_name), self.save_format)
-            except IOError:
-                print("Error writing %s." % file_name)
+            except IOError as e:
+                print("Error writing %s, %s. Change save_format to PNG?" % (file_name, e.message))
 
         return images[0]  # Currently not needed as a return value for all functions, such as generators.
 
@@ -223,14 +223,14 @@ class Pipeline(object):
         :return: The augmented image.
         """
 
-        pil_image = Image.fromarray(image)
+        pil_image = [Image.fromarray(image)]
 
         for operation in self.operations:
             r = round(random.uniform(0, 1), 1)
             if r <= operation.probability:
                 pil_image = operation.perform_operation(pil_image)
 
-        numpy_array = np.asarray(pil_image)
+        numpy_array = np.asarray(pil_image[0])
 
         return numpy_array
 
@@ -1405,7 +1405,7 @@ class Pipeline(object):
         else:
             self.add_operation(RandomErasing(probability=probability, rectangle_area=rectangle_area))
 
-    def ground_truth(self, ground_truth_directory, ignore_file_extension=False):
+    def ground_truth(self, ground_truth_directory):
         """
         Specifies a directory containing corresponding images that
         constitute respective ground truth images for the images
@@ -1422,9 +1422,6 @@ class Pipeline(object):
         ``cat321.jpg`` in the subdirectory ``cat`` relative to
         :attr:`ground_truth_directory`.
 
-        .. seealso:: See the :func:`sample_with_array` function if you
-         wish to supply images and their ground truths manually.
-
         Typically used to specify a set of ground truth or gold standard
         images that should be augmented alongside the original images
         of a dataset, such as image masks or semantic segmentation ground
@@ -1438,10 +1435,6 @@ class Pipeline(object):
          ground truth images that correspond to the images in the
          current pipeline.
         :type ground_truth_directory: String
-        :param ignore_file_extension: False (default) if the file names are
-         must have matching extensions. True means that an image named
-         ``cat321.BMP`` will match ``cat321.jpg`` in the directory specified by
-         :attr`ground_truth_directory`.
         :return: None.
         """
 
@@ -1463,13 +1456,6 @@ class Pipeline(object):
                     ground_truth_image = os.path.join(ground_truth_directory,
                                                       self.augmentor_images[augmentor_image_idx].class_label,
                                                       self.augmentor_images[augmentor_image_idx].image_file_name)
-                    current_pipeline_image_extension = \
-                        os.path.splitext(self.augmentor_images[augmentor_image_idx].image_file_name)[1]
-                    if ignore_file_extension:
-                        # extensions_to_attempt = self._valid_formats.remove(current_pipeline_image_extension)
-                        # For now we will do nothing, but eventually this will
-                        # check for files that have different file endings.
-                        pass
                     if os.path.isfile(ground_truth_image):
                         if self.augmentor_images[augmentor_image_idx].class_label == self.class_labels[i][0]:
                             # Check files are the same size. There may be a better way to do this.
@@ -1487,7 +1473,7 @@ class Pipeline(object):
         if num_of_ground_truth_images_added != 0:
             self.process_ground_truth_images = True
 
-        print("%s ground truth images found." % num_of_ground_truth_images_added)
+        print("%s ground truth image(s) found." % num_of_ground_truth_images_added)
 
     def get_ground_truth_paths(self):
         """
