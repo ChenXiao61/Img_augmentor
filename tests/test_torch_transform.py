@@ -6,6 +6,7 @@ import PIL.Image as Image
 
 import Augmentor
 
+
 def test_torch_transform():
     torchvision = pytest.importorskip("torchvision")
 
@@ -22,4 +23,5 @@ def test_torch_transform():
     ])
 
     assert red != transforms(red)
+    red = [red]
     assert g.perform_operation(red) == transforms(red)
