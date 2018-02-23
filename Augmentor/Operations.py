@@ -1805,16 +1805,16 @@ class Custom(Operation):
     def __str__(self):
         return "Custom (" + self.custom_function.__name__ + ")"
 
-    def perform_operation(self, image):
+    def perform_operation(self, images):
         """
-        Perform the custom operation on the passed image, returning the
-        transformed image.
+        Perform the custom operation on the passed image(s), returning the
+        transformed image(s).
 
-        :param image: The image to perform the custom operation on.
-        :return: The transformed image (other functions in the pipeline
+        :param images: The image to perform the custom operation on.
+        :return: The transformed image(s) (other functions in the pipeline
          will expect an image of type PIL.Image)
         """
-        return self.function_name(image, **self.function_arguments)
+        return self.function_name(images, **self.function_arguments)
 
 
 class ZoomGroundTruth(Operation):
