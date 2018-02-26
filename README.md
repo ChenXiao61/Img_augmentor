@@ -70,9 +70,15 @@ p = Augmentor.Pipeline("/path/to/images")
 # Images with the same file names will be added as ground truth data
 # and augmented in parallel to the original data.
 p.ground_truth("/path/to/ground_truth_images")
+# Add operations to the pipeline as normal:
+p.rotate(probability=1, max_left_rotation=5, max_right_rotation=5)
+p.flip_left_right(probability=0.5)
+p.zoom_random(probability=0.5, percentage_area=0.8)
+p.flip_top_bottom(probability=0.5)
+p.sample(50)
 ```
 
-### Keras and PyTorch
+### Generators for Keras and PyTorch
 
 If you do not wish to save to disk, you can use a generator (in this case with Keras):
 
