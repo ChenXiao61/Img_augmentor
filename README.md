@@ -62,7 +62,7 @@ Images can be passed through the pipeline in groups of two or more so that groun
 |---------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
 | ![OriginalMask](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/original-with-mask.png) | ![AugmentedMask](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/ground-truth.gif)   |
 
-To augment ground truth data in parallel to any original data, add a ground truth directory to a pipeline using the `ground_truth` function:
+To augment ground truth data in parallel to any original data, add a ground truth directory to a pipeline using the [ground_truth()](https://augmentor.readthedocs.io/en/master/code.html#Augmentor.Pipeline.Pipeline.ground_truth) function:
 
 ```python
 p = Augmentor.Pipeline("/path/to/images")
