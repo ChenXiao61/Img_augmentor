@@ -58,7 +58,7 @@ which will generate 10,000 augmented images based on your specifications. By def
 
 Images can be passed through the pipeline in groups of two or more so that ground truth data can be identically augmented.
 
-| Original image and mask                                                                                             | Augmented original and mask images generated                                                                     |
+| Original image and mask<sup>[3]</sup>                                                                               | Augmented original and mask images                                                                               |
 |---------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
 | ![OriginalMask](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/original-with-mask.png) | ![AugmentedMask](https://raw.githubusercontent.com/mdbloice/AugmentorFiles/master/UsageGuide/ground-truth.gif)   |
 
