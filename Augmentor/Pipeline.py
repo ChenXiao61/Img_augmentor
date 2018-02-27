@@ -197,7 +197,7 @@ class Pipeline(object):
         if save_to_disk:
             file_name = str(uuid.uuid4()) + "." + self.save_format
             try:
-                # TODO: FIX THIS ASAP, PIL ALWAYS RETURNS ERRORS HERE!
+                # TODO: IF A JPEG IMAGE IS SAVED AS PNG WE GET AN ERROR. FIX SOMEHOW.
                 # if image.mode != "RGB":
                 #     image = image.convert("RGB")
                 for i in range(len(images)):
@@ -210,7 +210,7 @@ class Pipeline(object):
             except IOError as e:
                 print("Error writing %s, %s. Change save_format to PNG?" % (file_name, e.message))
 
-        return images[0]  # Currently not needed as a return value for all functions, such as generators.
+        return images[0]  # Currently not needed as a return value for all functions, but is for generators.
 
     def test_ground_truth_augmentation(self, probability, min_scale, max_scale):
         self.add_operation(ZoomGroundTruth(probability=probability, min_factor=min_scale, max_factor=max_scale))
