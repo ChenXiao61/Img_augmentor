@@ -43,7 +43,7 @@ class Pipeline(object):
     _valid_formats = ["PNG", "BMP", "GIF", "JPEG"]
     _legal_filters = ["NEAREST", "BICUBIC", "ANTIALIAS", "BILINEAR"]
 
-    def __init__(self, source_directory=None, output_directory="output", save_format="JPEG"):
+    def __init__(self, source_directory=None, output_directory="output", save_format=None):
         """
         Create a new Pipeline object pointing to a directory containing your
         original image dataset.
@@ -150,10 +150,8 @@ class Pipeline(object):
                 with Image.open(augmentor_image.image_path) as opened_image:
                     self.distinct_dimensions.add(opened_image.size)
                     self.distinct_formats.add(opened_image.format)
-            except IOError:
-                print("There is a problem with image %s in your source directory. "
-                      "It is unreadable and will not be included when augmenting."
-                      % augmentor_image.image_path)
+            except IOError as e:
+                print("There is a problem with image %s in your source directory: %s" % (augmentor_image.image_path, e.message))
                 self.augmentor_images.remove(augmentor_image)
 
         sys.stdout.write("Initialised with %s image(s) found.\n" % len(self.augmentor_images))
@@ -195,25 +193,29 @@ class Pipeline(object):
                 images = operation.perform_operation(images)
 
         if save_to_disk:
-            file_name = str(uuid.uuid4()) + "." + self.save_format
+            file_name = str(uuid.uuid4())
             try:
-                # TODO: IF A JPEG IMAGE IS SAVED AS PNG WE GET AN ERROR. FIX SOMEHOW.
+                # TODO: Add a 'coerce' parameter to force conversion to RGB for PNGA->JPEG saving.
                 # if image.mode != "RGB":
                 #     image = image.convert("RGB")
                 for i in range(len(images)):
                     if i == 0:
-                        save_name = augmentor_image.class_label + "_original_" + file_name
-                        images[i].save(os.path.join(augmentor_image.output_directory, save_name), self.save_format)
+                        save_name = augmentor_image.class_label + "_original_" + file_name \
+                                    + "." + (self.save_format if self.save_format else augmentor_image.file_format)
+                        images[i].save(os.path.join(augmentor_image.output_directory, save_name))
                     else:
-                        save_name = "_groundtruth_(" + str(i) + ")_" + augmentor_image.class_label + "_" + file_name
-                        images[i].save(os.path.join(augmentor_image.output_directory, save_name), self.save_format)
+                        save_name = "_groundtruth_(" + str(i) + ")_" + augmentor_image.class_label + "_" + file_name \
+                                    + "." + (self.save_format if self.save_format else augmentor_image.file_format)
+                        images[i].save(os.path.join(augmentor_image.output_directory, save_name))
             except IOError as e:
                 print("Error writing %s, %s. Change save_format to PNG?" % (file_name, e.message))
+                print("You can change the save format using the set_save_format(save_format) function.")
+                print("By passing save_format=\"auto\", Augmentor can save in the correct format automatically.")
 
-        return images[0]  # Currently not needed as a return value for all functions, but is for generators.
-
-    def test_ground_truth_augmentation(self, probability, min_scale, max_scale):
-        self.add_operation(ZoomGroundTruth(probability=probability, min_factor=min_scale, max_factor=max_scale))
+        # Currently we return only the first image if it is a list
+        # for the generator functions.  This will be fixed in a future
+        # version.
+        return images[0]
 
     def _execute_with_array(self, image):
         """
@@ -233,6 +235,29 @@ class Pipeline(object):
         numpy_array = np.asarray(pil_image[0])
 
         return numpy_array
+
+    def set_save_format(self, save_format):
+        """
+        Set the save format for the pipeline. Pass the value
+        :attr:`save_format="auto"` to allow Augmentor to choose
+        the correct save format based on each individual image's
+        file extension.
+
+        If :attr:`save_format` is set to, for example,
+        :attr:`save_format="JPEG"` or :attr:`save_format=JPG`,
+        Augmentor will attempt to save the files using a the
+        JPEG format, which may result in errors if the file cannot
+        be saved in this format.
+
+        :param save_format: The save format to save the images
+         when writing to disk.
+        :return: None
+        """
+
+        if save_format == "auto":
+            self.save_format = None
+        else:
+            self.save_format = save_format
 
     def sample(self, n):
         """
@@ -726,7 +751,7 @@ class Pipeline(object):
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
         :type probability: Float
-        :return:
+        :return: None
         """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
@@ -755,15 +780,15 @@ class Pipeline(object):
         you must reduce the :attr:`max_left_rotation` and
         :attr:`max_right_rotation` arguments!
 
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
         :param max_left_rotation: The maximum number of degrees the image can
          be rotated to the left.
         :param max_right_rotation: The maximum number of degrees the image can
          be rotated to the right.
-        :param probability: A value between 0 and 1 representing the
-         probability that the operation should be performed.
+        :type probability: Float
         :type max_left_rotation: Integer
         :type max_right_rotation: Integer
-        :type probability: Float
         :return: None
         """
         if not 0 < probability <= 1:
@@ -780,16 +805,24 @@ class Pipeline(object):
         """
         Rotate an image without automatically cropping.
 
-        Expand defaults to False, as this will result in different sizes for
-        images depending on the rotation.
+        The :attr:`expand` parameter controls whether the image is enlarged
+        to contain the new rotated images, or if the image size is maintained
+        Defaults to :attr:`false` so that images maintain their dimensions
+        when using this function.
 
-        Documentation to appear.
-
-        :param probability:
-        :param max_left_rotation:
-        :param max_right_rotation:
-        :param expand:
-        :return:
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :param max_left_rotation: The maximum number of degrees the image can
+         be rotated to the left.
+        :param max_right_rotation: The maximum number of degrees the image can
+         be rotated to the right.
+        :type probability: Float
+        :type max_left_rotation: Integer
+        :type max_right_rotation: Integer
+        :param expand: Controls whether the image's size should be
+         increased to accommodate the rotation. Defaults to :attr:`false`
+         so that images maintain their original dimensions after rotation.
+        :return: None
         """
         self.add_operation(RotateStandard(probability=probability, max_left_rotation=ceil(max_left_rotation),
                                           max_right_rotation=ceil(max_right_rotation), expand=expand))
