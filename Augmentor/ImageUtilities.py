@@ -54,6 +54,15 @@ class AugmentorImage(object):
         self.image_path = image_path
         self.output_directory = output_directory
 
+    def __str__(self):
+        return """
+        Image path: %s
+        Ground truth path: %s
+        File format (inferred from extension): %s
+        Class label: %s
+        Numerical class label (auto assigned): %s
+        """ % (self.image_path, self.ground_truth, self.file_format, self.class_label, self.class_label_int)
+
     @property
     def output_directory(self):
         """
@@ -155,6 +164,14 @@ class AugmentorImage(object):
     def label_pair(self):
         return self.class_label_int, self.class_label
 
+    @property
+    def file_format(self):
+        return self._file_format
+
+    @file_format.setter
+    def file_format(self, value):
+        self._file_format = value
+
 
 def parse_user_parameter(user_param):
 
@@ -213,6 +230,7 @@ def scan(source_directory, output_directory):
             a.class_label = parent_directory_name
             a.class_label_int = label_counter
             a.categorical_label = [label_counter]
+            a.file_format = os.path.splitext(image_path)[1].split(".")[1]
             augmentor_images.append(a)
 
         class_labels.append((label_counter, parent_directory_name))
@@ -231,6 +249,7 @@ def scan(source_directory, output_directory):
                 a.class_label_int = label_counter
                 categorical_label[label_counter] = 1  # Set to 1 with the index of the current class.
                 a.categorical_label = categorical_label
+                a.file_format = os.path.splitext(image_path)[1].split(".")[1]
                 augmentor_images.append(a)
             class_labels.append((os.path.split(d)[1], label_counter))
             label_counter += 1
