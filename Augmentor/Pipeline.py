@@ -244,10 +244,11 @@ class Pipeline(object):
         file extension.
 
         If :attr:`save_format` is set to, for example,
-        :attr:`save_format="JPEG"` or :attr:`save_format=JPG`,
-        Augmentor will attempt to save the files using a the
+        :attr:`save_format="JPEG"` or :attr:`save_format="JPG"`,
+        Augmentor will attempt to save the files using the
         JPEG format, which may result in errors if the file cannot
-        be saved in this format.
+        be saved in this format, such as PNG images with an alpha
+        channel.
 
         :param save_format: The save format to save the images
          when writing to disk.
