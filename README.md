@@ -6,7 +6,7 @@ Augmentor is an image augmentation library in Python for machine learning. It ai
 [![Documentation Status](https://readthedocs.org/projects/augmentor/badge/?version=master)](https://augmentor.readthedocs.io/en/master/?badge=master)
 [![Build Status](https://travis-ci.org/mdbloice/Augmentor.svg?branch=master)](https://travis-ci.org/mdbloice/Augmentor)
 [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md)
-[![Project Status: WIP - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![Supported Python Versions](https://img.shields.io/badge/python-2.7%2C%203.3--3.6-blue.svg)](https://pypi.python.org/pypi/Augmentor)
 
 ## Installation
