@@ -200,11 +200,11 @@ class Pipeline(object):
                 #     image = image.convert("RGB")
                 for i in range(len(images)):
                     if i == 0:
-                        save_name = augmentor_image.class_label + "_original_" + file_name \
+                        save_name = augmentor_image.class_label + "_original_" + os.path.basename(augmentor_image.image_path) + "_" + file_name \
                                     + "." + (self.save_format if self.save_format else augmentor_image.file_format)
                         images[i].save(os.path.join(augmentor_image.output_directory, save_name))
                     else:
-                        save_name = "_groundtruth_(" + str(i) + ")_" + augmentor_image.class_label + "_" + file_name \
+                        save_name = "_groundtruth_(" + str(i) + ")_" + augmentor_image.class_label + "_" + os.path.basename(augmentor_image.image_path) + "_" + file_name \
                                     + "." + (self.save_format if self.save_format else augmentor_image.file_format)
                         images[i].save(os.path.join(augmentor_image.output_directory, save_name))
             except IOError as e:
@@ -247,8 +247,8 @@ class Pipeline(object):
         :attr:`save_format="JPEG"` or :attr:`save_format="JPG"`,
         Augmentor will attempt to save the files using the
         JPEG format, which may result in errors if the file cannot
-        be saved in this format, such as PNG images with an alpha
-        channel.
+        be saved in this format, such as trying to save PNG images
+        with an alpha channel as JPEG.
 
         :param save_format: The save format to save the images
          when writing to disk.
