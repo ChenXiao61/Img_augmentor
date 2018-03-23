@@ -261,14 +261,15 @@ def scan_directory(source_directory):
     """
     Scan a directory for images, returning any images found with the
     extensions ``.jpg``, ``.JPG``, ``.jpeg``, ``.JPEG``, ``.gif``, ``.GIF``,
-    ``.img``, ``.IMG``, ``.png`` or ``.PNG``.
+    ``.img``, ``.IMG``, ``.png``, ``.PNG``, ``.tif``, ``.TIF``, ``.tiff``,
+    or ``.TIFF``.
 
     :param source_directory: The directory to scan for images.
     :type source_directory: String
     :return: A list of images found in the :attr:`source_directory`
     """
     # TODO: GIFs are highly problematic. It may make sense to drop GIF support.
-    file_types = ['*.jpg', '*.bmp', '*.jpeg', '*.gif', '*.img', '*.png']
+    file_types = ['*.jpg', '*.bmp', '*.jpeg', '*.gif', '*.img', '*.png', '*.tiff', '*.tif']
 
     list_of_files = []
 
