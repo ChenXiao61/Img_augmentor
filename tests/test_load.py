@@ -163,7 +163,10 @@ def test_dataframe_initialise_with_ten_images():
 
         tmps[i].file.write(bytestream.getvalue())
         tmps[i].flush()
-    temp_df = pd.DataFrame(path = tmps, cat_id = [len(i) for i in tmps])
+
+    temp_df = pd.DataFrame(path = [i.name for i in tmps],
+                           cat_id = [len(i.name) for i in tmps])
+
     p = Augmentor.DataFramePipeline(temp_df,
                                     image_col = 'path',
                                     category_col='cat_id')
