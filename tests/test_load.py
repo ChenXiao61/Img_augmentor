@@ -149,7 +149,8 @@ def test_initialise_with_ten_images():
     shutil.rmtree(tmpdir)
 
 def test_dataframe_initialise_with_ten_images():
-    import pandas as pd
+    pandas = pytest.importorskip("pandas")
+
     tmpdir = tempfile.mkdtemp()
     tmps = []
 
@@ -164,8 +165,8 @@ def test_dataframe_initialise_with_ten_images():
         tmps[i].file.write(bytestream.getvalue())
         tmps[i].flush()
 
-    temp_df = pd.DataFrame(path = [i.name for i in tmps],
-                           cat_id = [len(i.name) for i in tmps])
+    temp_df = pandas.DataFrame(dict(path = [i.name for i in tmps],
+                           cat_id = [len(i.name) for i in tmps]))
 
     p = Augmentor.DataFramePipeline(temp_df,
                                     image_col = 'path',
