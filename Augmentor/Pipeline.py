@@ -16,7 +16,7 @@ from __future__ import (absolute_import, division,
 from builtins import *
 
 from .Operations import *
-from .ImageUtilities import scan_directory, scan, AugmentorImage
+from .ImageUtilities import scan_directory, scan, scan_dataframe, AugmentorImage
 
 import os
 import sys
@@ -128,6 +128,14 @@ class Pipeline(object):
         # Scan the directory that user supplied.
         self.augmentor_images, self.class_labels = scan(source_directory, abs_output_directory)
 
+        self._check_images(abs_output_directory)
+
+    def _check_images(self, abs_output_directory):
+        """
+        Private method. Used to check and get the dimensions of all of the images
+        :param abs_output_directory: the absolute path of the output directory
+        :return:
+        """
         # Make output directory/directories
         if len(set(self.class_labels)) <= 1:  # Fixed bad bug by adding set() function here.
             if not os.path.exists(abs_output_directory):
@@ -142,7 +150,6 @@ class Pipeline(object):
                         os.makedirs(os.path.join(abs_output_directory, str(class_label[0])))
                     except IOError:
                         print("Insufficient rights to read or write output directory (%s)" % abs_output_directory)
-
         # Check the images, read their dimensions, and remove them if they cannot be read
         # TODO: Do not throw an error here, just remove the image and continue.
         for augmentor_image in self.augmentor_images:
@@ -1526,3 +1533,48 @@ class Pipeline(object):
             paths.append((augmentor_image.image_path, augmentor_image.ground_truth))
 
         return paths
+
+class DataFramePipeline(Pipeline):
+    def __init__(self, source_dataframe, image_col, category_col, output_directory="output", save_format=None):
+        """
+        Create a new Pipeline object pointing to dataframe containing the paths
+        to your original image dataset.
+
+        Create a new Pipeline object, using the :attr:`source_dataframe`
+        and the columns :attr:`image_col` for the path of the image and
+        :attr:`category_col` for the name of the cateogry
+
+        :param source_dataframe: A Pandas DataFrame where the images are located
+        :param output_directory: Specifies where augmented images should be
+         saved to the disk. Default is the absolute path
+        :param save_format: The file format to use when saving newly created,
+         augmented images. Default is JPEG. Legal options are BMP, PNG, and
+         GIF.
+        :return: A :class:`Pipeline` object.
+        """
+        super(DataFramePipeline, self).__init__(source_directory = None,
+                                                output_directory=output_directory,
+                                                save_format=save_format)
+        self._populate(source_dataframe,
+                  image_col,
+                  category_col,
+                  output_directory,
+                  save_format)
+
+    def _populate(self,
+                  source_dataframe,
+                  image_col,
+                  category_col,
+                  output_directory,
+                  save_format):
+        # Assume we have an absolute path for the output
+        # Scan the directory that user supplied.
+        self.augmentor_images, self.class_labels = scan_dataframe(source_dataframe,
+                                                                   image_col,
+                                                                   category_col,
+                                                                  output_directory)
+
+        self._check_images(output_directory)
+
+
+

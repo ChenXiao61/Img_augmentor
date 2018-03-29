@@ -256,6 +256,34 @@ def scan(source_directory, output_directory):
 
         return augmentor_images, class_labels
 
+def scan_dataframe(source_dataframe, image_col, category_col, output_directory):
+    try:
+        import pandas as pd
+    except ImportError:
+        raise ImportError('Pandas is required to use the scan_dataframe function!\nrun pip install pandas and try again')
+
+    # ensure column is categorical
+    cat_col_series = pd.Categorical(source_dataframe[category_col])
+    abs_output_directory = os.path.abspath(output_directory)
+    class_labels = list(enumerate(cat_col_series.categories))
+
+    augmentor_images = []
+
+    for image_path, cat_name, cat_id in zip(source_dataframe[image_col].values,
+                                            cat_col_series.get_values(),
+                                            cat_col_series.codes):
+
+        a = AugmentorImage(image_path=image_path, output_directory=abs_output_directory)
+        a.class_label = cat_name
+        a.class_label_int = cat_id
+        categorical_label = np.zeros(len(class_labels), dtype=np.uint32)
+        categorical_label[cat_id] = 1
+        a.categorical_label = categorical_label
+        a.file_format = os.path.splitext(image_path)[1].split(".")[1]
+        augmentor_images.append(a)
+
+    return augmentor_images, class_labels
+
 
 def scan_directory(source_directory):
     """
