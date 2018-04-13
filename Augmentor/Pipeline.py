@@ -98,10 +98,9 @@ class Pipeline(object):
         therefore suitable for multi-threading.
 
         :param augmentor_image: The image to pass through the pipeline.
-        :param multi_threaded: Whether to use multi-threading or not.
         :return:
         """
-        return self._execute(augmentor_image, multi_threaded=True)
+        return self._execute(augmentor_image)
 
     def _populate(self, source_directory, output_directory, ground_truth_directory, ground_truth_output_directory):
         """
@@ -348,7 +347,7 @@ class Pipeline(object):
                     progress_bar.set_description("Processing %s" % os.path.basename(augmentor_image.image_path))
                     progress_bar.update(1)
 
-        # This does not work as it did in the pre-multi-theading code above for some reason.
+        # This does not work as it did in the pre-multi-threading code above for some reason.
         # progress_bar.close()
 
     def process(self):
