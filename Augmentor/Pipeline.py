@@ -87,7 +87,7 @@ class Pipeline(object):
                            ground_truth_directory=None,
                            ground_truth_output_directory=output_directory)
 
-    def __call__(self, augmentor_image, multi_threaded=True):
+    def __call__(self, augmentor_image):
         """
         Function used by the ThreadPoolExecutor to process the pipeline
         using multiple threads. Do not call directly.
@@ -101,7 +101,7 @@ class Pipeline(object):
         :param multi_threaded: Whether to use multi-threading or not.
         :return:
         """
-        return self._execute(augmentor_image, multi_threaded=multi_threaded)
+        return self._execute(augmentor_image, multi_threaded=True)
 
     def _populate(self, source_directory, output_directory, ground_truth_directory, ground_truth_output_directory):
         """
@@ -338,7 +338,7 @@ class Pipeline(object):
             # TODO: Restore the functionality from the pre-multi-thread code above.
             with tqdm(total=len(augmentor_images), desc="Executing Pipeline", unit=" Samples") as progress_bar:
                 with ThreadPoolExecutor(max_workers=None) as executor:
-                    for result in executor.map(self, augmentor_images, multi_threaded=multi_threaded):
+                    for result in executor.map(self, augmentor_images):
                         progress_bar.set_description("Processing %s" % result)
                         progress_bar.update(1)
         else:
