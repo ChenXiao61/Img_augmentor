@@ -23,8 +23,8 @@ import sys
 import random
 import uuid
 import warnings
-import numbers
 import numpy as np
+from concurrent.futures import ThreadPoolExecutor
 
 from tqdm import tqdm
 from PIL import Image
@@ -164,7 +164,7 @@ class Pipeline(object):
         sys.stdout.write("Initialised with %s image(s) found.\n" % len(self.augmentor_images))
         sys.stdout.write("Output directory set to %s." % abs_output_directory)
 
-    def _execute(self, augmentor_image, save_to_disk=True):
+    def _execute(self, augmentor_image, save_to_disk=True, multi_threaded=False):
         """
         Private method. Used to pass an image through the current pipeline,
         and return the augmented image.
@@ -180,7 +180,6 @@ class Pipeline(object):
         :type save_to_disk: Boolean
         :return: The augmented image.
         """
-        # self.image_counter += 1  # TODO: See if I can remove this...
 
         images = []
 
@@ -219,10 +218,10 @@ class Pipeline(object):
                 print("You can change the save format using the set_save_format(save_format) function.")
                 print("By passing save_format=\"auto\", Augmentor can save in the correct format automatically.")
 
-        # Currently we return only the first image if it is a list
-        # for the generator functions.  This will be fixed in a future
-        # version.
-        return images[0]
+        if multi_threaded:
+            return os.path.basename(augmentor_image.image_path)
+        else:
+            return images[0]  # Here we return only the first image for the generators.
 
     def _execute_with_array(self, image):
         """
@@ -267,7 +266,7 @@ class Pipeline(object):
         else:
             self.save_format = save_format
 
-    def sample(self, n):
+    def sample(self, n, multi_threaded=True):
         """
         Generate :attr:`n` number of samples from the current pipeline.
 
@@ -276,8 +275,16 @@ class Pipeline(object):
         are by default stored in an ``output`` directory, relative to the
         path defined during the pipeline's instantiation.
 
+        By default, Augmentor will use multi-threading to increase the speed
+        of processing the images. However, this may slow down some
+        operations if the images are very small. Set :attr:`multi_threaded`
+        to ``False`` if slowdown is experienced.
+
         :param n: The number of new samples to produce.
         :type n: Integer
+        :param multi_threaded: Whether to use multi-threading to process the
+         images. Defaults to ``True``.
+        :type multi_threaded: Boolean
         :return: None
         """
         if len(self.augmentor_images) == 0:
@@ -288,22 +295,140 @@ class Pipeline(object):
         if len(self.operations) == 0:
             raise IndexError("There are no operations associated with this pipeline.")
 
-        sample_count = 1
+        ####
+        # Pre-multi-threading code. Remove.
+        #sample_count = 1
+        #progress_bar = tqdm(total=n, desc="Executing Pipeline", unit=' Samples', leave=False)
+        #while sample_count <= n:
+        #    for augmentor_image in self.augmentor_images:
+        #        if sample_count <= n:
+        #            self._execute(augmentor_image)
+        #            file_name_to_print = os.path.basename(augmentor_image.image_path)
+        #            # This is just to shorten very long file names which obscure the progress bar.
+        #            if len(file_name_to_print) >= 30:
+        #                file_name_to_print = file_name_to_print[0:10] + "..." + \
+        #                                     file_name_to_print[-10: len(file_name_to_print)]
+        #            progress_bar.set_description("Processing %s" % file_name_to_print)
+        #            progress_bar.update(1)
+        #        sample_count += 1
+        #progress_bar.close()
 
-        progress_bar = tqdm(total=n, desc="Executing Pipeline", unit=' Samples', leave=False)
-        while sample_count <= n:
-            for augmentor_image in self.augmentor_images:
-                if sample_count <= n:
+        augmentor_images = [random.choice(self.augmentor_images) for _ in range(n)]
+
+        if multi_threaded:
+            # TODO: Restore the functionality from the pre-multi-thread code above.
+            with tqdm(total=len(augmentor_images), desc="Executing Pipeline", unit=" Samples") as progress_bar:
+                with ThreadPoolExecutor(max_workers=None) as executor:
+                    for result in executor.map(self, augmentor_images, multi_threaded=multi_threaded):
+                        progress_bar.set_description("Processing %s" % result)
+                        progress_bar.update(1)
+        else:
+            with tqdm(total=len(augmentor_images), desc="Executing Pipeline", unit=" Samples") as progress_bar:
+                for augmentor_image in augmentor_images:
                     self._execute(augmentor_image)
-                    file_name_to_print = os.path.basename(augmentor_image.image_path)
-                    # This is just to shorten very long file names which obscure the progress bar.
-                    if len(file_name_to_print) >= 30:
-                        file_name_to_print = file_name_to_print[0:10] + "..." + \
-                                             file_name_to_print[-10: len(file_name_to_print)]
-                    progress_bar.set_description("Processing %s" % file_name_to_print)
+                    progress_bar.set_description("Processing %s" % os.path.basename(augmentor_image.image_path))
                     progress_bar.update(1)
-                sample_count += 1
-        progress_bar.close()
+
+        # This does not work as it did in the pre-multi-theading code above for some reason.
+        # progress_bar.close()
+
+    def process(self, probability_override=True):
+        """
+        This function is used to process every image in the pipeline
+        exactly once, setting each operation's probability to 1.
+
+        This might be useful for resizing every image in a dataset,
+        for example.
+
+        If you do not wish to override each operation's probability,
+        the :attr:`probability_override` can be set to ``False``.
+
+        :return: None
+        """
+
+        warnings.warn("Not yet implemented!")
+
+        return None
+
+    ##
+    # Begin experimental multi-threading
+    #
+    # The following three functions __call__, _execute_multi_thread,
+    # and sample_multi_thread are experimental functions to test
+    # multi-threaded execution of the pipeline.
+    ##
+    def __call__(self, augmentor_image, multi_threaded=True):
+
+        return self._execute(augmentor_image, multi_threaded=multi_threaded)
+
+    @staticmethod
+    def _execute_multi_thread(image_operation_pair):
+        """
+        Private function that is executed in a multi-threaded manner by
+        :func:`sample_multi_threaded()`. Do not call this function directly.
+        :param image_operation_pair: A tuple of images and operations to execute.
+        :type image_operation_pair: Tuple
+        :return: The filename of the image that was passed through the
+         pipeline.
+        """
+
+        im = [Image.open(image_operation_pair[0].image_path)]
+
+        for op in image_operation_pair[1]:
+            im = op.perform_operation(im)
+
+        im[0].save("/tmp/tests_multithreading/output/" + str(uuid.uuid4()) + ".JPEG")
+        filename = os.path.basename(image_operation_pair[0].image_path)
+
+        return filename
+
+    def sample_multi_threaded(self, n):
+        """
+        Sample from the pipeline using multiple threads. This may speed up
+        execution greatly, however this depends on the size of the images.
+
+        .. warning::
+         This is an **experimental** feature. It will be incorporated into
+         the main :func:`sample()` function at a future date.
+
+        Augmentor's multi-threading functionality heavily depends on the
+        size of the images being processed and the number of operations
+        in the pipeline, due to the overhead of reading and saving images
+        to disk.
+
+        Setting the parameter :attr:`n` to ``0`` will apply the current
+        pipeline to all images in the pipeline exactly once. This may
+        be useful for resizing all images in the pipeline, for example.
+
+        This will set all probabilities in all operations to 1.
+
+        :param n: The number of samples to generate. If set to 0, the
+         pipeline is applied to all images in the pipeline exactly once.
+        :type n: Integer
+        :return: None
+        """
+        # NOTE
+        # It may make sense to check out the original multiprocessing module
+        # https://docs.python.org/2/library/multiprocessing.html
+        # It is built-in, and does not have the overhead of watching for the
+        # completion of threads and so on that the futures package provides.
+        # Also note: In Python 3 futures is built in. In Python 2, futures
+        # needs to be installed.
+
+        if n == 0:
+            augmentor_images = self.augmentor_images
+        else:
+            augmentor_images = [random.choice(self.augmentor_images) for _ in range(n)]
+
+        with tqdm(total=len(augmentor_images), ascii=False, unit=" Samples ") as progress_bar:
+            with ThreadPoolExecutor(max_workers=None) as executor:
+                for result in executor.map(self, augmentor_images):
+                    progress_bar.set_description("Processing %s" % result)
+                    progress_bar.update(1)
+
+    ##
+    # End experimental multi-treading.
+    ##
 
     def sample_with_array(self, image_array, save_to_disk=False):
         """
@@ -1534,6 +1659,7 @@ class Pipeline(object):
 
         return paths
 
+
 class DataFramePipeline(Pipeline):
     def __init__(self, source_dataframe, image_col, category_col, output_directory="output", save_format=None):
         """
@@ -1552,7 +1678,7 @@ class DataFramePipeline(Pipeline):
          GIF.
         :return: A :class:`Pipeline` object.
         """
-        super(DataFramePipeline, self).__init__(source_directory = None,
+        super(DataFramePipeline, self).__init__(source_directory=None,
                                                 output_directory=output_directory,
                                                 save_format=save_format)
         self._populate(source_dataframe,
@@ -1575,6 +1701,3 @@ class DataFramePipeline(Pipeline):
                                                                   output_directory)
 
         self._check_images(output_directory)
-
-
-

@@ -181,3 +181,6 @@ def test_zoom_ground_truth_temporary_class():
     # Remove the directories that we used entirely
     shutil.rmtree(standard_image_directory)
     shutil.rmtree(ground_truth_image_directory)
+
+
+

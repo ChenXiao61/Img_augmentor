@@ -148,6 +148,7 @@ def test_initialise_with_ten_images():
     # not delete itself after closing automatically
     shutil.rmtree(tmpdir)
 
+
 def test_dataframe_initialise_with_ten_images():
     pandas = pytest.importorskip("pandas")
 
