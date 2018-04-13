@@ -87,6 +87,22 @@ class Pipeline(object):
                            ground_truth_directory=None,
                            ground_truth_output_directory=output_directory)
 
+    def __call__(self, augmentor_image, multi_threaded=True):
+        """
+        Function used by the ThreadPoolExecutor to process the pipeline
+        using multiple threads. Do not call directly.
+
+        This function does nothing except call :func:`_execute`, rather
+        than :func:`_execute` being called directly in :func:`sample`.
+        This makes it possible for the procedure to be *pickled* and
+        therefore suitable for multi-threading.
+
+        :param augmentor_image: The image to pass through the pipeline.
+        :param multi_threaded: Whether to use multi-threading or not.
+        :return:
+        """
+        return self._execute(augmentor_image, multi_threaded=multi_threaded)
+
     def _populate(self, source_directory, output_directory, ground_truth_directory, ground_truth_output_directory):
         """
         Private method for populating member variables with AugmentorImage
@@ -313,7 +329,10 @@ class Pipeline(object):
         #        sample_count += 1
         #progress_bar.close()
 
-        augmentor_images = [random.choice(self.augmentor_images) for _ in range(n)]
+        if n == 0:
+            augmentor_images = self.augmentor_images
+        else:
+            augmentor_images = [random.choice(self.augmentor_images) for _ in range(n)]
 
         if multi_threaded:
             # TODO: Restore the functionality from the pre-multi-thread code above.
@@ -332,103 +351,23 @@ class Pipeline(object):
         # This does not work as it did in the pre-multi-theading code above for some reason.
         # progress_bar.close()
 
-    def process(self, probability_override=True):
+    def process(self):
         """
         This function is used to process every image in the pipeline
-        exactly once, setting each operation's probability to 1.
+        exactly once.
 
-        This might be useful for resizing every image in a dataset,
-        for example.
+        This might be useful for resizing a dataset for example, and
+        uses multi-threading for fast execution.
 
-        If you do not wish to override each operation's probability,
-        the :attr:`probability_override` can be set to ``False``.
+        It would make sense to set the probability of every operation
+        in the pipeline to ``1`` when using this function.
 
         :return: None
         """
 
-        warnings.warn("Not yet implemented!")
+        self.sample(0, multi_threaded=True)
 
         return None
-
-    ##
-    # Begin experimental multi-threading
-    #
-    # The following three functions __call__, _execute_multi_thread,
-    # and sample_multi_thread are experimental functions to test
-    # multi-threaded execution of the pipeline.
-    ##
-    def __call__(self, augmentor_image, multi_threaded=True):
-
-        return self._execute(augmentor_image, multi_threaded=multi_threaded)
-
-    @staticmethod
-    def _execute_multi_thread(image_operation_pair):
-        """
-        Private function that is executed in a multi-threaded manner by
-        :func:`sample_multi_threaded()`. Do not call this function directly.
-        :param image_operation_pair: A tuple of images and operations to execute.
-        :type image_operation_pair: Tuple
-        :return: The filename of the image that was passed through the
-         pipeline.
-        """
-
-        im = [Image.open(image_operation_pair[0].image_path)]
-
-        for op in image_operation_pair[1]:
-            im = op.perform_operation(im)
-
-        im[0].save("/tmp/tests_multithreading/output/" + str(uuid.uuid4()) + ".JPEG")
-        filename = os.path.basename(image_operation_pair[0].image_path)
-
-        return filename
-
-    def sample_multi_threaded(self, n):
-        """
-        Sample from the pipeline using multiple threads. This may speed up
-        execution greatly, however this depends on the size of the images.
-
-        .. warning::
-         This is an **experimental** feature. It will be incorporated into
-         the main :func:`sample()` function at a future date.
-
-        Augmentor's multi-threading functionality heavily depends on the
-        size of the images being processed and the number of operations
-        in the pipeline, due to the overhead of reading and saving images
-        to disk.
-
-        Setting the parameter :attr:`n` to ``0`` will apply the current
-        pipeline to all images in the pipeline exactly once. This may
-        be useful for resizing all images in the pipeline, for example.
-
-        This will set all probabilities in all operations to 1.
-
-        :param n: The number of samples to generate. If set to 0, the
-         pipeline is applied to all images in the pipeline exactly once.
-        :type n: Integer
-        :return: None
-        """
-        # NOTE
-        # It may make sense to check out the original multiprocessing module
-        # https://docs.python.org/2/library/multiprocessing.html
-        # It is built-in, and does not have the overhead of watching for the
-        # completion of threads and so on that the futures package provides.
-        # Also note: In Python 3 futures is built in. In Python 2, futures
-        # needs to be installed.
-
-        if n == 0:
-            augmentor_images = self.augmentor_images
-        else:
-            augmentor_images = [random.choice(self.augmentor_images) for _ in range(n)]
-
-        with tqdm(total=len(augmentor_images), ascii=False, unit=" Samples ") as progress_bar:
-            with ThreadPoolExecutor(max_workers=None) as executor:
-                for result in executor.map(self, augmentor_images):
-                    progress_bar.set_description("Processing %s" % result)
-                    progress_bar.update(1)
-
-    ##
-    # End experimental multi-treading.
-    ##
 
     def sample_with_array(self, image_array, save_to_disk=False):
         """

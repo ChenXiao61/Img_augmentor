@@ -2,7 +2,7 @@
 
 Augmentor is an image augmentation library in Python for machine learning. It aims to be a standalone library that is platform and framework independent, which is more convenient, allows for finer grained control over augmentation, and implements the most real-world relevant augmentation techniques. It employs a stochastic approach using building blocks that allow for operations to be pieced together in a pipeline.
 
-[![PyPI](https://img.shields.io/badge/Augmentor-v0.2.0-blue.svg?maxAge=2592000)](https://pypi.python.org/pypi/Augmentor)
+[![PyPI](https://img.shields.io/badge/Augmentor-v0.2.1-blue.svg?maxAge=2592000)](https://pypi.python.org/pypi/Augmentor)
 [![Documentation Status](https://readthedocs.org/projects/augmentor/badge/?version=master)](https://augmentor.readthedocs.io/en/master/?badge=master)
 [![Build Status](https://travis-ci.org/mdbloice/Augmentor.svg?branch=master)](https://travis-ci.org/mdbloice/Augmentor)
 [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat)](LICENSE.md)
@@ -55,11 +55,19 @@ p.sample(10000)
 
 which will generate 10,000 augmented images based on your specifications. By default these will be written to the disk in a directory named `output` relative to the path specified when initialising the `p` pipeline object above.
 
+If you wish to process each image in the pipeline exactly once, use `process()`:
+
+```python
+p.process()
+```
+
+This function might be useful for resizing a dataset for example. It would make sense to create a pipeline where all of its operations have their probability set to `1` when using the `process()` method.
+
 ### Multi-threading
 
-Augmentor (version >0.2.1) now uses multi-threading to increase the speed of generating images.
+Augmentor (version >=0.2.1) now uses multi-threading to increase the speed of generating images.
 
-However, this may slow down some pipelines if the original images are very small. Set `multi_threaded` to ``False`` if slowdown is experienced:
+This *may* slow down some pipelines if the original images are very small. Set `multi_threaded` to ``False`` if slowdown is experienced:
 
 ```python
 p.sample(100, multi_threaded=False)
