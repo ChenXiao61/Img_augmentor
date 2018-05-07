@@ -300,10 +300,8 @@ class RandomBrightness(Operation):
         :return: The transformed image(s) as a list of object(s) of type
          PIL.Image.
         """
-
-        def do(image):
-
-            factor = np.random.uniform(self.min_factor, self.max_factor)
+        factor = np.random.uniform(self.min_factor, self.max_factor)
+        def do(image):    
             imgenhancer_Brightness = ImageEnhance.Brightness(image)
             return imgenhancer_Brightness.enhance(factor)
 
@@ -349,10 +347,9 @@ class RandomColor(Operation):
         :return: The transformed image(s) as a list of object(s) of type
          PIL.Image.
         """
-
+        factor = np.random.uniform(self.min_factor, self.max_factor)
         def do(image):
 
-            factor = np.random.uniform(self.min_factor, self.max_factor)
             imgenhancer_Color = ImageEnhance.Color(image)
             return imgenhancer_Color.enhance(factor)
 
@@ -399,10 +396,9 @@ class RandomContrast(Operation):
         :return: The transformed image(s) as a list of object(s) of type
          PIL.Image.
         """
-
+        factor = np.random.uniform(self.min_factor, self.max_factor)
         def do(image):
 
-            factor = np.random.uniform(self.min_factor, self.max_factor)
             imgenhancer_Contrast = ImageEnhance.Contrast(image)
             return imgenhancer_Contrast.enhance(factor)
 
