@@ -1478,6 +1478,69 @@ class Pipeline(object):
         else:
             self.add_operation(Invert(probability=probability))
 
+    def random_brightness(self,probability,min_factor,max_factor):
+        """
+        Random change brightness of an image.
+
+        :param probability: A value between 0 and 1 representing the
+         probability that the operation should be performed.
+        :param min_factor: The value between 0.0 and max_factor that define the minimum adjustment of image brightness. 
+         The value  0.0 gives a black image, value 1.0 gives the original image, value bigger than 1.0 gives more bright image.
+        :param max_factor: A value should be bigger than min_factor that define the maximum adjustment of image brightness.
+         The value  0.0 gives a black image, value 1.0 gives the original image, value bigger than 1.0 gives more bright image.
+        :return: None
+        """ 
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        elif not 0 <= min_factor <= max_factor:
+            raise ValueError("The min_factor must be between 0 and max_factor.")
+        elif not min_factor <= max_factor:
+            raise ValueError("The max_factor must be bigger min_factor.")
+        else:
+            self.add_operation(RandomBrightness(probability=probability, min_factor=min_factor,max_factor=max_factor))
+
+    def random_color(self,probability,min_factor,max_factor):
+        """
+        Random change saturation of an image.
+
+        :param probability: Controls the probability that the operation is
+         performed when it is invoked in the pipeline.
+        :param min_factor: The value between 0.0 and max_factor that define the minimum adjustment of image saturation. 
+         The value 0.0 gives a black and white image, value 1.0 gives the original image.
+        :param max_factor: A value should be bigger than min_factor that define the maximum adjustment of image saturation.
+         The value 0.0 gives a black and white image, value 1.0 gives the original image.
+        :return: None
+        """
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        elif not 0 <= min_factor <= max_factor:
+            raise ValueError("The min_factor must be between 0 and max_factor.")
+        elif not min_factor <= max_factor:
+            raise ValueError("The max_factor must be bigger min_factor.")
+        else:
+            self.add_operation(RandomColor(probability=probability, min_factor=min_factor,max_factor=max_factor))
+
+    def random_contrast(self,probability,min_factor,max_factor):
+        """
+        Random change image contrast.
+
+        :param probability: Controls the probability that the operation is
+         performed when it is invoked in the pipeline.
+        :param min_factor: The value between 0.0 and max_factor that define the minimum adjustment of image contrast.
+         The value  0.0 gives s solid grey image, value 1.0 gives the original image.
+        :param max_factor: A value should be bigger than min_factor that define the maximum adjustment of image contrast.
+         The value  0.0 gives s solid grey image, value 1.0 gives the original image.
+        :return: None
+        """
+        if not 0 < probability <= 1:
+            raise ValueError(Pipeline._probability_error_text)
+        elif not 0 <= min_factor <= max_factor:
+            raise ValueError("The min_factor must be between 0 and max_factor.")
+        elif not min_factor <= max_factor:
+            raise ValueError("The max_factor must be bigger min_factor.")
+        else:
+            self.add_operation(RandomContrast(probability=probability, min_factor=min_factor,max_factor=max_factor))
+    
     def random_erasing(self, probability, rectangle_area):
         """
         Work in progress. This operation performs a Random Erasing operation,
