@@ -233,10 +233,15 @@ class Pipeline(object):
                 print("You can change the save format using the set_save_format(save_format) function.")
                 print("By passing save_format=\"auto\", Augmentor can save in the correct format automatically.")
 
-        if multi_threaded:
-            return os.path.basename(augmentor_image.image_path)
-        else:
-            return images[0]  # Here we return only the first image for the generators.
+        # TODO: Fix this really strange behaviour.
+        # As a work around, we can pass the same back and basically
+        # ignore the multi_threaded parameter completely for now.
+        # if multi_threaded:
+        #   return os.path.basename(augmentor_image.image_path)
+        # else:
+        #   return images[0]  # Here we return only the first image for the generators.
+
+        return images[0]
 
     def _execute_with_array(self, image):
         """
@@ -1485,12 +1490,12 @@ class Pipeline(object):
 
         :param probability: A value between 0 and 1 representing the
          probability that the operation should be performed.
-        :param min_factor: The value between 0.0 and max_factor that define the minimum adjustment of image brightness. 
+        :param min_factor: The value between 0.0 and max_factor that define the minimum adjustment of image brightness.
          The value  0.0 gives a black image, value 1.0 gives the original image, value bigger than 1.0 gives more bright image.
         :param max_factor: A value should be bigger than min_factor that define the maximum adjustment of image brightness.
          The value  0.0 gives a black image, value 1.0 gives the original image, value bigger than 1.0 gives more bright image.
         :return: None
-        """ 
+        """
         if not 0 < probability <= 1:
             raise ValueError(Pipeline._probability_error_text)
         elif not 0 <= min_factor <= max_factor:
@@ -1506,7 +1511,7 @@ class Pipeline(object):
 
         :param probability: Controls the probability that the operation is
          performed when it is invoked in the pipeline.
-        :param min_factor: The value between 0.0 and max_factor that define the minimum adjustment of image saturation. 
+        :param min_factor: The value between 0.0 and max_factor that define the minimum adjustment of image saturation.
          The value 0.0 gives a black and white image, value 1.0 gives the original image.
         :param max_factor: A value should be bigger than min_factor that define the maximum adjustment of image saturation.
          The value 0.0 gives a black and white image, value 1.0 gives the original image.
@@ -1541,7 +1546,7 @@ class Pipeline(object):
             raise ValueError("The max_factor must be bigger min_factor.")
         else:
             self.add_operation(RandomContrast(probability=probability, min_factor=min_factor,max_factor=max_factor))
-    
+
     def random_erasing(self, probability, rectangle_area):
         """
         Work in progress. This operation performs a Random Erasing operation,
