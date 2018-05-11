@@ -24,7 +24,7 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 from builtins import *
 
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageEnhance
 import math
 from math import floor, ceil
 
@@ -257,6 +257,150 @@ class BlackAndWhite(Operation):
             # but this might be faster.
             image = ImageOps.grayscale(image)
             return image.point(lambda x: 0 if x < self.threshold else 255, '1')
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
+
+class RandomBrightness(Operation):
+    """
+    This class is used to random change image brightness.
+    """
+    def __init__(self, probability, min_factor,max_factor):
+        """
+        required :attr:`probability` parameter
+
+        :func:`~Augmentor.Pipeline.Pipeline.random_brightness` function.
+
+        :param probability: Controls the probability that the operation is
+         performed when it is invoked in the pipeline.
+        :param min_factor: The value between 0.0 and max_factor 
+         that define the minimum adjustment of image brightness. 
+         The value  0.0 gives a black image,The value 1.0 gives the original image, value bigger than 1.0 gives more bright image.
+        :param max_factor: A value should be bigger than min_factor.
+         that define the maximum adjustment of image brightness.
+         The value  0.0 gives a black image, value 1.0 gives the original image, value bigger than 1.0 gives more bright image.
+        
+        :type probability: Float
+        :type max_factor: Float
+        :type max_factor: Float
+        """
+        Operation.__init__(self, probability)
+        self.min_factor = min_factor
+        self.max_factor = max_factor
+    def perform_operation(self, images):
+        """
+        Random change the passed image brightness.
+
+        :param images: The image to convert into monochrome.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
+        """
+        factor = np.random.uniform(self.min_factor, self.max_factor)
+        def do(image):    
+            imgenhancer_Brightness = ImageEnhance.Brightness(image)
+            return imgenhancer_Brightness.enhance(factor)
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
+
+class RandomColor(Operation):
+    """
+    This class is used to random change saturation of an image.
+    """
+    def __init__(self, probability, min_factor,max_factor):
+        """
+        required :attr:`probability` parameter
+
+        :func:`~Augmentor.Pipeline.Pipeline.random_color` function.
+
+        :param probability: Controls the probability that the operation is
+         performed when it is invoked in the pipeline.
+        :param min_factor: The value between 0.0 and max_factor 
+         that define the minimum adjustment of image saturation. 
+         The value 0.0 gives a black and white image, value 1.0 gives the original image.
+        :param max_factor: A value should be bigger than min_factor.
+         that define the maximum adjustment of image saturation.
+         The value 0.0 gives a black and white image, value 1.0 gives the original image.
+        
+        :type probability: Float
+        :type max_factor: Float
+        :type max_factor: Float
+        """
+        Operation.__init__(self, probability)
+        self.min_factor = min_factor
+        self.max_factor = max_factor
+    def perform_operation(self, images):
+        """
+        Random change the passed image saturation.
+
+        :param images: The image to convert into monochrome.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
+        """
+        factor = np.random.uniform(self.min_factor, self.max_factor)
+        def do(image):
+
+            imgenhancer_Color = ImageEnhance.Color(image)
+            return imgenhancer_Color.enhance(factor)
+
+        augmented_images = []
+
+        for image in images:
+            augmented_images.append(do(image))
+
+        return augmented_images
+
+
+class RandomContrast(Operation):
+    """
+    This class is used to random change contrast of an image.
+    """
+    def __init__(self, probability, min_factor,max_factor):
+        """
+        required :attr:`probability` parameter
+
+        :func:`~Augmentor.Pipeline.Pipeline.random_contrast` function.
+
+        :param probability: Controls the probability that the operation is
+         performed when it is invoked in the pipeline.
+        :param min_factor: The value between 0.0 and max_factor 
+         that define the minimum adjustment of image contrast.
+         The value  0.0 gives s solid grey image, value 1.0 gives the original image.
+        :param max_factor: A value should be bigger than min_factor.
+         that define the maximum adjustment of image contrast.
+         The value  0.0 gives s solid grey image, value 1.0 gives the original image.
+        
+        :type probability: Float
+        :type max_factor: Float
+        :type max_factor: Float
+        """
+        Operation.__init__(self, probability)
+        self.min_factor = min_factor
+        self.max_factor = max_factor
+    def perform_operation(self, images):
+        """
+        Random change the passed image contrast.
+
+        :param images: The image to convert into monochrome.
+        :type images: List containing PIL.Image object(s).
+        :return: The transformed image(s) as a list of object(s) of type
+         PIL.Image.
+        """
+        factor = np.random.uniform(self.min_factor, self.max_factor)
+        def do(image):
+
+            imgenhancer_Contrast = ImageEnhance.Contrast(image)
+            return imgenhancer_Contrast.enhance(factor)
 
         augmented_images = []
 
