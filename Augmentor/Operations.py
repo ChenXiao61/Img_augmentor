@@ -277,13 +277,13 @@ class RandomBrightness(Operation):
 
         :param probability: Controls the probability that the operation is
          performed when it is invoked in the pipeline.
-        :param min_factor: The value between 0.0 and max_factor 
-         that define the minimum adjustment of image brightness. 
+        :param min_factor: The value between 0.0 and max_factor
+         that define the minimum adjustment of image brightness.
          The value  0.0 gives a black image,The value 1.0 gives the original image, value bigger than 1.0 gives more bright image.
         :param max_factor: A value should be bigger than min_factor.
          that define the maximum adjustment of image brightness.
          The value  0.0 gives a black image, value 1.0 gives the original image, value bigger than 1.0 gives more bright image.
-        
+
         :type probability: Float
         :type max_factor: Float
         :type max_factor: Float
@@ -301,7 +301,7 @@ class RandomBrightness(Operation):
          PIL.Image.
         """
         factor = np.random.uniform(self.min_factor, self.max_factor)
-        def do(image):    
+        def do(image):
             imgenhancer_Brightness = ImageEnhance.Brightness(image)
             return imgenhancer_Brightness.enhance(factor)
 
@@ -324,13 +324,13 @@ class RandomColor(Operation):
 
         :param probability: Controls the probability that the operation is
          performed when it is invoked in the pipeline.
-        :param min_factor: The value between 0.0 and max_factor 
-         that define the minimum adjustment of image saturation. 
+        :param min_factor: The value between 0.0 and max_factor
+         that define the minimum adjustment of image saturation.
          The value 0.0 gives a black and white image, value 1.0 gives the original image.
         :param max_factor: A value should be bigger than min_factor.
          that define the maximum adjustment of image saturation.
          The value 0.0 gives a black and white image, value 1.0 gives the original image.
-        
+
         :type probability: Float
         :type max_factor: Float
         :type max_factor: Float
@@ -373,13 +373,13 @@ class RandomContrast(Operation):
 
         :param probability: Controls the probability that the operation is
          performed when it is invoked in the pipeline.
-        :param min_factor: The value between 0.0 and max_factor 
+        :param min_factor: The value between 0.0 and max_factor
          that define the minimum adjustment of image contrast.
          The value  0.0 gives s solid grey image, value 1.0 gives the original image.
         :param max_factor: A value should be bigger than min_factor.
          that define the maximum adjustment of image contrast.
          The value  0.0 gives s solid grey image, value 1.0 gives the original image.
-        
+
         :type probability: Float
         :type max_factor: Float
         :type max_factor: Float
@@ -991,9 +991,12 @@ class Crop(Operation):
          PIL.Image.
         """
 
-        def do(image):
+        w, h = images[0].size  # All images must be the same size, so we can just check the first image in the list
 
-            w, h = image.size
+        left_shift = random.randint(0, int((w - self.width)))
+        down_shift = random.randint(0, int((h - self.height)))
+
+        def do(image):
 
             # TODO: Fix. We may want a full crop.
             if self.width > w or self.height > h:
@@ -1002,8 +1005,6 @@ class Crop(Operation):
             if self.centre:
                 return image.crop(((w/2)-(self.width/2), (h/2)-(self.height/2), (w/2)+(self.width/2), (h/2)+(self.height/2)))
             else:
-                left_shift = random.randint(0, int((w - self.width)))
-                down_shift = random.randint(0, int((h - self.height)))
                 return image.crop((left_shift, down_shift, self.width + left_shift, self.height + down_shift))
 
         augmented_images = []
