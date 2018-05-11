@@ -179,7 +179,7 @@ class Pipeline(object):
         sys.stdout.write("Initialised with %s image(s) found.\n" % len(self.augmentor_images))
         sys.stdout.write("Output directory set to %s." % abs_output_directory)
 
-    def _execute(self, augmentor_image, save_to_disk=True, multi_threaded=False):
+    def _execute(self, augmentor_image, save_to_disk=True, multi_threaded=True):
         """
         Private method. Used to pass an image through the current pipeline,
         and return the augmented image.
@@ -407,6 +407,7 @@ class Pipeline(object):
             yield self._execute(self.augmentor_images[im_index], save_to_disk=False), \
                 self.augmentor_images[im_index].class_label_int
 
+    # TODO: Fix: scaled=True results in an error.
     def keras_generator(self, batch_size, scaled=True, image_data_format="channels_last"):
         """
         Returns an image generator that will sample from the current pipeline
