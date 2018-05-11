@@ -15,6 +15,6 @@ from .Pipeline import Pipeline, DataFramePipeline
 
 __author__ = """Marcus D. Bloice"""
 __email__ = 'marcus.bloice@medunigraz.at'
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 __all__ = ['Pipeline', 'DataFramePipeline']
