@@ -256,6 +256,7 @@ def scan(source_directory, output_directory):
 
         return augmentor_images, class_labels
 
+
 def scan_dataframe(source_dataframe, image_col, category_col, output_directory):
     try:
         import pandas as pd
