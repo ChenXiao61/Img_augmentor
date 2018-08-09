@@ -607,6 +607,38 @@ class Pipeline(object):
 
             yield(X, y)
 
+    def keras_preprocess_func(self):
+        """
+        Returns the pipeline as a function that can be used with Keras ImageDataGenerator.
+        The image array data fed to the returned function is supposed to have scaled to [0, 1].
+        It will be once converted to PIL format internally as
+        `Image.fromarray(np.uint8(255 * image))`.
+
+        .. code-block:: python
+
+            >>> import Augmentor
+            >>> import torchvision
+            >>> p = Augmentor.Pipeline()
+            >>> p.rotate(probability=0.7, max_left_rotate=10, max_right_rotate=10)
+            >>> p.zoom(probability=0.5, min_factor=1.1, max_factor=1.5)
+            >>> from keras.preprocessing.image import ImageDataGenerator
+            >>> datagen = ImageDataGenerator(
+            >>>     ...
+            >>>     preprocessing_function=p.keras_preprocess_func())
+
+        :return: The pipeline as a function.
+        """
+        def _transform_keras_preprocess_func(image):
+            image = Image.fromarray(np.uint8(255 * image))
+            for operation in self.operations:
+                r = random.uniform(0, 1)
+                if r < operation.probability:
+                    image = operation.perform_operation([image])[0]
+            #a = AugmentorImage(image_path=None, output_directory=None)
+            #a.image_PIL = 
+            return image #self._execute(a)
+        return _transform_keras_preprocess_func
+
     def torch_transform(self):
         """
         Returns the pipeline as a function that can be used with torchvision.
