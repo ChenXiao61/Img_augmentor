@@ -675,7 +675,7 @@ class Pipeline(object):
                 if r < operation.probability:
                     image = operation.perform_operation([image])[0]
             #a = AugmentorImage(image_path=None, output_directory=None)
-            #a.image_PIL = 
+            #a.image_PIL =
             return image #self._execute(a)
         return _transform_keras_preprocess_func
 
@@ -1782,7 +1782,25 @@ class DataFramePipeline(Pipeline):
 
 class DataPipeline(Pipeline):
     """
+    The DataPipeline used to create augmented data that is not read from or
+    saved to the hard disk. The class is provides beta functionality and will
+    be incorporated into the standard Pipeline class at a later date.
 
+    Its main purpose is to provide functionality for augmenting images
+    that have multiple masks.
+
+    See https://github.com/mdbloice/Augmentor/blob/master/notebooks/Multiple-Mask-Augmentation.ipynb
+    for example usage.
+
+    DataPipeline objects are initialised by passing images and their
+    corresponding masks (grouped as lists) along with an optional list of
+    labels. If labels are provided, the augmented images and its corresponding
+    label are returned, otherwise only the images are returned. Image data
+    is returned in array format.
+
+    The images and masks that are passed can be of differing formats and
+    have differing numbers of channels. For example, the ground truth data
+    can be 3 channel RGB, while its mask images can be 1 channel monochrome.
     """
 
     def __init__(self, images, labels=None):
