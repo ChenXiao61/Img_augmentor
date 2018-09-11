@@ -1,5 +1,5 @@
 # ImageUtilities.py
-# Author: Marcus D. Bloice <https://github.com/mdbloice>
+# Author: Marcus D. Bloice <https://github.com/mdbloice> and contributors
 # Licensed under the terms of the MIT Licence.
 """
 The ImageUtilities module provides a number of helper functions, as well as
@@ -27,7 +27,13 @@ class AugmentorImage(object):
     Each image that is found by Augmentor during the initialisation of a
     Pipeline object is contained with a new AugmentorImage object.
     """
-    def __init__(self, image_path, output_directory):
+    def __init__(self,
+                 image_path,
+                 output_directory,
+                 pil_images=None,
+                 array_images=None,
+                 path_images=None,
+                 class_label_int=None):
         """
         To initialise an AugmentorImage object for any image, the image's
         file path is required, as well as that image's output directory,
@@ -37,22 +43,39 @@ class AugmentorImage(object):
         :param output_directory: The directory where augmented images for this
          image should be saved.
         """
-        # Just to stop Pylint complaining about initialising these outside
-        # of __init__ which is not actually happening, as the are being
-        # initialised in the setters from within init, but anyway I shall obey.
+
+        # Could really think about initialising AugmentorImage member
+        # variables here and and only here during init. Then remove all
+        # setters below so that they cannot be altered later.
+
+        # Call the setters from parameters that are required.
+        self._image_path = image_path
+        self._output_directory = output_directory
+
         self._ground_truth = None
-        self._image_path = None
-        self._output_directory = None
-        self._file_format = None  # TODO: pass this for each image.
-        self._image_PIL = None
+
+        self._image_paths = None
+        self._image_arrays = None
+        self._pil_images = None
+
+        self._file_format = None
         self._class_label = None
         self._class_label_int = None
+        self._label = None
         self._label_pair = None
         self._categorical_label = None
 
-        # Now we call the setters that we require.
-        self.image_path = image_path
-        self.output_directory = output_directory
+        if pil_images is not None:
+            self._pil_images = pil_images
+
+        if array_images is not None:
+            self._array_images = array_images
+
+        if path_images is not None:
+            self._path_images = path_images
+
+        if class_label_int is not None:
+            self._class_label_int = class_label_int
 
     def __str__(self):
         return """
@@ -61,7 +84,31 @@ class AugmentorImage(object):
         File format (inferred from extension): %s
         Class label: %s
         Numerical class label (auto assigned): %s
-        """ % (self.image_path, self.ground_truth, self.file_format, self.class_label, self.class_label_int)
+        """ % (self._image_path, self._ground_truth, self._file_format, self._class_label, self._class_label_int)
+
+    @property
+    def pil_images(self):
+        return self._pil_images
+
+    @pil_images.setter
+    def pil_images(self, value):
+        self._pil_images = value
+
+    @property
+    def image_arrays(self):
+        return self._image_arrays
+
+    @image_arrays.setter
+    def image_arrays(self, value):
+        self._image_arrays = value
+
+    @property
+    def class_label_int(self):
+        return self._class_label_int
+
+    @class_label_int.setter
+    def class_label_int(self, value):
+        self._class_label_int = value
 
     @property
     def output_directory(self):
@@ -94,18 +141,10 @@ class AugmentorImage(object):
     @image_path.setter
     def image_path(self, value):
         self._image_path = value
-        #if os.path.exists(value):
-        #    self._image_path = value
-        #else:
-        #    raise IOError("The file specified does not exist.")
 
     @property
-    def image_PIL(self):
-        return self._image_PIL
-
-    @image_PIL.setter
-    def image_PIL(self, value):
-        self._image_PIL = value
+    def pil_images(self):
+        return self._pil_images
 
     @property
     def image_file_name(self):
@@ -117,7 +156,7 @@ class AugmentorImage(object):
         :getter: Returns this image's file name.
         :type: String
         """
-        return os.path.basename(self.image_path)
+        return os.path.basename(self._image_path)
 
     @property
     def class_label(self):
@@ -128,12 +167,12 @@ class AugmentorImage(object):
         self._class_label = value
 
     @property
-    def class_label_int(self):
-        return self._class_label_int
+    def label(self):
+        return self._label
 
-    @class_label_int.setter
-    def class_label_int(self, value):
-        self._class_label_int = value
+    @label.setter
+    def label(self, value):
+        self._label = value
 
     @property
     def categorical_label(self):
@@ -162,7 +201,7 @@ class AugmentorImage(object):
 
     @property
     def label_pair(self):
-        return self.class_label_int, self.class_label
+        return self._class_label_int, self._class_label
 
     @property
     def file_format(self):

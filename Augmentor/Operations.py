@@ -1,5 +1,5 @@
 # Operations.py
-# Author: Marcus D. Bloice <https://github.com/mdbloice>
+# Author: Marcus D. Bloice <https://github.com/mdbloice> and contributors
 # Licensed under the terms of the MIT Licence.
 """
 The Operations module contains classes for all operations used by Augmentor.
@@ -265,11 +265,12 @@ class BlackAndWhite(Operation):
 
         return augmented_images
 
+
 class RandomBrightness(Operation):
     """
     This class is used to random change image brightness.
     """
-    def __init__(self, probability, min_factor,max_factor):
+    def __init__(self, probability, min_factor, max_factor):
         """
         required :attr:`probability` parameter
 
@@ -291,6 +292,7 @@ class RandomBrightness(Operation):
         Operation.__init__(self, probability)
         self.min_factor = min_factor
         self.max_factor = max_factor
+
     def perform_operation(self, images):
         """
         Random change the passed image brightness.
@@ -301,9 +303,11 @@ class RandomBrightness(Operation):
          PIL.Image.
         """
         factor = np.random.uniform(self.min_factor, self.max_factor)
+
         def do(image):
-            imgenhancer_Brightness = ImageEnhance.Brightness(image)
-            return imgenhancer_Brightness.enhance(factor)
+
+            image_enhancer_brightness = ImageEnhance.Brightness(image)
+            return image_enhancer_brightness.enhance(factor)
 
         augmented_images = []
 
@@ -312,11 +316,12 @@ class RandomBrightness(Operation):
 
         return augmented_images
 
+
 class RandomColor(Operation):
     """
     This class is used to random change saturation of an image.
     """
-    def __init__(self, probability, min_factor,max_factor):
+    def __init__(self, probability, min_factor, max_factor):
         """
         required :attr:`probability` parameter
 
@@ -338,6 +343,7 @@ class RandomColor(Operation):
         Operation.__init__(self, probability)
         self.min_factor = min_factor
         self.max_factor = max_factor
+
     def perform_operation(self, images):
         """
         Random change the passed image saturation.
@@ -348,10 +354,11 @@ class RandomColor(Operation):
          PIL.Image.
         """
         factor = np.random.uniform(self.min_factor, self.max_factor)
+
         def do(image):
 
-            imgenhancer_Color = ImageEnhance.Color(image)
-            return imgenhancer_Color.enhance(factor)
+            image_enhancer_color = ImageEnhance.Color(image)
+            return image_enhancer_color.enhance(factor)
 
         augmented_images = []
 
@@ -387,6 +394,7 @@ class RandomContrast(Operation):
         Operation.__init__(self, probability)
         self.min_factor = min_factor
         self.max_factor = max_factor
+
     def perform_operation(self, images):
         """
         Random change the passed image contrast.
@@ -397,10 +405,11 @@ class RandomContrast(Operation):
          PIL.Image.
         """
         factor = np.random.uniform(self.min_factor, self.max_factor)
+
         def do(image):
 
-            imgenhancer_Contrast = ImageEnhance.Contrast(image)
-            return imgenhancer_Contrast.enhance(factor)
+            image_enhancer_contrast = ImageEnhance.Contrast(image)
+            return image_enhancer_contrast.enhance(factor)
 
         augmented_images = []
 

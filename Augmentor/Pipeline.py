@@ -1,5 +1,5 @@
 # Pipeline.py
-# Author: Marcus D. Bloice <https://github.com/mdbloice>
+# Author: Marcus D. Bloice <https://github.com/mdbloice> and contributors
 # Licensed under the terms of the MIT Licence.
 """
 The Pipeline module is the user facing API for the Augmentor package. It
@@ -13,6 +13,7 @@ example images, can be seen in the :ref:`mainfeatures` section.
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
+from PIL.Image import Image
 from builtins import *
 
 from .Operations import *
@@ -24,7 +25,7 @@ import random
 import uuid
 import warnings
 import numpy as np
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 from tqdm import tqdm
 from PIL import Image
@@ -66,8 +67,6 @@ class Pipeline(object):
          GIF.
         :return: A :class:`Pipeline` object.
         """
-        random.seed()
-
         # TODO: Allow a single image to be added when initialising.
         # Initialise some variables for the Pipeline object.
         self.image_counter = 0
@@ -79,8 +78,6 @@ class Pipeline(object):
         self.class_labels = []
         self.process_ground_truth_images = False
 
-        # Now we populate some fields, which we may need to do again later if another
-        # directory is added, so we place it all in a function of its own.
         if source_directory is not None:
             self._populate(source_directory=source_directory,
                            output_directory=output_directory,
@@ -98,7 +95,7 @@ class Pipeline(object):
         therefore suitable for multi-threading.
 
         :param augmentor_image: The image to pass through the pipeline.
-        :return:
+        :return: None
         """
         return self._execute(augmentor_image)
 
@@ -145,35 +142,48 @@ class Pipeline(object):
 
         self._check_images(abs_output_directory)
 
+    def _populate_image_arrays(self):
+        """
+        Private method. Do not call directly.
+        When passed image arrays, populate each AugmentorImage
+        with the array data.
+        Currently not implemented.
+        :return: None
+        """
+        warnings.warn("Currently not implemented. Do not call directly.")
+        return 1
+
     def _check_images(self, abs_output_directory):
         """
-        Private method. Used to check and get the dimensions of all of the images
+        Private method. Used to check images as they are added to the
+        pipeline. Do not call directly.
         :param abs_output_directory: the absolute path of the output directory
         :return:
         """
         # Make output directory/directories
-        if len(set(self.class_labels)) <= 1:  # Fixed bad bug by adding set() function here.
+        if len(set(self.class_labels)) <= 1:
             if not os.path.exists(abs_output_directory):
                 try:
                     os.makedirs(abs_output_directory)
                 except IOError:
-                    print("Insufficient rights to read or write output directory (%s)" % abs_output_directory)
+                    print("Insufficient rights to read or write output directory (%s)"
+                          % abs_output_directory)
         else:
             for class_label in self.class_labels:
                 if not os.path.exists(os.path.join(abs_output_directory, str(class_label[0]))):
                     try:
                         os.makedirs(os.path.join(abs_output_directory, str(class_label[0])))
                     except IOError:
-                        print("Insufficient rights to read or write output directory (%s)" % abs_output_directory)
-        # Check the images, read their dimensions, and remove them if they cannot be read
-        # TODO: Do not throw an error here, just remove the image and continue.
+                        print("Insufficient rights to read or write output directory (%s)"
+                              % abs_output_directory)
         for augmentor_image in self.augmentor_images:
             try:
                 with Image.open(augmentor_image.image_path) as opened_image:
                     self.distinct_dimensions.add(opened_image.size)
                     self.distinct_formats.add(opened_image.format)
             except IOError as e:
-                print("There is a problem with image %s in your source directory: %s" % (augmentor_image.image_path, e.message))
+                print("There is a problem with image %s in your source directory: %s"
+                      % (augmentor_image.image_path, e.message))
                 self.augmentor_images.remove(augmentor_image)
 
         sys.stdout.write("Initialised with %s image(s) found.\n" % len(self.augmentor_images))
@@ -201,6 +211,10 @@ class Pipeline(object):
         if augmentor_image.image_path is not None:
             images.append(Image.open(augmentor_image.image_path))
 
+        # What if they are array data?
+        if augmentor_image.pil_images is not None:
+            images.append(augmentor_image.pil_images)
+
         if augmentor_image.ground_truth is not None:
             if isinstance(augmentor_image.ground_truth, list):
                 for image in augmentor_image.ground_truth:
@@ -213,34 +227,52 @@ class Pipeline(object):
             if r <= operation.probability:
                 images = operation.perform_operation(images)
 
+        # TEMP FOR TESTING
+        # save_to_disk = False
+
         if save_to_disk:
             file_name = str(uuid.uuid4())
             try:
-                # TODO: Add a 'coerce' parameter to force conversion to RGB for PNGA->JPEG saving.
-                # if image.mode != "RGB":
-                #     image = image.convert("RGB")
                 for i in range(len(images)):
                     if i == 0:
-                        save_name = augmentor_image.class_label + "_original_" + os.path.basename(augmentor_image.image_path) + "_" + file_name \
-                                    + "." + (self.save_format if self.save_format else augmentor_image.file_format)
+                        save_name = augmentor_image.class_label \
+                                    + "_original_" \
+                                    + os.path.basename(augmentor_image.image_path) \
+                                    + "_" \
+                                    + file_name \
+                                    + "." \
+                                    + (self.save_format if self.save_format else augmentor_image.file_format)
+
                         images[i].save(os.path.join(augmentor_image.output_directory, save_name))
+
                     else:
-                        save_name = "_groundtruth_(" + str(i) + ")_" + augmentor_image.class_label + "_" + os.path.basename(augmentor_image.image_path) + "_" + file_name \
-                                    + "." + (self.save_format if self.save_format else augmentor_image.file_format)
+                        save_name = "_groundtruth_(" \
+                                    + str(i) \
+                                    + ")_" \
+                                    + augmentor_image.class_label \
+                                    + "_" \
+                                    + os.path.basename(augmentor_image.image_path) \
+                                    + "_" \
+                                    + file_name \
+                                    + "." \
+                                    + (self.save_format if self.save_format else augmentor_image.file_format)
+
                         images[i].save(os.path.join(augmentor_image.output_directory, save_name))
+
             except IOError as e:
                 print("Error writing %s, %s. Change save_format to PNG?" % (file_name, e.message))
                 print("You can change the save format using the set_save_format(save_format) function.")
                 print("By passing save_format=\"auto\", Augmentor can save in the correct format automatically.")
 
         # TODO: Fix this really strange behaviour.
-        # As a work around, we can pass the same back and basically
+        # As a workaround, we can pass the same back and basically
         # ignore the multi_threaded parameter completely for now.
         # if multi_threaded:
         #   return os.path.basename(augmentor_image.image_path)
         # else:
         #   return images[0]  # Here we return only the first image for the generators.
 
+        # return images[0]  # old method.
         return images[0]
 
     def _execute_with_array(self, image):
@@ -315,31 +347,13 @@ class Pipeline(object):
         if len(self.operations) == 0:
             raise IndexError("There are no operations associated with this pipeline.")
 
-        ####
-        # Pre-multi-threading code. Remove.
-        #sample_count = 1
-        #progress_bar = tqdm(total=n, desc="Executing Pipeline", unit=' Samples', leave=False)
-        #while sample_count <= n:
-        #    for augmentor_image in self.augmentor_images:
-        #        if sample_count <= n:
-        #            self._execute(augmentor_image)
-        #            file_name_to_print = os.path.basename(augmentor_image.image_path)
-        #            # This is just to shorten very long file names which obscure the progress bar.
-        #            if len(file_name_to_print) >= 30:
-        #                file_name_to_print = file_name_to_print[0:10] + "..." + \
-        #                                     file_name_to_print[-10: len(file_name_to_print)]
-        #            progress_bar.set_description("Processing %s" % file_name_to_print)
-        #            progress_bar.update(1)
-        #        sample_count += 1
-        #progress_bar.close()
-
         if n == 0:
             augmentor_images = self.augmentor_images
         else:
             augmentor_images = [random.choice(self.augmentor_images) for _ in range(n)]
 
         if multi_threaded:
-            # TODO: Restore the functionality from the pre-multi-thread code above.
+            # TODO: Restore the functionality (appearance of progress bar) from the pre-multi-thread code above.
             with tqdm(total=len(augmentor_images), desc="Executing Pipeline", unit=" Samples") as progress_bar:
                 with ThreadPoolExecutor(max_workers=None) as executor:
                     for result in executor.map(self, augmentor_images):
@@ -378,7 +392,7 @@ class Pipeline(object):
         Generate images using a single image in array-like format.
 
         .. seealso::
-         See :func:`keras_image_generator_without_replacement()` for
+         See :func:`keras_image_generator_without_replacement()`
 
         :param image_array: The image to pass through the pipeline.
         :param save_to_disk: Whether to save to disk or not (default).
@@ -407,10 +421,36 @@ class Pipeline(object):
         return one_hot_encoding
 
     def image_generator(self):
+        """
+        Deprecated. Use the sample function and return a generator.
+        :return: A random image passed through the pipeline.
+        """
+        warnings.warn("This function has been deprecated.", DeprecationWarning)
+
         while True:
             im_index = random.randint(0, len(self.augmentor_images)-1)  # Fix for issue 52.
-            yield self._execute(self.augmentor_images[im_index], save_to_disk=False), \
-                self.augmentor_images[im_index].class_label_int
+            yield self._execute(self.augmentor_images[im_index], save_to_disk=False)
+
+    def generator_threading_tests(self, batch_size):
+
+        while True:
+
+            return_results = []
+
+            augmentor_images = [random.choice(self.augmentor_images) for _ in range(batch_size)]
+
+            with ThreadPoolExecutor(max_workers=None) as executor:
+                for result in executor.map(self, augmentor_images):
+                    return_results.append(result)
+
+            yield return_results
+
+    def generator_threading_tests_with_matrix_data(self, images, label):
+
+        self.augmentor_images = [AugmentorImage(image_path=None, output_directory=None, pil_images=x, label=y)
+                                 for x, y in zip(images, label)]
+
+        return 1
 
     # TODO: Fix: scaled=True results in an error.
     def keras_generator(self, batch_size, scaled=True, image_data_format="channels_last"):
@@ -498,7 +538,7 @@ class Pipeline(object):
 
             if scaled:
                 X = X.astype('float32')
-                X /= 255
+                X /= 255.  # PR #126
 
             yield (X, y)
 
@@ -603,7 +643,7 @@ class Pipeline(object):
 
             if scaled:
                 X = X.astype('float32')
-                X /= 255
+                X /= 255.  # PR #126
 
             yield(X, y)
 
@@ -1708,3 +1748,128 @@ class DataFramePipeline(Pipeline):
                                                                   output_directory)
 
         self._check_images(output_directory)
+
+
+class DataPipeline(Pipeline):
+    """
+
+    """
+
+    def __init__(self, images, labels=None):
+
+        # We will not use this member variable for now.
+        # if output_directory:
+        #    self.output_directory = output_directory
+        # else:
+        #    self.output_directory = None
+
+        self.augmentor_images = images
+        self.labels = labels
+
+        self.operations = []
+
+    ####################################################################################################################
+    # Properties
+    ####################################################################################################################
+
+    # @property
+    # def output_directory(self):
+    #     return self._output_directory
+
+    # @output_directory.setter
+    # def output_directory(self, value):
+    #     if os.path.isdir(value):
+    #         self._output_directory = value
+    #     else:
+    #         raise IOError("The provided argument, %s, is not a directory." % value)
+
+    @property
+    def augmentor_images(self):
+        return self._augmentor_images
+
+    @augmentor_images.setter
+    def augmentor_images(self, value):
+            self._augmentor_images = value
+
+    @property
+    def labels(self):
+        return self._labels
+
+    @labels.setter
+    def labels(self, value):
+        self._labels = value
+
+    ####################################################################################################################
+    # End Properties
+    ####################################################################################################################
+
+    def __call__(self, augmentor_image):
+        """
+        Multi-threading support to be enabled in a future release.
+        """
+        return self._execute(augmentor_image)
+
+    def generator(self, batch_size=1):
+
+        # If the number is 0 or negative, default it to 1
+        batch_size = 1 if (batch_size < 1) else batch_size
+
+        while True:
+
+            batch = []
+            y = []
+
+            for i in range(0, batch_size):
+
+                index = random.randint(0, len(self.augmentor_images) - 1)
+                images_to_yield = [Image.fromarray(x) for x in self.augmentor_images[index]]
+
+                for operation in self.operations:
+                    r = round(random.uniform(0, 1), 1)
+                    if r <= operation.probability:
+                        images_to_yield = operation.perform_operation(images_to_yield)
+
+                images_to_yield = [np.asarray(x) for x in images_to_yield]
+
+                if self.labels:
+                    batch.append(images_to_yield)
+                    y.append(self.labels[index])
+                else:
+                    batch.append(images_to_yield)
+
+            if self.labels:
+                yield batch, y
+            else:
+                yield batch
+
+    def sample(self, n):
+
+        batch = []
+        y = []
+
+        for i in range(0, n):
+
+            # We first get a random image(s) and label, because even if
+            # the pipeline does nothing (e.g. the probabilities are very low)
+            # then we return the images as they are, as the user requested.
+            index = random.randint(0, len(self.augmentor_images) - 1)
+            images_to_return = [Image.fromarray(x) for x in self.augmentor_images[index]]
+
+            for operation in self.operations:
+                r = round(random.uniform(0, 1), 1)
+                if r <= operation.probability:
+                    images_to_return = operation.perform_operation(images_to_return)
+
+            # Convert to array data
+            images_to_return = [np.asarray(x) for x in images_to_return]
+
+            if self.labels:
+                batch.append(images_to_return)
+                y.append(self.labels[index])
+            else:
+                batch.append(images_to_return)
+
+        if self.labels:
+            return batch, y
+        else:
+            return batch
