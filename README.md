@@ -100,6 +100,31 @@ p.flip_top_bottom(probability=0.5)
 p.sample(50)
 ```
 
+### Multiple Mask/Image Augmentation
+
+Using the `DataPipeline` class (Augmentor version >= 0.2.3), images that have multiple associated masks can be augmented:
+
+| Multiple Mask Augmentation                                                                               |
+|----------------------------------------------------------------------------------------------------------|
+| ![MultipleMask](https://github.com/mdbloice/AugmentorFiles/blob/master/UsageGuide/merged-multi-mask.gif) |
+
+Arbitrarily long lists of images can be passed through the pipeline in groups and augmented identically using the `DataPipeline` class. This is useful for ground truth images that have several masks, for example.
+
+In the example below, the images and their masks are contained in the `images` data structure (as lists of lists), while their labels are contained in `y`:
+
+```python
+p = Augmentor.DataPipeline(images, y)
+p.rotate(1, max_left_rotation=5, max_right_rotation=5)
+p.flip_top_bottom(0.5)
+p.zoom_random(1, percentage_area=0.5)
+
+augmented_images, labels = p.sample(100)
+```
+
+The `DataPipeline` returns images directly (`augmented_images` above), and does not save them to disk, nor does it read data from the disk. Images are passed directory to `DataPipeline` during initialisation.
+
+For details of the `images` data structure and how to create it, see the [`Mutilple-Mask-Augmentation.ipynb`](https://github.com/mdbloice/Augmentor/blob/master/notebooks/Mutilple-Mask-Augmentation.ipynb) Jupyter notebook.
+
 ### Generators for Keras and PyTorch
 
 If you do not wish to save to disk, you can use a generator (in this case with Keras):
