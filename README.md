@@ -121,7 +121,7 @@ p.zoom_random(1, percentage_area=0.5)
 augmented_images, labels = p.sample(100)
 ```
 
-The `DataPipeline` returns images directly (`augmented_images` above), and does not save them to disk, nor does it read data from the disk. Images are passed directory to `DataPipeline` during initialisation.
+The `DataPipeline` returns images directly (`augmented_images` above), and does not save them to disk, nor does it read data from the disk. Images are passed directly to `DataPipeline` during initialisation.
 
 For details of the `images` data structure and how to create it, see the [`Multiple-Mask-Augmentation.ipynb`](https://github.com/mdbloice/Augmentor/blob/master/notebooks/Multiple-Mask-Augmentation.ipynb) Jupyter notebook.
 
