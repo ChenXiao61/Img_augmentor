@@ -319,7 +319,7 @@ You can use `urllib` to obtain the skin lesion image in order to reproduce the a
 
 Note: For Python 3, use `from urllib.request import urlretrieve`.
 
-Logo created at <LogoMakr.com>
+Logo created at [LogoMakr.com](https://logomakr.com)
 
 ## Tests
 To run the automated tests, clone the repository and run:
