@@ -19,6 +19,47 @@ from PIL import Image
 from Augmentor import ImageUtilities
 
 
+def test_image_generator_function():
+
+    width = 80
+    height = 80
+
+    tmpdir = tempfile.mkdtemp()
+    tmps = []
+
+    for i in range(10):
+        tmps.append(tempfile.NamedTemporaryFile(dir=tmpdir, suffix='.JPEG'))
+
+        bytestream = io.BytesIO()
+
+        im = Image.new('RGB', (width, height))
+        im.save(bytestream, 'JPEG')
+
+        tmps[i].file.write(bytestream.getvalue())
+        tmps[i].flush()
+
+    p = Augmentor.Pipeline(tmpdir)
+    assert len(p.augmentor_images) == len(tmps)
+
+    p.rotate(probability=0.5, max_left_rotation=5, max_right_rotation=5)
+    p.flip_left_right(probability=0.333)
+    p.flip_top_bottom(probability=0.5)
+
+    g = p.image_generator()
+
+    X = next(g)
+
+    assert X is not None
+
+    # Close all temporary files which will also delete them automatically
+    for i in range(len(tmps)):
+        tmps[i].close()
+
+    # Finally remove the directory (and everything in it) as mkdtemp does
+    # not delete itself after closing automatically
+    shutil.rmtree(tmpdir)
+
+
 def test_keras_generator_from_disk():
 
     batch_size = random.randint(1, 50)
@@ -68,7 +109,6 @@ def test_keras_generator_from_disk():
 
     X2, y2 = next(g2)
 
-    assert len(X2) == batch_size
     assert len(X2) == batch_size
     assert len(X2) == len(y2)
 
@@ -159,7 +199,7 @@ def test_generator():
     g = p.keras_generator(batch_size=batch_size)
 
     batch = next(g)
-    # A tuple should be returned, containing the augmentented images and their labels
+    # A tuple should be returned, containing the augmented images and their labels
     assert len(batch) == 2
 
     X = batch[0]
