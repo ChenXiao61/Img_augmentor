@@ -2,6 +2,10 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 from builtins import *
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath('.'))
+
 import Augmentor
 from PIL import Image
 import tempfile
@@ -10,7 +14,6 @@ import shutil
 import glob
 import random
 import numpy as np
-import os
 
 import pytest
 
