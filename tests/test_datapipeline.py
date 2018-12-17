@@ -12,7 +12,9 @@ import random
 import numpy as np
 import os
 
+import pytest
 
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_sample_with_no_masks():
     # NOTE:
     # ---
@@ -69,8 +71,7 @@ def test_sample_with_no_masks():
     shutil.rmtree(tmpdir)
 
 
-def sample_with_masks():
-
+def test_sample_with_masks():
     width = 80
     height = 80
 
