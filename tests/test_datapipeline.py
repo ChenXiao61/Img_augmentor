@@ -14,7 +14,8 @@ import os
 
 import pytest
 
-@pytest.mark.skip(reason="no way of currently testing this")
+
+@pytest.mark.skip(reason="DataPipeline has not been written to handle this circumstance yet.")
 def test_sample_with_no_masks():
     # NOTE:
     # ---
